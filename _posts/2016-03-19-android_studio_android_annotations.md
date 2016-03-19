@@ -1,11 +1,9 @@
 ---
 layout: post
-categories: android
+category: android
 title: Android Studio 配置 android annotations
 ---
 
-* annotations
-{:toc}
 
 按照如下代码注释中的分别在全局gradle和局部gradle中添加相应代码即可，留着自己备忘用。
 
