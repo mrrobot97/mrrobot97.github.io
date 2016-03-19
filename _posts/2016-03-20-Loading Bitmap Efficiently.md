@@ -1,6 +1,6 @@
 ---
-layout:post
-title:Loading Bitmap Efficiently
+layout: post
+title: Loading Bitmap Efficiently
 ---
 
 #### Android系统为每个程序都分配了一定的内存，当我们的程序加载比较大的bitmap时十分容易出现OOM(Out Of Memory)的错误，本篇文章就讲述如何高效地加载一个Bitmap.
