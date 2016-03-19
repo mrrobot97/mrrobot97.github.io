@@ -1,6 +1,5 @@
 ---
 layout: post
-category: android
 title: Android Studio 配置 android annotations
 ---
 
