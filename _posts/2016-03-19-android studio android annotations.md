@@ -1,9 +1,9 @@
 ---
 layout: post
-title: Android Studio 配置 android annotations
+title: android studio android annotations
 ---
 
-
+在android studio 中配置android annotations.
 按照如下代码注释中的分别在全局gradle和局部gradle中添加相应代码即可，留着自己备忘用。
 
 
