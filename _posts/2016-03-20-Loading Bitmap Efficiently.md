@@ -3,11 +3,11 @@ layout: post
 title: Loading Bitmap Efficiently
 ---
 
-#### Android系统为每个程序都分配了一定的内存，当我们的程序加载比较大的bitmap时十分容易出现OOM(Out Of Memory)的错误，本篇文章就讲述如何高效地加载一个Bitmap.
+#### Android系统为每个程序都分配了一定的内存，当我们的程序加载比较大的bitmap时十分容易出现OOM(Out Of Memory)的错误，这种错尤其容易出现在用Listiew加载图片时。本篇文章讲述如何高效地加载一个Bitmap，即使其占用的内存足够小.
 
-文章分析来源于Google官方给的Training [Displaying Bitmaps Efficiently](http://developer.android.com/training/building-graphics.html)
+文章分析及实例代码来源于Google官方给的Training [Displaying Bitmaps Efficiently](http://developer.android.com/training/building-graphics.html)
 
-首先我们获取要加载的图片的宽与高，方法如下：
+首先我们获取要加载的图片的宽与高与图片类型，方法如下：
 
 ```
 BitmapFactory.Options options = new BitmapFactory.Options();
@@ -17,10 +17,10 @@ int imageHeight = options.outHeight;
 int imageWidth = options.outWidth;
 String imageType = options.outMimeType;
 
-
 ```
 
-然后通过比较图片实际的宽高与我们需要显示在屏幕上显示的大小，调整BitmapFactory.Options的inSampleSize,注意通过设置options.inJustDecodeBounds=true，我们可以至加载图片的大小和类型，而不会真正地讲图片加载到内存中。
+然后通过比较图片实际的宽高与我们需要在屏幕上显示的大小，调整BitmapFactory.Options的inSampleSize,注意通过设置options.inJustDecodeBounds=true，我们可以只加载图片的大小和类型，而不会真正地将图片加载到内存中。
+	
 
 ```
 public static int calculateInSampleSize(
@@ -47,7 +47,7 @@ public static int calculateInSampleSize(
 }
 ```
 
-options.inSampleSize是用来调整图片的压缩比例的，比如inSampleSize=2，就讲图片的width和height分别设置为原图片的一半，这样压缩后的图片的体积就只有原来的1/4了。
+options.inSampleSize是用来调整图片的压缩比例的，比如inSampleSize=2，就将图片的width和height分别设置为原图片的一半，这样压缩后的图片的体积就只有原来的1/4了。
 
 最后当我们获取到合适的inSampleSize后再将options.inJustDecodeBounds设置为true，就可以真正地将压缩后的图片加载到内存中去了。
 

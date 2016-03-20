@@ -1,5 +1,6 @@
 ---
 layout: post
+author: mrrobot
 title: First blog
 ---
 

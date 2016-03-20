@@ -2,20 +2,20 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Mrrobot</title>
-    <description></description>
-    <link>/</link>
-    <atom:link href="/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Sun, 20 Mar 2016 00:42:59 +0800</pubDate>
-    <lastBuildDate>Sun, 20 Mar 2016 00:42:59 +0800</lastBuildDate>
+    <description>Record my study in android.</description>
+    <link>http://mrrobot97.github.io/</link>
+    <atom:link href="http://mrrobot97.github.io/feed.xml" rel="self" type="application/rss+xml"/>
+    <pubDate>Sun, 20 Mar 2016 09:19:23 +0800</pubDate>
+    <lastBuildDate>Sun, 20 Mar 2016 09:19:23 +0800</lastBuildDate>
     <generator>Jekyll v3.1.2</generator>
     
       <item>
         <title>Loading Bitmap Efficiently</title>
-        <description>&lt;h4 id=&quot;androidbitmapoomout-of-memorybitmap&quot;&gt;Android系统为每个程序都分配了一定的内存，当我们的程序加载比较大的bitmap时十分容易出现OOM(Out Of Memory)的错误，本篇文章就讲述如何高效地加载一个Bitmap.&lt;/h4&gt;
+        <description>&lt;h4 id=&quot;androidbitmapoomout-of-memorylistiewbitmap&quot;&gt;Android系统为每个程序都分配了一定的内存，当我们的程序加载比较大的bitmap时十分容易出现OOM(Out Of Memory)的错误，这种错尤其容易出现在用Listiew加载图片时。本篇文章讲述如何高效地加载一个Bitmap，即使其占用的内存足够小.&lt;/h4&gt;
 
-&lt;p&gt;文章分析来源于Google官方给的Training &lt;a href=&quot;http://developer.android.com/training/building-graphics.html&quot;&gt;Displaying Bitmaps Efficiently&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;文章分析及实例代码来源于Google官方给的Training &lt;a href=&quot;http://developer.android.com/training/building-graphics.html&quot;&gt;Displaying Bitmaps Efficiently&lt;/a&gt;&lt;/p&gt;
 
-&lt;p&gt;首先我们获取要加载的图片的宽与高，方法如下：&lt;/p&gt;
+&lt;p&gt;首先我们获取要加载的图片的宽与高与图片类型，方法如下：&lt;/p&gt;
 
 &lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;BitmapFactory.Options options = new BitmapFactory.Options();
 options.inJustDecodeBounds = true;
@@ -24,11 +24,10 @@ int imageHeight = options.outHeight;
 int imageWidth = options.outWidth;
 String imageType = options.outMimeType;
 
-
 &lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 
-&lt;p&gt;然后通过比较图片实际的宽高与我们需要显示在屏幕上显示的大小，调整BitmapFactory.Options的inSampleSize,注意通过设置options.inJustDecodeBounds=true，我们可以至加载图片的大小和类型，而不会真正地讲图片加载到内存中。&lt;/p&gt;
+&lt;p&gt;然后通过比较图片实际的宽高与我们需要在屏幕上显示的大小，调整BitmapFactory.Options的inSampleSize,注意通过设置options.inJustDecodeBounds=true，我们可以只加载图片的大小和类型，而不会真正地将图片加载到内存中。&lt;/p&gt;
 
 &lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;public static int calculateInSampleSize(
             BitmapFactory.Options options, int reqWidth, int reqHeight) {
@@ -55,7 +54,7 @@ String imageType = options.outMimeType;
 &lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 
-&lt;p&gt;options.inSampleSize是用来调整图片的压缩比例的，比如inSampleSize=2，就讲图片的width和height分别设置为原图片的一半，这样压缩后的图片的体积就只有原来的1/4了。&lt;/p&gt;
+&lt;p&gt;options.inSampleSize是用来调整图片的压缩比例的，比如inSampleSize=2，就将图片的width和height分别设置为原图片的一半，这样压缩后的图片的体积就只有原来的1/4了。&lt;/p&gt;
 
 &lt;p&gt;最后当我们获取到合适的inSampleSize后再将options.inJustDecodeBounds设置为true，就可以真正地将压缩后的图片加载到内存中去了。&lt;/p&gt;
 
@@ -78,8 +77,8 @@ String imageType = options.outMimeType;
 &lt;/div&gt;
 </description>
         <pubDate>Sun, 20 Mar 2016 00:00:00 +0800</pubDate>
-        <link>/Loading-Bitmap-Efficiently/</link>
-        <guid isPermaLink="true">/Loading-Bitmap-Efficiently/</guid>
+        <link>http://mrrobot97.github.io/Loading-Bitmap-Efficiently/</link>
+        <guid isPermaLink="true">http://mrrobot97.github.io/Loading-Bitmap-Efficiently/</guid>
         
         
       </item>
@@ -363,8 +362,8 @@ sed (Stream Editor)
   [ 参数 + 文件名 ]&lt;/p&gt;
 </description>
         <pubDate>Sat, 19 Mar 2016 00:00:00 +0800</pubDate>
-        <link>/linux%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4%E6%B1%87%E6%80%BB/</link>
-        <guid isPermaLink="true">/linux%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4%E6%B1%87%E6%80%BB/</guid>
+        <link>http://mrrobot97.github.io/linux%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4%E6%B1%87%E6%80%BB/</link>
+        <guid isPermaLink="true">http://mrrobot97.github.io/linux%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4%E6%B1%87%E6%80%BB/</guid>
         
         
       </item>
@@ -453,8 +452,8 @@ dependencies {
 &lt;/div&gt;
 </description>
         <pubDate>Sat, 19 Mar 2016 00:00:00 +0800</pubDate>
-        <link>/android-studio-android-annotations/</link>
-        <guid isPermaLink="true">/android-studio-android-annotations/</guid>
+        <link>http://mrrobot97.github.io/android-studio-android-annotations/</link>
+        <guid isPermaLink="true">http://mrrobot97.github.io/android-studio-android-annotations/</guid>
         
         
       </item>
@@ -468,8 +467,8 @@ dependencies {
 &lt;p&gt;Start from today.&lt;/p&gt;
 </description>
         <pubDate>Fri, 18 Mar 2016 00:00:00 +0800</pubDate>
-        <link>/first-blog/</link>
-        <guid isPermaLink="true">/first-blog/</guid>
+        <link>http://mrrobot97.github.io/first-blog/</link>
+        <guid isPermaLink="true">http://mrrobot97.github.io/first-blog/</guid>
         
         
       </item>

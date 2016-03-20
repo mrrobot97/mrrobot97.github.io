@@ -7,9 +7,10 @@
 
 # Site settings
 title: Mrrobot
-description: '' # write a nice description for your blog
+author: mrrobot
+description: 'Record my study in android.' # write a nice description for your blog
 baseurl: '' # the subpath of your site, e.g. /blog
-url: '' # the base hostname & protocol for your site http://www.example.com
+url: 'http://mrrobot97.github.io' # the base hostname & protocol for your site http://www.example.com
 # google_analytics: 'UA-XXXXXX-X'
 twitter_username: 'mrrobot'
 
