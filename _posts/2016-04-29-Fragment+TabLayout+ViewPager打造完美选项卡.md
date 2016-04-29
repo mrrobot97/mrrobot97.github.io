@@ -5,8 +5,8 @@ title: Fragment+TabLayout+ViewPager打造完美选项卡
 ---
 >2015年Google IO大会上谷歌发布了Android Design Support Library，包含了许多新特性，其中整合了很多之前的开源第三方空间，其中TabLayout使得选项卡的实现变得非常简单。
 
-####TabLayout: compile 'com.android.support:design:23.1.1'
-####ViewPager: compile 'com.android.support:support-v4:23.1.1'
+#### TabLayout: compile 'com.android.support:design:23.1.1'
+#### ViewPager: compile 'com.android.support:support-v4:23.1.1'
 
 
 
