@@ -6,7 +6,7 @@ title: 硬盘缓存DiskLruCache
 
 众所周知，Google官方提供一套内存缓存方案LruCache,但是并没有提供硬盘缓存方案。第三方提供了一个硬盘缓存方案DiskLruCache，不过没有被Google官方收录，故没有加入到SDK中。要使用DiskLruCache，先下载其源码：
 
-[DiskLruCache源码](android.googlesource.com/platform/libcore/+/jb-mr2-release/luni/src/main/java/libcore/io/DiskLruCache.java)
+[DiskLruCache源码](http://android.googlesource.com/platform/libcore/+/jb-mr2-release/luni/src/main/java/libcore/io/DiskLruCache.java)
 
 下载后将源码放在自己的项目中即可使用。关于DiskLruCache的使用：
 
