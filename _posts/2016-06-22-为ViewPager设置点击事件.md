@@ -1,3 +1,4 @@
+---
 layout: post
 title: 为ViewPager设置点击事件
 author: mrrobot
