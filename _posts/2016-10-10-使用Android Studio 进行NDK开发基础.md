@@ -4,7 +4,7 @@ author: mrrobot97
 title: 使用Android Studio 进行NDK开发基础
 ---
 
-##配置NDK环境
+## 配置NDK环境
 在SDKManager中下载NDK依赖包以及额外工具，只需要勾选NDK、LLDB、CMAKE：
 
 ![](https://developer.android.com/studio/images/projects/ndk-install_2-2_2x.png)
