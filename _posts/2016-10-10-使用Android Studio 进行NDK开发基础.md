@@ -11,9 +11,9 @@ title: 使用Android Studio 进行NDK开发基础
 
 安装完成后，重启AndroidStudio即可自动配置好NDK开发环境。
 
-##JNI调用
+## JNI调用
 
-###定义本地Native方法
+### 定义本地Native方法
 
 ```
 public class HelloJNI {
@@ -25,7 +25,7 @@ public class HelloJNI {
 
 此时getStringFromC()方法会报错，这是由于找不到这个方法，无视之，直接build project。
 
-###生成头文件
+### 生成头文件
 
 build成功后进入app/build/intermediates/classes/debug目录下，使用命令行javah生成HelloJNI中的native方法对应的头文件：
 
@@ -44,7 +44,7 @@ JNIEXPORT jstring JNICALL Java_me_mrrobot97_hellojni_HelloJNI_getStringFromC
   }
 ```
 
-###修改gradle
+### 修改gradle
 然后修改module级别的build.gradle文件，在defaultConfig中加入如下配置：
 
 ```
