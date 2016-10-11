@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="http://mrrobot97.github.io/stylesheets/stylesheet.css">
+  <link rel="canonical" href="http://mrrobot97.github.io/2016/09/16/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E5%9B%BE%E7%89%87%E8%A3%81%E5%87%8F%E5%99%A8.html">
+  <link rel="alternate" type="application/rss+xml" title="Mrrobot" href="http://mrrobot97.github.io/feed.xml">
+  <meta name="description" content="  这篇文章讲的是制作一个比较简单的自定义View—图片裁减器，为了降低难度，我只实现了矩形的裁减。">
+
+   <title>从零开始制作图片裁减器</title>
+
+
+
+</head>
+
+
+  <body>
+
+    <header class="page-header">
+     <h1 class="project-name"> <a class="header-link" href="/"> Mrrobot</a></h1>
+     <!--<h3 style="font-weight: lighter;">a blog for <a class="header-link" href="http://canijustgo.com/" target="_blank">canijustgo.com</a></h3>-->
+     <h3><a class="header-link" href="https://twitter.com/Mr_Robot___" target="_blank">follow @mrrobot</a></h3>
+</header>
+
+
+    <section class="main-content">
+      <div class="wrapper">
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+
+    <div class="main-content" itemprop="articleBody">
+  <header class="post-header">
+    <h1 class="post-title" itemprop="name headline">从零开始制作图片裁减器</h1>
+   <p class="post-meta"><time datetime="2016-09-16T00:00:00+08:00" itemprop="datePublished">Sep 16, 2016</time> • <span itemprop="author" itemscope itemtype="http://schema.org/Person"><span itemprop="name">mrrobot97</span></span></p>
+  </header>
+
+    <blockquote>
+  <p>这篇文章讲的是制作一个比较简单的自定义View—图片裁减器，为了降低难度，我只实现了矩形的裁减。</p>
+</blockquote>
+
+<p>先看看效果图:</p>
+
+<p><img src="http://ockr1qfi1.bkt.clouddn.com/Screen%2520Capture%2520on%25202016-09-16%2520at%252017-21-09.gif" alt="" /></p>
+
+<p>在开始码代码之前先想一下我们的裁减器TailorView都需要实现哪些功能：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>1.打开系统相册，从中选中一张图片交给我们的Activity.
+2.将图片加载到一个ImageView上.
+3.显示一个矩形裁减框，并且可以放大、缩小、拖动.
+4.将图片中在裁减框范围之外的部分加上一个黑色滤镜.
+5.获取并生成裁减器框内部分的图片并生成Bitmap.
+</code></pre>
+</div>
+
+<p>好了，然后我们就开始码代码喽~</p>
+
+<p>首先是打开相册并选择一张图片，这件事我们交个一个Activity：MainActivity，这也是我们的入口Activity。注意由于我们需要取得位于SD卡上的图片文件，故需要再AndroidManifest文件中声明如下权限：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>&lt;uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/&gt;
+</code></pre>
+</div>
+
+<p>同时由于我的测试机型是Android6.0.1的，故还需要再运行时动态监测权限并申请权限。方便起见，我们打开应用的第一时间就申请权限：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED){
+            ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}
+                    ,READ_EXTERNAL_STORAGE_REQUEST_CODE);
+        }
+</code></pre>
+</div>
+<p>这就是在运行时动态申请权限的代码，这里我只申请了READ_EXTERNAL_STROAGE,其他权限同样处理方法。</p>
+
+<p>那么我们怎样才知道用户是否授予了权限呢？很简单，只需要重写Activity的onRequestPermissionsResult方法即可，然后在里面判断用户是否给予了权限：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>@Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if(requestCode==READ_EXTERNAL_STORAGE_REQUEST_CODE&amp;&amp;grantResults.length&gt;0){
+            //do something
+        }
+    }
+</code></pre>
+</div>
+
+<p>注意这里的READ_EXTERNAL_STORAGE_REQUEST_CODE和申请权限时的是同一个，都是我们自定义的常量。</p>
+
+<p>好了，权限的问题我们已经搞定了，接下来就是调用系统相册了，很简单，只需一个Intent即可：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>Intent intent = new Intent(Intent.ACTION_PICK,
+       android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+startActivityForResult(intent, IMAGE_CODE);
+</code></pre>
+</div>
+
+<p>然后就会自动打开系统相册，并且当你选择了一张图片的时候，就会返回。</p>
+
+<p>接下来就是获取这张我们选择的图片,这里需要重写onActivityResult方法，因为我们调用系统相册时利用的是startActivityForResult(),故当Activity返回时会调用onActivityResult方法，连同返回的数据。</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>@Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode==IMAGE_CODE&amp;&amp;resultCode==RESULT_OK&amp;&amp;data!=null){
+            Uri selectedImage=data.getData();
+            String[] filePathColumn={MediaStore.Images.Media.DATA};
+            Cursor cursor=getContentResolver().query(selectedImage,
+                    filePathColumn,null,null,null);
+            if(cursor!=null){
+                cursor.moveToFirst();
+                String picturePath=
+                	cursor.getString(cursor.getColumnIndex(filePathColumn[0]));
+                cursor.close();
+                Intent intent=new Intent(this,TailorActivity.class);
+                intent.putExtra("picturePath",picturePath);
+                startActivityForResult(intent,IMAGE_TAILORED);
+            }
+        }
+    }
+</code></pre>
+</div>
+
+<p>同样，这里的IMAGE_CODE就是startActivityForResylt中的IMAGE_CODE.这样我们就获取了图片的绝对路径，接下来就是加载这个图片到ImageView中了。这里我新建了一个Activity:TailorActivity,并在其布局里放了一个占据全屏的ImageView，我们将图片路径一并传给Activity:TailorActivity即可。</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>Intent intent=new Intent(this,TailorActivity.class);
+                intent.putExtra("picturePath",picturePath);
+                startActivityForResult(intent,IMAGE_TAILORED);
+</code></pre>
+</div>
+
+<p>在TailorActivity先从Intent中取出路径，并加载图片：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>mBitmap= BitmapFactory.decodeFile(imagePath);
+        mImageView.setImageBitmap(mBitmap);
+</code></pre>
+</div>
+
+<p>接下来就是今天的主角：自定义View—-TailorView</p>
+
+<p>我先说一下这个View的结构：TailorView内部维护四个Point类，每个Point很简单只包含一个坐标x和y,这四个Point对应着我们要在屏幕上绘制的裁减框的四个角。我们每次draw的时候先根据这四个Point的位置画出四条线，就是裁减框的边界，然后绘制四个小的实心圆，当用户拖拽任意个=一个实心圆时，我们的裁剪框做出相应的大小改变。当用户点击裁剪框中间的部分时，裁剪框跟随者用户手指左右平移。</p>
+
+<p>其中裁剪框放大、缩小、平移的逻辑都是在View的onTouchEvent中实现的。
+先看看我们的onDraw:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>@Override
+    protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+        //drawLines
+        mPaint.setStyle(Paint.Style.STROKE);
+        for (int i=0;i&lt;4;i++){
+            canvas.drawLine(points[i].getX(),points[i].getY()
+                    ,points[(i+1)%4].getX(),points[(i+1)%4].getY(),mPaint);
+        }
+        mPaint.setStyle(Paint.Style.FILL);
+        //draw points
+        for (int i=0;i&lt;4;i++){
+            canvas.drawCircle(points[i].getX(),points[i].getY(),mRadius,mPaint);
+        }
+    }
+</code></pre>
+</div>
+<p>这样很轻松的就绘制除了四个边和四个实心角。</p>
+
+<p>由于我们的TailorView有一个默认初始大小，因此在xml布局文件中使用的时候都不需要指定宽高了，我们也不用重写onMeasure（）方法了，算是偷了个懒。</p>
+
+<p>我们要对我们的TailorView做出一些限制：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>1.四个点的顺序不能乱，因为后面我们还要靠这四个点的顺序来构造一个Rect，这个Rect就是不会被黑色滤镜覆盖的范围。
+
+2.我们的TailorView所能移动的地方存在一个边界，就是ImageView中显示的图片的实际边界。
+</code></pre>
+</div>
+
+<p>四个点的顺序不能乱，那就在onTouchEvent中检测四个点的相对坐标即可：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>
+//check if points gets collide
+    private boolean pointsCross(int x, int y, int selectedIndex) {
+        if ((selectedIndex==0&amp;&amp;points[1].x-x&lt;=mTouchSlop)
+                ||(selectedIndex==0&amp;&amp;points[3].y-y&lt;=mTouchSlop)) return true;
+        if ((selectedIndex==1&amp;&amp;x-points[0].x&lt;=mTouchSlop)
+                ||(selectedIndex==1&amp;&amp;points[2].y-y&lt;=mTouchSlop)) return true;
+        if ((selectedIndex==2&amp;&amp;y-points[1].y&lt;=mTouchSlop)
+                ||(selectedIndex==2&amp;&amp;x-points[3].x&lt;=mTouchSlop)) return true;
+        if ((selectedIndex==3&amp;&amp;points[2].x-x&lt;=mTouchSlop)
+                ||(selectedIndex==3&amp;&amp;y-points[0].y&lt;=mTouchSlop)) return true;
+        return false;
+
+    }
+</code></pre>
+</div>
+
+<p>可以看出，我的做法是当相邻两个点的某一方向上的距离小于mTouchSlop时，即视为冲突，就无法再任由用户移动了。</p>
+
+<p>然后是我自定义了一个Bounds类，也很简单，就是包含x1,x2,y1,y1，即为边界的左上和右下点的坐标,在初始化的时候我们利用ImageView中Bitmp的实际边界，给我们的mBound进行赋值。然后同样在onTouchEvent中进行移动的时候，检测是否和边界冲突，倘若冲突，就停止移动：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>private boolean checkOutBounds(int x, int y) {
+        return mBounds.x1&lt;=x&amp;&amp;mBounds.x2&gt;=x&amp;&amp;mBounds.y1&lt;=y&amp;&amp;mBounds.y2&gt;=y;
+    }
+</code></pre>
+</div>
+<p>然后就是判断点击的点是在裁剪框内部还是在四个边角上：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>private boolean inCenter(int x,int y){
+        for(int i=0;i&lt;4;i++){
+            if (inCircle(x,y,points[i])) return false;
+        }
+        return mRect.contains(x,y);
+    }
+
+    private boolean inCircle(int x,int y,Point p){
+        return Math.hypot(x-p.getX(),y-p.getY())&lt;=checkLength;
+    }
+</code></pre>
+</div>
+
+<p>当用户点击的是边框内部的时候，我们就随用户的移动移动整个裁剪框：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>//move the whole rect
+    private void moveWhole(int delX,int delY){
+        for (int i=0;i&lt;4;i++){
+            if (!checkOutBounds(points[i].x+delX,points[i].y+delY)) return;
+        }
+        for (int i=0;i&lt;4;i++){
+            points[i].x+=delX;
+            points[i].y+=delY;
+        }
+        mRect=new Rect(points[0].getX(),points[0].getY(),points[2].getX(),points[2].getY());
+        mListener.onRectPositionChange();
+    }
+</code></pre>
+</div>
+
+<p>当用户点击的是某个边角时，相应的需要改变其相邻的两个Point的x或y：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>if (shouldMove){
+        p.setX(x).setY(y);
+        //change the relative two circle's position
+        if (selectedIndex%2==0){
+             points[(selectedIndex+1)%4].setY(y);
+             points[(selectedIndex+3)%4].setX(x);
+        }else{
+             points[(selectedIndex+1)%4].setX(x);
+             points[(selectedIndex+3)%4].setY(y);
+            }
+         if (mListener!=null){
+             mListener.onRectPositionChange();
+             }
+            mRect=new Rect(points[0].getX(),points[0].getY(),points[2].getX(),points[2].getY());
+  }
+</code></pre>
+</div>
+
+<p>这样，裁剪框的逻辑基本就实现了，完整的代码我会放在后面。</p>
+
+<p>然后是我们的另一个自定义View—FilterView，其功能就是给出了裁剪框以外的部分加上一个黑色滤镜，这个就很好实现了，我们只需要让FilterView充满屏幕，然后绘制一个半透明黑色背景色即可。
+直接看onDraw方法吧：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>@Override
+    protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+        //draw filter color except the rect consists the four points
+        mPaint.setAlpha(alpha);
+        canvas.drawRect(0,0,mWidth,mRect.top,mPaint);
+        canvas.drawRect(0,mRect.bottom,mWidth,mHeight,mPaint);
+        canvas.drawRect(0,mRect.top,mRect.left,mRect.bottom,mPaint);
+        canvas.drawRect(mRect.right,mRect.top,mWidth,mRect.bottom,mPaint);
+    }
+</code></pre>
+</div>
+
+<p>这里的alpha我的取值是0xAA。</p>
+
+<p>这里的mRect就是从TailorView那里取得的Rect，注意我们的TailorView的Rect在不停的改变，因此我们需要定义一个接口Listener对其实现监听：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>public interface RectPositionChangeListener{
+        void onRectPositionChange();
+    }
+</code></pre>
+</div>
+
+<p>然后我们给TailorView设置一个Listener，在其内部每当Rect变化时就调用onRectPOsitionChange（）方法即可。</p>
+
+<p>最后就是我们截取图片的功能了，思路是先利用View的getDrawingCache方法获取屏幕截图，然后再利用Rect的坐标从截图中生成一张新的图片：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>//return a screen capture bitmap unscaled
+    public static Bitmap getScreenCapture(Activity activity){
+        View view=activity.getWindow().getDecorView();
+        view.setDrawingCacheEnabled(true);
+        view.buildDrawingCache();
+        Bitmap bitmap=view.getDrawingCache();
+        int []wh=getScreenWidthAndHeight(activity);
+        Bitmap scaled=Bitmap.createBitmap(bitmap,0,0,wh[0],wh[1]);
+        view.setDrawingCacheEnabled(false);
+        view.destroyDrawingCache();
+        return scaled;
+    }
+</code></pre>
+</div>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>//this screen bitmap contain the statusBar, remember to minus its height.
+        Bitmap screen=ScreenUtils.getScreenCapture(this);
+        Rect rect=mTailorView.getRect();
+        Bitmap bitmap=Bitmap.createBitmap(screen,rect.left,rect.top+mTailorView.statusBarHeight
+                ,rect.right-rect.left,rect.bottom-rect.top);
+</code></pre>
+</div>
+<p>注意这个截图是包含状态栏的，故需要对坐标进行一下处理。</p>
+
+<p>至此，我们的自定义图片裁减器就基本完成了，当然有很多缺点和bug，但作为一个自定义View学习Demo还是足够了。</p>
+
+<p>文章中都是抽离出了部分代码，可能阅读起来不太容易理解，<a href="https://github.com/mrrobot97/ImageTailor">完整的源代码见此</a>,加上注释理解起来应该好很多。</p>
+
+  </div>
+
+
+<a href="http://mrrobot97.github.io"><h3 style="text-align: center;">- to blog -</h3></a>
+
+<div id="disqus_thread"></div>
+<script>
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+s.src = '//http-mrrobot97-me.disqus.com/embed.js';
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+</article>
+
+
+      </div>
+    </div>
+
+  </body>
+
+    
+
+
+    <!-- 背景特效 -->
+    <script type="text/javascript">
+      !function() {
+    function o(w, v, i) {
+        return w.getAttribute(v) || i
+    }
+    function j(i) {
+        return document.getElementsByTagName(i)
+    }
+    function l() {
+        var i = j("script"), w = i.length, v = i[w - 1];
+        return {
+            l: w,
+            z: o(v, "zIndex", - 1),
+            o: o(v, "opacity", 0.5),
+            c: o(v, "color", "84,106,122"),
+            n: o(v, "count", 70)
+        }
+    }
+    function k() {
+        r = u.width = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth, n = u.height = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight
+    }
+    function b() {
+        e.clearRect(0, 0, r, n);
+        var w = [f].concat(t);
+        var x, v, A, B, z, y;
+        t.forEach(function(i) {
+            i.x += i.xa, i.y += i.ya, i.xa*=i.x > r || i.x < 0?-1 : 1, i.ya*=i.y > n || i.y < 0?-1 : 1, e.fillRect(i.x - 0.5, i.y - 0.5, 1, 1);
+            for (v = 0; v < w.length; v++) {
+                x = w[v];
+                if (i !== x && null !== x.x && null !== x.y) {
+                    B = i.x - x.x, z = i.y - x.y, y = B * B + z * z;
+                    y < x.max && (x === f && y >= x.max / 2 && (i.x -= 0.03 * B, i.y -= 0.03 * z), A = (x.max - y) / x.max, e.beginPath(), e.lineWidth = A / 2, e.strokeStyle = "rgba(" + s.c + "," + (A + 0.2) + ")", e.moveTo(i.x, i.y), e.lineTo(x.x, x.y), e.stroke())
+                }
+            }
+            w.splice(w.indexOf(i), 1)
+        }), m(b)
+    }
+    var u = document.createElement("canvas"), s = l(), c = "c_n" + s.l, e = u.getContext("2d"), r, n, m = window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame || function(i) {
+        window.setTimeout(i, 1000 / 45)
+    }, a = Math.random, f = {
+        x: null,
+        y: null,
+        max: 20000
+    };
+    u.id = c;
+    u.style.cssText = "position:fixed;top:0;left:0;z-index:" + s.z + ";opacity:" + s.o;
+    j("body")[0].appendChild(u);
+    k(), window.onresize = k;
+    window.onmousemove = function(i) {
+        i = i || window.event, f.x = i.clientX, f.y = i.clientY
+    }, window.onmouseout = function() {
+        f.x = null, f.y = null
+    };
+    for (var t = [], p = 0; s.n > p; p++) {
+        var h = a() * r, g = a() * n, q = 2 * a() - 1, d = 2 * a() - 1;
+        t.push({
+            x: h,
+            y: g,
+            xa: q,
+            ya: d,
+            max: 6000
+        })
+    }
+    setTimeout(function() {
+        b()
+    }, 100)
+}();
+    </script>
+
+</html>

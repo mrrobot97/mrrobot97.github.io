@@ -5,24 +5,74 @@
     <description>Record my study in android.</description>
     <link>http://mrrobot97.github.io/</link>
     <atom:link href="http://mrrobot97.github.io/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Tue, 22 Mar 2016 13:33:30 +0800</pubDate>
-    <lastBuildDate>Tue, 22 Mar 2016 13:33:30 +0800</lastBuildDate>
+    <pubDate>Tue, 11 Oct 2016 17:39:06 +0800</pubDate>
+    <lastBuildDate>Tue, 11 Oct 2016 17:39:06 +0800</lastBuildDate>
     <generator>Jekyll v3.1.2</generator>
     
       <item>
-        <title>Android反编译教程</title>
-        <description>&lt;p&gt;本博客转自Android大神郭霖&lt;a href=&quot;http://blog.csdn.net/guolin_blog/article/details/49738023&quot;&gt;Android安全攻防战，反编译与混淆技术完全解析（上）&lt;/a&gt;&lt;/p&gt;
+        <title>使用Android Studio 进行NDK开发基础</title>
+        <description>&lt;h2 id=&quot;ndk&quot;&gt;配置NDK环境&lt;/h2&gt;
+&lt;p&gt;在SDKManager中下载NDK依赖包以及额外工具，只需要勾选NDK、LLDB、CMAKE：&lt;/p&gt;
 
-&lt;hr /&gt;
-&lt;blockquote&gt;
-  &lt;p&gt;之前一直有犹豫过要不要写这篇文章，毕竟去反编译人家的程序并不是什么值得骄傲的事情。不过单纯从技术角度上来讲，掌握反编译功能确实是一项非常有用的技能，可能平常不太会用得到，但是一旦真的需要用到的了，而你却不会的话，那就非常头疼了。另外既然别人可以反编译程序，我们当然有理由应该对程序进行一定程度的保护，因此代码混淆也是我们必须要掌握的一项技术。那么最近的两篇文章我们就围绕反编译和混淆这两个主题来进行一次完全解析。&lt;/p&gt;
-&lt;/blockquote&gt;
+&lt;p&gt;&lt;img src=&quot;https://developer.android.com/studio/images/projects/ndk-install_2-2_2x.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
 
-&lt;h1 id=&quot;section&quot;&gt;反编译&lt;/h1&gt;
+&lt;p&gt;安装完成后，重启AndroidStudio即可自动配置好NDK开发环境。&lt;/p&gt;
 
-&lt;p&gt;我们都知道，Android程序打完包之后得到的是一个APK文件，这个文件是可以直接安装到任何Android手机上的，我们反编译其实也就是对这个APK文件进行反编译。Android的反编译主要又分为两个部分，一个是对代码的反编译，一个是对资源的反编译，我们马上来逐个学习一下。 
-在开始学习之前，首先我们需要准备一个APK文件，为了尊重所有开发者，我就不拿任何一个市面上的软件来演示了，而是自己写一个Demo用来测试。 
-这里我希望代码越简单越好，因此我们建立一个新项目，在Activity里加入一个按钮，当点击按钮时弹出一个Toast，就这么简单，代码如下所示：&lt;/p&gt;
+&lt;h2 id=&quot;jni&quot;&gt;JNI调用&lt;/h2&gt;
+
+&lt;h3 id=&quot;native&quot;&gt;定义本地Native方法&lt;/h3&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;public class HelloJNI {
+    
+    public native String getStringFromC();
+}
+
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;此时getStringFromC()方法会报错，这是由于找不到这个方法，无视之，直接build project。&lt;/p&gt;
+
+&lt;h3 id=&quot;section&quot;&gt;生成头文件&lt;/h3&gt;
+
+&lt;p&gt;build成功后进入app/build/intermediates/classes/debug目录下，使用命令行javah生成HelloJNI中的native方法对应的头文件：&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;javah -jni me.mrrobot97.hellojni.HelloJNI
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;注意包名以及类名都要正确，成功运行后在debug目录下就会生成一个头文件&lt;code class=&quot;highlighter-rouge&quot;&gt;me_mrrobot97_hellojni_HelloJNI.h&lt;/code&gt;，我们将这个头文件拷贝至AndroidStudio的JNI目录下，没有这个目录就手动创建一个，然后根据这个头文件创建对应的C文件，同样放置于JNI目录下：&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;#include &quot;me_mrrobot97_hellojni_HelloJNI.h&quot;
+
+JNIEXPORT jstring JNICALL Java_me_mrrobot97_hellojni_HelloJNI_getStringFromC
+  (JNIEnv * env, jobject obj)
+  {
+        return (*env)-&amp;gt;NewStringUTF(env, &quot;Hello JNI!&quot;);
+  }
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;h3 id=&quot;gradle&quot;&gt;修改gradle&lt;/h3&gt;
+&lt;p&gt;然后修改module级别的build.gradle文件，在defaultConfig中加入如下配置：&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;ndk{
+            moduleName &quot;hellojni&quot;
+   }
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;这里的moduleName就是我们要生成的.so文件的名字。修改gradle.properties,加入如下：&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;android.useDeprecatedNdk=true
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;然后就可以build了，build后会在app/build/intermediates/ndk/目录下生成对应的.so文件。有了.so文件我们就不需要JNI目录下的C文件了，直接在HelloJNI类中加入:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;static {
+        System.loadLibrary(&quot;hellojni&quot;);
+    }
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;就可以使用我们定义的native方法了。&lt;/p&gt;
 
 &lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;public class MainActivity extends AppCompatActivity {
 
@@ -30,687 +80,1168 @@
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Button button = (Button) findViewById(R.id.button);
-        button.setOnClickListener(new View.OnClickListener() {
+        HelloJNI helloJNI=new HelloJNI();
+        Log.d(&quot;yjw&quot;,helloJNI.getStringFromC());
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;运行项目，查看log:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;10-10 05:53:43.958 1811-1811/? D/yjw: Hello JNI!
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;证实我们已经成功调用了.so文件来实现native方法调用了！&lt;/p&gt;
+
+&lt;p&gt;上面的方法是针对只有源C文件而无.so文件的使用步骤，如果我们有现成的.so文件，直接调用System.loadLibrary即可。&lt;/p&gt;
+</description>
+        <pubDate>Mon, 10 Oct 2016 00:00:00 +0800</pubDate>
+        <link>http://mrrobot97.github.io/2016/10/10/%E4%BD%BF%E7%94%A8Android-Studio-%E8%BF%9B%E8%A1%8CNDK%E5%BC%80%E5%8F%91%E5%9F%BA%E7%A1%80.html</link>
+        <guid isPermaLink="true">http://mrrobot97.github.io/2016/10/10/%E4%BD%BF%E7%94%A8Android-Studio-%E8%BF%9B%E8%A1%8CNDK%E5%BC%80%E5%8F%91%E5%9F%BA%E7%A1%80.html</guid>
+        
+        
+      </item>
+    
+      <item>
+        <title>使用ItemTouchHelper实现RecyclerView的拖动排序、滑动删除</title>
+        <description>&lt;blockquote&gt;
+  &lt;p&gt;Google为我们提供的RecyclerView真的是非常的好用，高度可定制化，这次我们利用ItemTouchHelper来实现对RecyclerView的拖动排序以及滑动删除。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;先看看效果图:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://ockr1qfi1.bkt.clouddn.com/demo.gif&quot; alt=&quot;效果图&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;效果还是不错的，如果再结合自定义的ItemAnimator,可以实现很漂亮的花样。&lt;/p&gt;
+
+&lt;p&gt;首先我们要定义一个类实现&lt;code class=&quot;highlighter-rouge&quot;&gt;ItemTouchHelper.Callback&lt;/code&gt;接口，然后实现其中的几个方法:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;1.public boolean isLongPressDragEnabled()
+2.public boolean isItemViewSwipeEnabled()
+3.public int getMovementFlags(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder)
+4.public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target)
+5.public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;其中isLongPressDragEnable是决定是否可以通过长按Item来对其排序，isItemViewSwipeEnable决定是否可以滑动Item，只需要在需要实现的功能里面返回true即可，这里我们两个都返回true&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;@Override
+    public boolean isLongPressDragEnabled() {
+        return true;
+    }
+
+    @Override
+    public boolean isItemViewSwipeEnabled() {
+        return true;
+    }
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;然后就是重写onMove和onSwiped方法了，在这两个方法里面我们可以获取需要改变的item的位置，然后我们需要将这些位置通知给我们的Adapter，做法是定义一个接口：&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;public interface OnDragListener {
+
+    void onDrag(int from,int to);
+
+    void onDismiss(int pos);
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;让MainActivity实现这个接口，然后重写这两个方法，并通知Adapter数据更新:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;@Override
+    public void onDrag(int from, int to) {
+        Collections.swap(mList,from,to);
+        mAdapter.notifyItemMoved(from,to);
+    }
+
+    @Override
+    public void onDismiss(int pos) {
+        mList.remove(pos);
+        mAdapter.notifyItemRemoved(pos);
+    }
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;onMove以及onSwiped方法如下:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;@Override
+    public int getMovementFlags(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
+        int dragFlags=ItemTouchHelper.DOWN|ItemTouchHelper.UP|ItemTouchHelper.LEFT|ItemTouchHelper.RIGHT;
+        int swipeFlags=ItemTouchHelper.LEFT|ItemTouchHelper.RIGHT;
+
+        return makeMovementFlags(dragFlags,swipeFlags);
+    }
+
+    @Override
+    public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
+        mListener.onDrag(viewHolder.getAdapterPosition(),target.getAdapterPosition());
+        return true;
+    }
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;makeMovementFlags()是用来控制滑动以及拖动的方向的，用法如上所示。&lt;/p&gt;
+
+&lt;p&gt;最后就是在MainActivity中将我们的ItemTouchHelper.Callback与RecyclerView绑定:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;ItemTouchHelper.Callback callback=new MyItemTouchHelper(this);
+        ItemTouchHelper helper=new ItemTouchHelper(callback);
+        helper.attachToRecyclerView(mRecyclerView);
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;这样所有的工作就做完了。
+完整的项目源码地址&lt;a href=&quot;https://github.com/mrrobot97/DragableRecyclerView&quot;&gt;在此&lt;/a&gt;&lt;/p&gt;
+</description>
+        <pubDate>Tue, 27 Sep 2016 00:00:00 +0800</pubDate>
+        <link>http://mrrobot97.github.io/2016/09/27/%E4%BD%BF%E7%94%A8ItemTouchHelper%E5%AE%9E%E7%8E%B0RecyclerView%E7%9A%84%E6%8B%96%E5%8A%A8%E6%8E%92%E5%BA%8F-%E6%BB%91%E5%8A%A8%E5%88%A0%E9%99%A4.html</link>
+        <guid isPermaLink="true">http://mrrobot97.github.io/2016/09/27/%E4%BD%BF%E7%94%A8ItemTouchHelper%E5%AE%9E%E7%8E%B0RecyclerView%E7%9A%84%E6%8B%96%E5%8A%A8%E6%8E%92%E5%BA%8F-%E6%BB%91%E5%8A%A8%E5%88%A0%E9%99%A4.html</guid>
+        
+        
+      </item>
+    
+      <item>
+        <title>利用二阶贝塞尔曲线绘制动态波浪</title>
+        <description>&lt;blockquote&gt;
+  &lt;p&gt;利用贝塞尔曲线我们可以很好地拟合出各种曲线效果，其中二阶贝塞尔曲线可以用来模拟正弦曲线，及我们的“波浪”效果。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;先上效果图:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://ockr1qfi1.bkt.clouddn.com/ezgif.com-video-to-gif.gif&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;我们自定义一个WaveView，在onDraw中绘制我们的波浪，当然我们只能绘制静态的曲线，但是我们可以在onDraw中不断的调用invalidate()来实现模拟一帧帧的动画效果。&lt;/p&gt;
+
+&lt;p&gt;Android中的贝塞尔曲线是利用Path.quadTo(x1,y1,x2,y2)来实现二阶贝塞尔曲线的，其中x1,y1和x2,y2即分别为二阶贝塞尔曲线中的P1和P2，Path的起点即为P0.&lt;/p&gt;
+
+&lt;p&gt;width和height为我们定义的浪宽和浪高，sWidth和sHeight为屏幕的宽和高，我们在每一次onDraw中绘制出多条波浪，然后调用invalidate，并且平移一点x，即可实现动画效果:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;public class WaveView extends View {
+    private Paint mPaint;
+    //single wave height and weidth
+    private int width,height;
+    //screen width,height
+    private int sWidth,sHeight;
+    private int waveColor= Color.BLUE;
+    private Path mPath;
+    private int strokeWidth;
+    private float x,y;
+
+    private boolean isAnim=false;
+
+    public WaveView(Context context) {
+        this(context,null);
+    }
+
+    public WaveView(Context context, AttributeSet attrs) {
+        this(context, attrs,0);
+    }
+
+    public WaveView(Context context, AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
+        init();
+    }
+
+    private void init() {
+        strokeWidth=ScreenUtils.dp2px(getContext(),4);
+        mPaint=new Paint();
+        mPaint.setAntiAlias(true);
+        mPaint.setColor(waveColor);
+        mPaint.setStyle(Paint.Style.STROKE);
+        mPaint.setStrokeWidth(strokeWidth);
+        width=ScreenUtils.dp2px(getContext(),50);
+        height=ScreenUtils.dp2px(getContext(),40);
+        int[] wh=ScreenUtils.getScreenWidthAndHeight(getContext());
+        sWidth=wh[0];
+        sHeight=wh[1]-ScreenUtils.getStatusBarHeight(getContext());
+        mPath=new Path();
+        x=0;
+        y=sHeight/2;
+    }
+
+    @Override
+    protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+        mPath.reset();
+        mPath.moveTo(x,y);
+        float tmpX=x;
+        for(int i=0;tmpX&amp;lt;=sWidth+width;i++){
+            if (i%2==0){
+                //凸弧
+                mPath.quadTo(tmpX+width,y-height/2,tmpX+width*2,y);
+            }else{
+                //凹弧
+                mPath.quadTo(tmpX+width,y+height/2,tmpX+width*2,y);
+            }
+            canvas.drawPath(mPath,mPaint);
+            tmpX+=width*2;
+            mPath.moveTo(tmpX,y);
+        }
+        if (isAnim){
+            x-=width/10;
+            if (x&amp;lt;=-width*4){
+                x+=width*4;
+            }
+            invalidate();
+        }
+
+    }
+
+    public void startAnim(boolean anim){
+        isAnim=anim;
+        invalidate();
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+</description>
+        <pubDate>Sat, 17 Sep 2016 00:00:00 +0800</pubDate>
+        <link>http://mrrobot97.github.io/2016/09/17/%E5%88%A9%E7%94%A8%E4%BA%8C%E9%98%B6%E8%B4%9D%E5%A1%9E%E5%B0%94%E6%9B%B2%E7%BA%BF%E7%BB%98%E5%88%B6%E5%8A%A8%E6%80%81%E6%B3%A2%E6%B5%AA.html</link>
+        <guid isPermaLink="true">http://mrrobot97.github.io/2016/09/17/%E5%88%A9%E7%94%A8%E4%BA%8C%E9%98%B6%E8%B4%9D%E5%A1%9E%E5%B0%94%E6%9B%B2%E7%BA%BF%E7%BB%98%E5%88%B6%E5%8A%A8%E6%80%81%E6%B3%A2%E6%B5%AA.html</guid>
+        
+        
+      </item>
+    
+      <item>
+        <title>ViewPager实现无限轮播</title>
+        <description>&lt;blockquote&gt;
+  &lt;p&gt;Android自带的ViewGroup有翻页功能，支持用户手势滑动，但是不支持循环滚动，因此我们就在PagerAdapter的基础上为其增加循环滚动的功能就行了。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;自定义Adapter继承自PagerAdapter，我们需要重写四个方法:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;1.public int getCount()
+2.public Object instantiateItem(ViewGroup container, int position)
+3.public boolean isViewFromObject(View view, Object object)
+4.public void finishUpdate(ViewGroup container)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;假如我们有N个item需要循环滚动，那么在getCount中就返回2*N，这样让ViewPager以为我们有2N个page需要滚动，因此在滚动到第N页，即逻辑上的最后一页时，还能继续向后滚动，因为此时ViewPager以为后面还有N个page呢~&lt;/p&gt;
+
+&lt;p&gt;在instantiateItem需要对position进行对N求模处理，毕竟我们实际上只有N个page，然后生成相应的View并添加到container中去：&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;@Override
+    public Object instantiateItem(ViewGroup container, int position) {
+        position%=viewCnt;
+        ViewGroup parent= (ViewGroup) mViews.get(position).getParent();
+        if (parent!=null){
+            parent.removeView(mViews.get(position));
+        }
+        container.addView(mViews.get(position));
+        return mViews.get(position);
+    }
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;isViewFromObject的写法是固定的:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;@Override
+    public boolean isViewFromObject(View view, Object object) {
+        return view==object;
+    }
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;然后是finnishUpdate()方法，这个方法会在page切换完成之后调用，我们需要在这里实现page的偷偷替换：&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;@Override
+    public void finishUpdate(ViewGroup container) {
+        super.finishUpdate(container);
+        int position=mViewPager.getCurrentItem();
+        if (position==0){
+            //first pager,false to cancel translation
+            mViewPager.setCurrentItem(viewCnt,false);
+        }else if(position==getCount()-1){
+            //last pager
+            mViewPager.setCurrentItem(viewCnt-1,false);
+        }
+    }
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;之所以将第1个替换为第N+1个是因为第一个page无法向左滑动，而第N+1个左右滑动都可以，因为它左边是第N个，右面是第N+2个。同理将第2N个替换为第N个，因为第2N个无法向右滑动。&lt;/p&gt;
+
+&lt;p&gt;因为替换的前后是同一个page的内容，并且我们的setCurrentItem()的第二个参数为false,即取消过渡动画，立即切换，因此用户不会感觉到page发生了切换。这样我们通过”暗度陈仓”，就实现了ViewPager的循环滚动。&lt;/p&gt;
+
+&lt;p&gt;理论上我们还应该重写destroyItem()方法，但在我重写并在其中调用container.removeView(mViews.get(position))之后，发现在滚动的过程中会出现白屏现象，也没找到原因，反而注释这段代码之后正常了，知道原因的话请留言告诉我。&lt;/p&gt;
+
+&lt;p&gt;Demo:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://ockr1qfi1.bkt.clouddn.com/Screen%2520Capture%2520on%25202016-09-17%2520at%252015-51-54.gif&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+</description>
+        <pubDate>Sat, 17 Sep 2016 00:00:00 +0800</pubDate>
+        <link>http://mrrobot97.github.io/2016/09/17/ViewPager%E5%AE%9E%E7%8E%B0%E6%97%A0%E9%99%90%E8%BD%AE%E6%92%AD.html</link>
+        <guid isPermaLink="true">http://mrrobot97.github.io/2016/09/17/ViewPager%E5%AE%9E%E7%8E%B0%E6%97%A0%E9%99%90%E8%BD%AE%E6%92%AD.html</guid>
+        
+        
+      </item>
+    
+      <item>
+        <title>Android断点续传原理及实现</title>
+        <description>&lt;p&gt;原理：利用HttpURLConnection进行从网站上下载文件时，我们可以利用HttpURLConnection的setRequestProperty()方法，对我们要读取的字节部分进行控制，比如:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;1.Range=0-100代表只读取前100个字节。
+2.Range=100-500代表读取从第100个字节开始，读到第500个字节为止。
+3.Range=100-则代表从第100个字节开始读取，一直读取到文件末尾结束。
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;这样我们就可以轻松的实现对文件的各部分的读取了，我们只需要在暂停时记录一下已经读取到的位置，在重新开始的时候利用setRequestProperty()方法设置一下我们要读取的字节位置即可。&lt;/p&gt;
+
+&lt;p&gt;这里还有一个问题就是我们应该怎样将读取到的字节流写入文件中，由于File是不支持在指定处写入字节的，因此我们这里要使用RandomAccessFile来进行字节流的写入，RandomAccessFile有一个方法seek(long)，允许我们指定要写入的位置。&lt;/p&gt;
+
+&lt;p&gt;这样两者结合，就能够轻易的实现文件的断点续传了。&lt;/p&gt;
+
+&lt;p&gt;多线程断点续传实现原理相同，只是利用多个线程同时下载，每个线程指定要下载的字节部分，写入到文件的指定部分。故这里只给出了单线程断点续传下载的实现部分：&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;class SingleDownloadTask{
+
+        private String filePath;
+        private int contentLength;
+        private int readLength;
+        private RandomAccessFile file=null;
+         private boolean isPause=false;
+        private URL url;
+
+         public boolean isDownloading() {
+             return isDownloading;
+         }
+
+         private boolean isDownloading=false;
+
+        private Handler mHandler=new Handler();
+
+        public SingleDownloadTask(String urlStr,String filePath) {
+            this.filePath=filePath;
+            readLength=0;
+            contentLength=0;
+            try {
+                url=new URL(urlStr);
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            }
+        }
+
+        //download from pos
+        public void download(){
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    isDownloading=true;
+                    HttpURLConnection conn=null;
+                    InputStream is=null;
+                    BufferedInputStream bis=null;
+                    try {
+                        file=new RandomAccessFile(filePath,&quot;rw&quot;);
+                        file.seek(readLength);
+                        conn= (HttpURLConnection) url.openConnection();
+                        if(readLength==0){
+                            contentLength=conn.getContentLength();
+                        }else{
+                            conn.setRequestProperty(&quot;Range&quot;,&quot;bytes=&quot;+readLength+&quot;-&quot;);
+                        }
+                        is=conn.getInputStream();
+                        bis=new BufferedInputStream(is);
+                        byte[] bytes=new byte[1024];
+                        int len=0;
+                        while (!isPause&amp;amp;&amp;amp;((len=bis.read(bytes,0,1024)))!=-1){
+                            file.write(bytes,0,len);
+                            readLength+=len;
+                            mHandler.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    float rate=((float)readLength)/contentLength;
+                                    mProgressBar.setProgress((int) (100*rate));
+                                    mTextView.setText((int)(100*rate)+&quot;%&quot;);
+                                }
+                            });
+                        }
+                        isDownloading=false;
+                        if (readLength&amp;gt;=contentLength){
+                            mHandler.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast.makeText(MainActivity.this, &quot;文件下载成功,保存在&quot;+filePath
+                                            , Toast.LENGTH_SHORT).show();
+                                    mImageView.setImageBitmap(BitmapFactory.decodeFile(filePath));
+                                }
+                            });
+                        }
+                        file.close();
+                    } catch (MalformedURLException e) {
+                        e.printStackTrace();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }finally {
+                        if (bis!=null){
+                            try {
+                                bis.close();
+                                if (is!=null){
+                                    is.close();
+                                }
+                                if (conn!=null){
+                                    conn.disconnect();
+                                }
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                }
+            }).start();
+        }
+
+        public void start(){
+            isPause=false;
+            download();
+        }
+
+        public void pause(){
+            isPause=true;
+        }
+
+    }
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://github.com/mrrobot97/PauseDownload&quot;&gt;完整的Demo地址&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Demo:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://ockr1qfi1.bkt.clouddn.com/2016-09-17_12_09_42.gif&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+</description>
+        <pubDate>Sat, 17 Sep 2016 00:00:00 +0800</pubDate>
+        <link>http://mrrobot97.github.io/2016/09/17/Android%E6%96%AD%E7%82%B9%E7%BB%AD%E4%BC%A0%E5%8E%9F%E7%90%86%E5%8F%8A%E5%AE%9E%E7%8E%B0.html</link>
+        <guid isPermaLink="true">http://mrrobot97.github.io/2016/09/17/Android%E6%96%AD%E7%82%B9%E7%BB%AD%E4%BC%A0%E5%8E%9F%E7%90%86%E5%8F%8A%E5%AE%9E%E7%8E%B0.html</guid>
+        
+        
+      </item>
+    
+      <item>
+        <title>从零开始制作图片裁减器</title>
+        <description>&lt;blockquote&gt;
+  &lt;p&gt;这篇文章讲的是制作一个比较简单的自定义View—图片裁减器，为了降低难度，我只实现了矩形的裁减。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;先看看效果图:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://ockr1qfi1.bkt.clouddn.com/Screen%2520Capture%2520on%25202016-09-16%2520at%252017-21-09.gif&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;在开始码代码之前先想一下我们的裁减器TailorView都需要实现哪些功能：&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;1.打开系统相册，从中选中一张图片交给我们的Activity.
+2.将图片加载到一个ImageView上.
+3.显示一个矩形裁减框，并且可以放大、缩小、拖动.
+4.将图片中在裁减框范围之外的部分加上一个黑色滤镜.
+5.获取并生成裁减器框内部分的图片并生成Bitmap.
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;好了，然后我们就开始码代码喽~&lt;/p&gt;
+
+&lt;p&gt;首先是打开相册并选择一张图片，这件事我们交个一个Activity：MainActivity，这也是我们的入口Activity。注意由于我们需要取得位于SD卡上的图片文件，故需要再AndroidManifest文件中声明如下权限：&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&amp;lt;uses-permission android:name=&quot;android.permission.READ_EXTERNAL_STORAGE&quot;/&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;同时由于我的测试机型是Android6.0.1的，故还需要再运行时动态监测权限并申请权限。方便起见，我们打开应用的第一时间就申请权限：&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED){
+            ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}
+                    ,READ_EXTERNAL_STORAGE_REQUEST_CODE);
+        }
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;这就是在运行时动态申请权限的代码，这里我只申请了READ_EXTERNAL_STROAGE,其他权限同样处理方法。&lt;/p&gt;
+
+&lt;p&gt;那么我们怎样才知道用户是否授予了权限呢？很简单，只需要重写Activity的onRequestPermissionsResult方法即可，然后在里面判断用户是否给予了权限：&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;@Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if(requestCode==READ_EXTERNAL_STORAGE_REQUEST_CODE&amp;amp;&amp;amp;grantResults.length&amp;gt;0){
+            //do something
+        }
+    }
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;注意这里的READ_EXTERNAL_STORAGE_REQUEST_CODE和申请权限时的是同一个，都是我们自定义的常量。&lt;/p&gt;
+
+&lt;p&gt;好了，权限的问题我们已经搞定了，接下来就是调用系统相册了，很简单，只需一个Intent即可：&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Intent intent = new Intent(Intent.ACTION_PICK,
+       android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+startActivityForResult(intent, IMAGE_CODE);
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;然后就会自动打开系统相册，并且当你选择了一张图片的时候，就会返回。&lt;/p&gt;
+
+&lt;p&gt;接下来就是获取这张我们选择的图片,这里需要重写onActivityResult方法，因为我们调用系统相册时利用的是startActivityForResult(),故当Activity返回时会调用onActivityResult方法，连同返回的数据。&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;@Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode==IMAGE_CODE&amp;amp;&amp;amp;resultCode==RESULT_OK&amp;amp;&amp;amp;data!=null){
+            Uri selectedImage=data.getData();
+            String[] filePathColumn={MediaStore.Images.Media.DATA};
+            Cursor cursor=getContentResolver().query(selectedImage,
+                    filePathColumn,null,null,null);
+            if(cursor!=null){
+                cursor.moveToFirst();
+                String picturePath=
+                	cursor.getString(cursor.getColumnIndex(filePathColumn[0]));
+                cursor.close();
+                Intent intent=new Intent(this,TailorActivity.class);
+                intent.putExtra(&quot;picturePath&quot;,picturePath);
+                startActivityForResult(intent,IMAGE_TAILORED);
+            }
+        }
+    }
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;同样，这里的IMAGE_CODE就是startActivityForResylt中的IMAGE_CODE.这样我们就获取了图片的绝对路径，接下来就是加载这个图片到ImageView中了。这里我新建了一个Activity:TailorActivity,并在其布局里放了一个占据全屏的ImageView，我们将图片路径一并传给Activity:TailorActivity即可。&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Intent intent=new Intent(this,TailorActivity.class);
+                intent.putExtra(&quot;picturePath&quot;,picturePath);
+                startActivityForResult(intent,IMAGE_TAILORED);
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;在TailorActivity先从Intent中取出路径，并加载图片：&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;mBitmap= BitmapFactory.decodeFile(imagePath);
+        mImageView.setImageBitmap(mBitmap);
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;接下来就是今天的主角：自定义View—-TailorView&lt;/p&gt;
+
+&lt;p&gt;我先说一下这个View的结构：TailorView内部维护四个Point类，每个Point很简单只包含一个坐标x和y,这四个Point对应着我们要在屏幕上绘制的裁减框的四个角。我们每次draw的时候先根据这四个Point的位置画出四条线，就是裁减框的边界，然后绘制四个小的实心圆，当用户拖拽任意个=一个实心圆时，我们的裁剪框做出相应的大小改变。当用户点击裁剪框中间的部分时，裁剪框跟随者用户手指左右平移。&lt;/p&gt;
+
+&lt;p&gt;其中裁剪框放大、缩小、平移的逻辑都是在View的onTouchEvent中实现的。
+先看看我们的onDraw:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;@Override
+    protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+        //drawLines
+        mPaint.setStyle(Paint.Style.STROKE);
+        for (int i=0;i&amp;lt;4;i++){
+            canvas.drawLine(points[i].getX(),points[i].getY()
+                    ,points[(i+1)%4].getX(),points[(i+1)%4].getY(),mPaint);
+        }
+        mPaint.setStyle(Paint.Style.FILL);
+        //draw points
+        for (int i=0;i&amp;lt;4;i++){
+            canvas.drawCircle(points[i].getX(),points[i].getY(),mRadius,mPaint);
+        }
+    }
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;这样很轻松的就绘制除了四个边和四个实心角。&lt;/p&gt;
+
+&lt;p&gt;由于我们的TailorView有一个默认初始大小，因此在xml布局文件中使用的时候都不需要指定宽高了，我们也不用重写onMeasure（）方法了，算是偷了个懒。&lt;/p&gt;
+
+&lt;p&gt;我们要对我们的TailorView做出一些限制：&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;1.四个点的顺序不能乱，因为后面我们还要靠这四个点的顺序来构造一个Rect，这个Rect就是不会被黑色滤镜覆盖的范围。
+
+2.我们的TailorView所能移动的地方存在一个边界，就是ImageView中显示的图片的实际边界。
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;四个点的顺序不能乱，那就在onTouchEvent中检测四个点的相对坐标即可：&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;
+//check if points gets collide
+    private boolean pointsCross(int x, int y, int selectedIndex) {
+        if ((selectedIndex==0&amp;amp;&amp;amp;points[1].x-x&amp;lt;=mTouchSlop)
+                ||(selectedIndex==0&amp;amp;&amp;amp;points[3].y-y&amp;lt;=mTouchSlop)) return true;
+        if ((selectedIndex==1&amp;amp;&amp;amp;x-points[0].x&amp;lt;=mTouchSlop)
+                ||(selectedIndex==1&amp;amp;&amp;amp;points[2].y-y&amp;lt;=mTouchSlop)) return true;
+        if ((selectedIndex==2&amp;amp;&amp;amp;y-points[1].y&amp;lt;=mTouchSlop)
+                ||(selectedIndex==2&amp;amp;&amp;amp;x-points[3].x&amp;lt;=mTouchSlop)) return true;
+        if ((selectedIndex==3&amp;amp;&amp;amp;points[2].x-x&amp;lt;=mTouchSlop)
+                ||(selectedIndex==3&amp;amp;&amp;amp;y-points[0].y&amp;lt;=mTouchSlop)) return true;
+        return false;
+
+    }
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;可以看出，我的做法是当相邻两个点的某一方向上的距离小于mTouchSlop时，即视为冲突，就无法再任由用户移动了。&lt;/p&gt;
+
+&lt;p&gt;然后是我自定义了一个Bounds类，也很简单，就是包含x1,x2,y1,y1，即为边界的左上和右下点的坐标,在初始化的时候我们利用ImageView中Bitmp的实际边界，给我们的mBound进行赋值。然后同样在onTouchEvent中进行移动的时候，检测是否和边界冲突，倘若冲突，就停止移动：&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;private boolean checkOutBounds(int x, int y) {
+        return mBounds.x1&amp;lt;=x&amp;amp;&amp;amp;mBounds.x2&amp;gt;=x&amp;amp;&amp;amp;mBounds.y1&amp;lt;=y&amp;amp;&amp;amp;mBounds.y2&amp;gt;=y;
+    }
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;然后就是判断点击的点是在裁剪框内部还是在四个边角上：&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;private boolean inCenter(int x,int y){
+        for(int i=0;i&amp;lt;4;i++){
+            if (inCircle(x,y,points[i])) return false;
+        }
+        return mRect.contains(x,y);
+    }
+
+    private boolean inCircle(int x,int y,Point p){
+        return Math.hypot(x-p.getX(),y-p.getY())&amp;lt;=checkLength;
+    }
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;当用户点击的是边框内部的时候，我们就随用户的移动移动整个裁剪框：&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;//move the whole rect
+    private void moveWhole(int delX,int delY){
+        for (int i=0;i&amp;lt;4;i++){
+            if (!checkOutBounds(points[i].x+delX,points[i].y+delY)) return;
+        }
+        for (int i=0;i&amp;lt;4;i++){
+            points[i].x+=delX;
+            points[i].y+=delY;
+        }
+        mRect=new Rect(points[0].getX(),points[0].getY(),points[2].getX(),points[2].getY());
+        mListener.onRectPositionChange();
+    }
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;当用户点击的是某个边角时，相应的需要改变其相邻的两个Point的x或y：&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;if (shouldMove){
+        p.setX(x).setY(y);
+        //change the relative two circle&#39;s position
+        if (selectedIndex%2==0){
+             points[(selectedIndex+1)%4].setY(y);
+             points[(selectedIndex+3)%4].setX(x);
+        }else{
+             points[(selectedIndex+1)%4].setX(x);
+             points[(selectedIndex+3)%4].setY(y);
+            }
+         if (mListener!=null){
+             mListener.onRectPositionChange();
+             }
+            mRect=new Rect(points[0].getX(),points[0].getY(),points[2].getX(),points[2].getY());
+  }
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;这样，裁剪框的逻辑基本就实现了，完整的代码我会放在后面。&lt;/p&gt;
+
+&lt;p&gt;然后是我们的另一个自定义View—FilterView，其功能就是给出了裁剪框以外的部分加上一个黑色滤镜，这个就很好实现了，我们只需要让FilterView充满屏幕，然后绘制一个半透明黑色背景色即可。
+直接看onDraw方法吧：&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;@Override
+    protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+        //draw filter color except the rect consists the four points
+        mPaint.setAlpha(alpha);
+        canvas.drawRect(0,0,mWidth,mRect.top,mPaint);
+        canvas.drawRect(0,mRect.bottom,mWidth,mHeight,mPaint);
+        canvas.drawRect(0,mRect.top,mRect.left,mRect.bottom,mPaint);
+        canvas.drawRect(mRect.right,mRect.top,mWidth,mRect.bottom,mPaint);
+    }
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;这里的alpha我的取值是0xAA。&lt;/p&gt;
+
+&lt;p&gt;这里的mRect就是从TailorView那里取得的Rect，注意我们的TailorView的Rect在不停的改变，因此我们需要定义一个接口Listener对其实现监听：&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;public interface RectPositionChangeListener{
+        void onRectPositionChange();
+    }
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;然后我们给TailorView设置一个Listener，在其内部每当Rect变化时就调用onRectPOsitionChange（）方法即可。&lt;/p&gt;
+
+&lt;p&gt;最后就是我们截取图片的功能了，思路是先利用View的getDrawingCache方法获取屏幕截图，然后再利用Rect的坐标从截图中生成一张新的图片：&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;//return a screen capture bitmap unscaled
+    public static Bitmap getScreenCapture(Activity activity){
+        View view=activity.getWindow().getDecorView();
+        view.setDrawingCacheEnabled(true);
+        view.buildDrawingCache();
+        Bitmap bitmap=view.getDrawingCache();
+        int []wh=getScreenWidthAndHeight(activity);
+        Bitmap scaled=Bitmap.createBitmap(bitmap,0,0,wh[0],wh[1]);
+        view.setDrawingCacheEnabled(false);
+        view.destroyDrawingCache();
+        return scaled;
+    }
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;//this screen bitmap contain the statusBar, remember to minus its height.
+        Bitmap screen=ScreenUtils.getScreenCapture(this);
+        Rect rect=mTailorView.getRect();
+        Bitmap bitmap=Bitmap.createBitmap(screen,rect.left,rect.top+mTailorView.statusBarHeight
+                ,rect.right-rect.left,rect.bottom-rect.top);
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;注意这个截图是包含状态栏的，故需要对坐标进行一下处理。&lt;/p&gt;
+
+&lt;p&gt;至此，我们的自定义图片裁减器就基本完成了，当然有很多缺点和bug，但作为一个自定义View学习Demo还是足够了。&lt;/p&gt;
+
+&lt;p&gt;文章中都是抽离出了部分代码，可能阅读起来不太容易理解，&lt;a href=&quot;https://github.com/mrrobot97/ImageTailor&quot;&gt;完整的源代码见此&lt;/a&gt;,加上注释理解起来应该好很多。&lt;/p&gt;
+</description>
+        <pubDate>Fri, 16 Sep 2016 00:00:00 +0800</pubDate>
+        <link>http://mrrobot97.github.io/2016/09/16/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E5%9B%BE%E7%89%87%E8%A3%81%E5%87%8F%E5%99%A8.html</link>
+        <guid isPermaLink="true">http://mrrobot97.github.io/2016/09/16/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E5%9B%BE%E7%89%87%E8%A3%81%E5%87%8F%E5%99%A8.html</guid>
+        
+        
+      </item>
+    
+      <item>
+        <title>利用注解+反射实现view的auto bind</title>
+        <description>&lt;blockquote&gt;
+  &lt;p&gt;相信都用过JakeWharton大神的&lt;a href=&quot;https://github.com/JakeWharton/butterknife&quot;&gt;ButterKnife&lt;/a&gt;框架，有了ButterKnife我们就可以不用再反复地写繁琐的findViewById()了，ButterKnife内部利用的是注解+编译时生成java字节码实现的，没有利用到反射，故在实际使用时不会对应用的性能产生影响。今天我们就简单的利用注解+反射实现一个简单的view的auto bind，当然只是为了了解一下注解和反射的简单用法。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;首先我们定义一个注解接口：&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;@Target(ElementType.FIELD)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface BindView {
+    public int id();
+}
+
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;很简单，只有一个id，因为我们为view绑定控件时只需要一个int类型的id即可。&lt;/p&gt;
+
+&lt;p&gt;然后是我们的注解处理类：&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;public class Binder {
+    public static void bind(Object object, View view){
+        Field[] fields=object.getClass().getDeclaredFields();
+        for (Field field:fields){
+            if (field.isAnnotationPresent(BindView.class)){
+                BindView bindView=field.getAnnotation(BindView.class);
+                if (bindView!=null){
+                    field.setAccessible(true);
+                    try {
+                        field.set(object,view.findViewById(bindView.id()));
+                    } catch (IllegalAccessException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;我们需要将注解所在的object以及需要绑定到的view作为参数传进去。&lt;/p&gt;
+
+&lt;p&gt;然后就可以使用啦！&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;public class MainActivity extends AppCompatActivity {
+
+    @BindView(id=R.id.text_view)
+    private TextView mTextView;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        Binder.bind(this,this.findViewById(android.R.id.content));
+        mTextView.setText(&quot;This is not a hello world&quot;);
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;这里我们只需要@BindView(id=…)，然后在setContentView()后调用Binder.bind()即可使用我们的mTextView了。&lt;/p&gt;
+
+&lt;p&gt;当然利用反射是会对应用性能产生影响的，实际使用中我们还是应该使用ButterKnife。&lt;/p&gt;
+</description>
+        <pubDate>Sun, 11 Sep 2016 00:00:00 +0800</pubDate>
+        <link>http://mrrobot97.github.io/2016/09/11/%E5%88%A9%E7%94%A8%E6%B3%A8%E8%A7%A3+%E5%8F%8D%E5%B0%84%E5%AE%9E%E7%8E%B0view%E7%9A%84auto-bind.html</link>
+        <guid isPermaLink="true">http://mrrobot97.github.io/2016/09/11/%E5%88%A9%E7%94%A8%E6%B3%A8%E8%A7%A3+%E5%8F%8D%E5%B0%84%E5%AE%9E%E7%8E%B0view%E7%9A%84auto-bind.html</guid>
+        
+        
+      </item>
+    
+      <item>
+        <title>为RecyclerView添加Header、Footer、加载更多的通用原理</title>
+        <description>&lt;blockquote&gt;
+  &lt;p&gt;RecyclerView固然好用，但是官方并没有为其提供像ListView的addHeaderView()、addFooterView()等方法，固我们需要自己来实现。本文以一个简单例子介绍其通用原理，对题干中的三项都试用。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;方法就是：继承RecyclerView.Adapter，然后在其内部进行自己的逻辑实现。这里以在RecyclerView的尾部添加一个加载更多的FooterView为例进行介绍。&lt;/p&gt;
+
+&lt;p&gt;继承RecyclerView.Adapter，则需要重写三个方法：&lt;/p&gt;
+
+&lt;p&gt;1.onCreateViewHolder(ViewGroup parent, int viewType)&lt;/p&gt;
+
+&lt;p&gt;2.onBindViewHolder(RecyclerView.ViewHolder holder, int position)&lt;/p&gt;
+
+&lt;p&gt;3.getItemCount()&lt;/p&gt;
+
+&lt;p&gt;注意到在onCreateViewHolder方法中有一个参数viewType,我们就是利用这个参数进行改造。首先声明两个ViewType:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;private static final int VIEW_TYPE_NORMAL=0;
+
+private static final int VIEW_TYPE_BUTTON=1;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;既然有两种viewType，自然就需要有两个布局文件，一个对应我们普通item的layout,一个对应我们的footerview的layout.同理有两个ViewHolder&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;public static class ViewHolder extends RecyclerView.ViewHolder{
+        public TextView mTextView;
+
+        public ViewHolder(View itemView) {
+            super(itemView);
+            mTextView= (TextView) itemView.findViewById(R.id.text_view);
+        }
+    }
+
+    public  class LoadMoreHolder extends RecyclerView.ViewHolder{
+        private Button mButton;
+        private RelativeLayout mLayout;
+        public LoadMoreHolder(View itemView) {
+            super(itemView);
+            mLayout= (RelativeLayout) itemView.findViewById(R.id.relative_layout);
+            mButton= (Button) itemView.findViewById(R.id.load_more_bt);
+            mButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (mListener!=null){
+                        mListener.loadMore();
+                    }
+                }
+            });
+        }
+    }
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;这里我们必须主动重写一个函数getItemViewType(int position)，我们需要根据position来决定我们的viewType，这里我添加的是footerview，所以实现逻辑是这样的：&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;@Override
+    public int getItemViewType(int position) {
+        if (position&amp;lt;mData.size()){
+            return VIEW_TYPE_NORMAL;
+        }
+        return VIEW_TYPE_BUTTON;
+    }
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;然后是onCreateViewHolder，在这里根据viewType来生成不同的view以及ViewHolder&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;@Override
+    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        if (viewType==VIEW_TYPE_NORMAL){
+            View view= LayoutInflater.from(mContext).inflate(R.layout.item_layout,null);
+            ViewHolder holder=new ViewHolder(view);
+            return holder;
+        }else{
+            View view=LayoutInflater.from(mContext).inflate(R.layout.load_more_button_layout,null);
+            LoadMoreHolder holder=new LoadMoreHolder(view);
+            return holder;
+        }
+
+    }
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;然后是onBindViewHolder&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;@Override
+    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+        if (position&amp;lt;mData.size()){
+            ((ViewHolder)holder).mTextView.setText(mData.get(position));
+        }
+    }
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;在getItemCount函数中注意要+1，因为我们手动为RecyclerView添加了一个footerview&lt;/p&gt;
+
+&lt;p&gt;到这里为止，我们的Adapter已经能正常为LinearLayoutManager样式的RecyclerView工作了，
+若还想要在GridLayoutManager和StaggeredLayoutManager时正常使用，还需重写下面两个函数：&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;@Override
+    public void onAttachedToRecyclerView(RecyclerView recyclerView) {
+        super.onAttachedToRecyclerView(recyclerView);
+        RecyclerView.LayoutManager manager=recyclerView.getLayoutManager();
+        if (manager instanceof GridLayoutManager){
+            final RecyclerView.LayoutManager finalManager = manager;
+            ((GridLayoutManager) manager).setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+                @Override
+                public int getSpanSize(int position) {
+                    return position&amp;lt;mData.size()?((GridLayoutManager) finalManager).getSpanCount():1;
+                }
+            });
+        }
+    }
+
+    @Override
+    public void onViewAttachedToWindow(RecyclerView.ViewHolder holder) {
+        super.onViewAttachedToWindow(holder);
+        if (holder instanceof LoadMoreHolder){
+            ViewGroup.LayoutParams lp=((LoadMoreHolder) holder).mLayout.getLayoutParams();
+            if (lp!=null&amp;amp;&amp;amp;lp instanceof StaggeredGridLayoutManager.LayoutParams){
+                ((StaggeredGridLayoutManager.LayoutParams)lp).setFullSpan(true);
+            }
+        }
+    }
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;应该能看懂，不解释了。&lt;/p&gt;
+
+&lt;p&gt;样例全部代码:
+&lt;a href=&quot;https://github.com/mrrobot97/LoadMoreRecyclerView&quot;&gt;Github样例代码&lt;/a&gt;&lt;/p&gt;
+</description>
+        <pubDate>Sat, 10 Sep 2016 00:00:00 +0800</pubDate>
+        <link>http://mrrobot97.github.io/2016/09/10/%E4%B8%BARecyclerView%E6%B7%BB%E5%8A%A0Header-Footer-%E5%8A%A0%E8%BD%BD%E6%9B%B4%E5%A4%9A%E7%9A%84%E9%80%9A%E7%94%A8%E5%8E%9F%E7%90%86.html</link>
+        <guid isPermaLink="true">http://mrrobot97.github.io/2016/09/10/%E4%B8%BARecyclerView%E6%B7%BB%E5%8A%A0Header-Footer-%E5%8A%A0%E8%BD%BD%E6%9B%B4%E5%A4%9A%E7%9A%84%E9%80%9A%E7%94%A8%E5%8E%9F%E7%90%86.html</guid>
+        
+        
+      </item>
+    
+      <item>
+        <title>夜间模式过渡动画简单实现</title>
+        <description>&lt;blockquote&gt;
+  &lt;p&gt;众所周知，知乎的夜间模式切换时有一个挺不错的过渡效果，本文就简单说明一下这个过渡是怎么实现的。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;原理就是：在切换至夜间模式，即给各个view更换底色之前，先给当前屏幕截一张图，然后将这张图显示在view的最上面，然后不断改变其透明度直至透明 ，然后再改变各个view的底色。至于屏幕截图，使用View的
+getDrawingCache()函数来实现的，不过要注意这个函数返回的是一张
+&amp;gt;A non-scaled bitmap representing this view&lt;/p&gt;
+
+&lt;p&gt;的图片，所以我们需要一这个Bitmap为src在创建一个Bitmap.&lt;/p&gt;
+
+&lt;p&gt;代码实现：&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;
+package me.mrrobot97.nightmode;
+
+import android.animation.Animator;
+import android.animation.ObjectAnimator;
+import android.app.Activity;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.os.Bundle;
+import android.util.TypedValue;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
+import android.view.animation.LinearInterpolator;
+import android.widget.Button;
+import android.widget.RelativeLayout;
+
+public class MainActivity extends Activity {
+    private Button changeBt;
+    private boolean isNight=false;
+    private RelativeLayout layout;
+
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        setTheme(R.style.DayTheme);
+        setContentView(R.layout.activity_main);
+        changeBt= (Button) findViewById(R.id.change_bt);
+        layout= (RelativeLayout) findViewById(R.id.relative_layout);
+        changeBt.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
-                Toast.makeText(MainActivity.this, &quot;you clicked button&quot;, Toast.LENGTH_SHORT).show();
+            public void onClick(View view) {
+                showAnim();
+                changeTheme();
+                refreshUI();
             }
         });
     }
+
+    private void refreshUI() {
+        TypedValue backgroundColor=new TypedValue();
+        TypedValue buttonColor=new TypedValue();
+        Resources.Theme theme=getTheme();
+        theme.resolveAttribute(R.attr.colorBackground,backgroundColor,true);
+        theme.resolveAttribute(R.attr.colorButton,buttonColor,true);
+        layout.setBackgroundResource(backgroundColor.resourceId);
+        changeBt.setBackgroundResource(buttonColor.resourceId);
+    }
+
+    private void showAnim() {
+        //获取一个屏幕截图,然后通过更改其透明度来实现过渡动画
+        final View decorView=getWindow().getDecorView();
+        decorView.setDrawingCacheEnabled(true);
+        decorView.buildDrawingCache(true);
+        Bitmap nonScaleBitmap=decorView.getDrawingCache();
+        Bitmap screenCapture= Bitmap.createBitmap(nonScaleBitmap);
+        decorView.setDrawingCacheEnabled(false);
+        if (decorView instanceof ViewGroup&amp;amp;&amp;amp;screenCapture!=null){
+            final View view=new View(this);
+            view.setBackgroundDrawable(new BitmapDrawable(getResources(),screenCapture));
+            ViewGroup.LayoutParams lp=new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT
+                    , ViewGroup.LayoutParams.MATCH_PARENT);
+            ((ViewGroup) decorView).addView(view,lp);
+            ObjectAnimator animator=ObjectAnimator.ofFloat(view,&quot;alpha&quot;,1f,0);
+            animator.setInterpolator(new LinearInterpolator());
+            animator.setDuration(300);
+            animator.addListener(new Animator.AnimatorListener() {
+                @Override
+                public void onAnimationStart(Animator animator) {
+
+                }
+
+                @Override
+                public void onAnimationEnd(Animator animator) {
+                    ((ViewGroup) decorView).removeView(view);
+                }
+
+                @Override
+                public void onAnimationCancel(Animator animator) {
+
+                }
+
+                @Override
+                public void onAnimationRepeat(Animator animator) {
+
+                }
+            });
+            animator.start();
+        }
+
+    }
+
+    private void changeTheme() {
+        isNight=!isNight;
+        if (isNight){
+            setTheme(R.style.NightTheme);
+        }else{
+            setTheme(R.style.DayTheme);
+        }
+    }
 }
 &lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 
-&lt;p&gt;activity_main.xml中的资源如下所示：&lt;/p&gt;
+&lt;p&gt;我的style文件是这样的：&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&amp;lt;resources&amp;gt;
+
+    &amp;lt;!-- Base application theme. --&amp;gt;
+    &amp;lt;style name=&quot;AppTheme&quot; parent=&quot;Theme.AppCompat.Light.DarkActionBar&quot;&amp;gt;
+        &amp;lt;!-- Customize your theme here. --&amp;gt;
+        &amp;lt;item name=&quot;colorPrimary&quot;&amp;gt;@color/colorPrimary&amp;lt;/item&amp;gt;
+        &amp;lt;item name=&quot;colorPrimaryDark&quot;&amp;gt;@color/colorPrimaryDark&amp;lt;/item&amp;gt;
+        &amp;lt;item name=&quot;colorAccent&quot;&amp;gt;@color/colorAccent&amp;lt;/item&amp;gt;
+    &amp;lt;/style&amp;gt;
+
+    &amp;lt;style name=&quot;DayTheme&quot; parent=&quot;Theme.AppCompat.Light.DarkActionBar&quot;&amp;gt;
+        &amp;lt;item name=&quot;colorPrimary&quot;&amp;gt;@color/colorPrimary&amp;lt;/item&amp;gt;
+        &amp;lt;item name=&quot;colorPrimaryDark&quot;&amp;gt;@color/colorPrimaryDark&amp;lt;/item&amp;gt;
+        &amp;lt;item name=&quot;colorAccent&quot;&amp;gt;@color/colorAccent&amp;lt;/item&amp;gt;
+        &amp;lt;item name=&quot;colorBackground&quot;&amp;gt;@android:color/white&amp;lt;/item&amp;gt;
+        &amp;lt;item name=&quot;colorButton&quot;&amp;gt;@android:color/white&amp;lt;/item&amp;gt;
+    &amp;lt;/style&amp;gt;
+
+    &amp;lt;style name=&quot;NightTheme&quot; parent=&quot;Theme.AppCompat.Light.DarkActionBar&quot;&amp;gt;
+        &amp;lt;item name=&quot;colorPrimary&quot;&amp;gt;@color/color3F3F3F&amp;lt;/item&amp;gt;
+        &amp;lt;item name=&quot;colorPrimaryDark&quot;&amp;gt;@color/color3A3A3A&amp;lt;/item&amp;gt;
+        &amp;lt;item name=&quot;colorAccent&quot;&amp;gt;@color/color868686&amp;lt;/item&amp;gt;
+        &amp;lt;item name=&quot;colorBackground&quot;&amp;gt;@color/color868686&amp;lt;/item&amp;gt;
+        &amp;lt;item name=&quot;colorButton&quot;&amp;gt;@color/color868686&amp;lt;/item&amp;gt;
+    &amp;lt;/style&amp;gt;
+
+&amp;lt;/resources&amp;gt;
+
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;其中colorBackground、colorButton是我在attrs.xml中自定义的两个属性&lt;/p&gt;
 
 &lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;cp&quot;&gt;&amp;lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&amp;gt;&lt;/span&gt;
-&lt;span class=&quot;nt&quot;&gt;&amp;lt;RelativeLayout&lt;/span&gt;
-    &lt;span class=&quot;na&quot;&gt;xmlns:android=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;http://schemas.android.com/apk/res/android&quot;&lt;/span&gt;
-    &lt;span class=&quot;na&quot;&gt;android:layout_width=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;match_parent&quot;&lt;/span&gt;
-    &lt;span class=&quot;na&quot;&gt;android:layout_height=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;match_parent&quot;&lt;/span&gt;
-    &lt;span class=&quot;na&quot;&gt;android:paddingBottom=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;@dimen/activity_vertical_margin&quot;&lt;/span&gt;
-    &lt;span class=&quot;na&quot;&gt;android:paddingLeft=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;@dimen/activity_horizontal_margin&quot;&lt;/span&gt;
-    &lt;span class=&quot;na&quot;&gt;android:paddingRight=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;@dimen/activity_horizontal_margin&quot;&lt;/span&gt;
-    &lt;span class=&quot;na&quot;&gt;android:paddingTop=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;@dimen/activity_vertical_margin&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
-
-    &lt;span class=&quot;nt&quot;&gt;&amp;lt;Button&lt;/span&gt;
-        &lt;span class=&quot;na&quot;&gt;android:id=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;@+id/button&quot;&lt;/span&gt;
-        &lt;span class=&quot;na&quot;&gt;android:layout_width=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;wrap_content&quot;&lt;/span&gt;
-        &lt;span class=&quot;na&quot;&gt;android:layout_height=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;wrap_content&quot;&lt;/span&gt;
-        &lt;span class=&quot;na&quot;&gt;android:text=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Button&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt;
-
-&lt;span class=&quot;nt&quot;&gt;&amp;lt;/RelativeLayout&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;resources&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;attr&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;name=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;colorBackground&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;format=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;color&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&amp;lt;/attr&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;attr&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;name=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;colorButton&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;format=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;color&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&amp;lt;/attr&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;/resources&amp;gt;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 
-&lt;p&gt;然后我们将代码打成一个APK包，并命名成Demo.apk，再把它安装到手机上，结果如下所示：&lt;/p&gt;
+&lt;p&gt;最终效果:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&quot;http://img.blog.csdn.net/20160204142511216&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;好的，到这里准备工作就已经基本完成了，接下来就让我们开始对这个Demo程序进行反编译吧。
-# 反编译代码
-要想将APK文件中的代码反编译出来，我们需要用到以下两款工具：&lt;/p&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;
-    &lt;p&gt;dex2jar 这个工具用于将dex文件转换成jar文件&lt;/p&gt;
-
-    &lt;p&gt;下载地址：http://sourceforge.net/projects/dex2jar/files/&lt;/p&gt;
-  &lt;/li&gt;
-  &lt;li&gt;
-    &lt;p&gt;jd-gui 这个工具用于将jar文件转换成java代码&lt;/p&gt;
-
-    &lt;p&gt;下载地址：http://jd.benow.ca/&lt;/p&gt;
-  &lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;将这两个工具都下载好并解压，然后我们就开始对Demo程序进行反编译。解压dex2jar压缩包后，你会发现有很多个文件，如下图所示：&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://img.blog.csdn.net/20160204153609614&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;其中我们要用到的是d2j-dex2jar.bat这个文件，当然如果你是linux或mac系统的话就要用d2j-dex2jar.sh这个文件。 
-然后我们将Demo.apk文件也进行解压，如果不知道怎么直接解压的可以先将文件重命名成Demo.zip，然后用解压软件打开。解压之后你会发现里面有一个classes.dex文件，如下图所示：&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://img.blog.csdn.net/20160204160337530&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;这个classes.dex文件就是存放所有java代码的地方了，我们将它拷贝到dex2jar解压后的目录下，并在cmd中也进入到同样的目录，然后执行：&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;d2j-dex2jar classes.dex
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;p&gt;执行结果如下图所示：&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://img.blog.csdn.net/20160204160725801&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;没有报任何错误，这就说明我们已经转换成功了。现在观察dex2jar目录，你会发现多了一个文件，如下图所示：&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://img.blog.csdn.net/20160204161831426&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;可以看到，classes-dex2jar.jar这个文件就是我们借助工具之后成功转换出来的jar文件了。但是对于我们而言，jar文件也不是可读的，因此这里还需要再借助一下jd-gui这个工具来将jar文件转换成java代码。 
-下面就很简单了，使用jd-gui工具打开classes-dex2jar.jar这个文件，结果如下图所示：&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://img.blog.csdn.net/20160204162548914&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;OK，由此可见，我们的代码反编译工作已经成功了，MainActivity中的代码非常清晰，基本已经做到了90%以上的还原工作。但是如果想要做到100%的代码还原还是非常有难度的，因为像setContentView()方法传入的参数，其实就是一个资源的id值而已，那么这里反编译也就只能将相应的id值进行还原，而无法变成像R.layout.activity_main这样直观的代码展示。 
-另外，除了MainActivity之外，还有很多其它的代码也被反编译出来了，因为当前项目有引用support-v4和support-v7的包，这些引用的library也会作为代码的一部分被打包到classes.dex文件当中，因此反编译的时候这些代码也会一起被还原。 
-好的，学完了反编译代码，接下来我们看一下如何反编译资源。&lt;/p&gt;
-
-&lt;h1 id=&quot;section-1&quot;&gt;反编译资源&lt;/h1&gt;
-
-&lt;p&gt;其实细心的朋友可能已经观察到了，刚才Demo.apk的解压目录当中不是已经有资源文件了吗，有AndroidManifest.xml文件，也有res目录。进入res目录当中，内容如下图所示：&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://img.blog.csdn.net/20160205114006588&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;这不是所有资源文件都在这里了么？其实这些资源文件都是在打包的时候被编译过了，我们直接打开的话是看不到明文的，不信的话我们打开AndroidManifest.xml文件来瞧一瞧，内容如下图所示：&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://img.blog.csdn.net/20160205114422374&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;可以看到，这代码是完全没法阅读的。当然如果你去打开activity_main.xml看看，结果也不会好到哪儿去：&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://img.blog.csdn.net/20160205114648290&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;由此可见，直接对APK包进行解压是无法得到它的原始资源文件的，因此我们还需要对资源进行反编译才行。 
-要想将APK文件中的资源反编译出来，又要用到另外一个工具了：&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;
-    &lt;p&gt;&lt;strong&gt;apktool&lt;/strong&gt; 这个工具用于最大幅度地还原APK文件中的9-patch图片、布局、字符串等等一系列的资源。&lt;/p&gt;
-
-    &lt;p&gt;下载地址：http://ibotpeaches.github.io/Apktool/install/&lt;/p&gt;
-  &lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;关于这个工具的下载我还要再补充几句，我们需要的就是apktool.bat和apktool.jar这两个文件。目前apktool.jar的最新版本是2.0.3，这里我就下载最新的了，然后将apktool_2.0.3.jar重命名成apktool.jar，并将它们放到同一个文件夹下就可以了，如下图所示：&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://img.blog.csdn.net/20160205125449076&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;接下来的工作就很简单了，我们将Demo.apk拷贝到和这两个文件同样的目录当中，然后cmd也进入到这个目录下，并在cmd中执行如下命令：&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;apktool d Demo.apk
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;p&gt;其中d是decode的意思，表示我们要对Demo.apk这个文件进行解码。那除了这个基本用法之外，我们还可以再加上一些附加参数来控制decode的更多行为：&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;&lt;strong&gt;-f&lt;/strong&gt; 如果目标文件夹已存在，则强制删除现有文件夹（默认如果目标文件夹已存在，则解码失败）。&lt;/li&gt;
-  &lt;li&gt;&lt;strong&gt;-o&lt;/strong&gt; 指定解码目标文件夹的名称（默认使用APK文件的名字来命名目标文件夹）。&lt;/li&gt;
-  &lt;li&gt;&lt;strong&gt;-s&lt;/strong&gt; 不反编译dex文件，也就是说classes.dex文件会被保留（默认会将dex文件解码成smali文件）。&lt;/li&gt;
-  &lt;li&gt;&lt;strong&gt;-r&lt;/strong&gt; 不反编译资源文件，也就是说resources.arsc文件会被保留（默认会将resources.arsc解码成具体的资源文件）。&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;常用用法就这么多了，那么上述命令的执行结果如下图所示：&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://img.blog.csdn.net/20160205130623698&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;这就说明反编译资源已经成功了。 
-当然即使你在和我执行一模一样的操作，也有可能会在这里反编译失败，比如说会报如下错误：&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://img.blog.csdn.net/20160205131116809&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;出现这个错误的原因很有可能是你之前使用过apktool的老版本进行过反编译操作，然后apktool就会在你系统的 &lt;code class=&quot;highlighter-rouge&quot;&gt;C:\Users\Administrator\apktool\framework&lt;/code&gt; 这个目录下生成一个名字为 &lt;code class=&quot;highlighter-rouge&quot;&gt;1.apk&lt;/code&gt; 的缓存文件，将这个缓存文件删除掉，然后再重新执行反编译命令应该就可以成功了。&lt;/p&gt;
-
-&lt;p&gt;现在你会发现在当前目录下多了一个Demo文件夹，这个文件夹中存放的就是反编译的结果了。我们可以打开AndroidManifest.xml来瞧一瞧，如下图所示：&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://img.blog.csdn.net/20160205184526870&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;怎么样？这样就完全能看得懂了吧，然后可以再到res/layout中看一下activity_main.xml文件，如下图所示：&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://img.blog.csdn.net/20160205185353442&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;可以看到，activity_main.xml中的内容基本和源代码中的内容是一致的，外层是一个RelativeLayout，里面则是一个Button。你可以再到其它目录中去看一看别的资源，基本上都是可以正常还原的，这样我们就把反编译资源的方法也已经掌握了。&lt;/p&gt;
-
-&lt;h1 id=&quot;section-2&quot;&gt;重新打包&lt;/h1&gt;
-
-&lt;p&gt;那么对于反编译出来的文件夹，我们能不能重新把它打包成APK文件呢？答案是肯定的，只不过我实在想不出有什么义正言辞的理由可以让我们这么做。有的人会说汉化，没错，汉化的方式确实就是将一个APK进行反编译，然后翻译其中的资源再重新打包，但是不管怎么说这仍然是将别人的程序进行破解，所以我并不认为这是什么光荣的事情。那么我们就不去讨论本身这件事情的对或错，这里只是站在技术的角度来学习一下重新打包的相关知识。 
-首先我们来看一下通过apktool反编译后的包目录情况，如下图所示：&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://img.blog.csdn.net/20160208234027946&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;其中，original文件夹下存放的是未经反编译过、原始的AndroidManifest.xml文件，res文件夹下存放的是反编译出来的所有资源，smali文件夹下存放的是反编译出来的所有代码，AndroidManifest.xml则是经过反编译还原后的manifest文件。这里值得一提的是smali文件夹，如果你进入到这个文件夹中你会发现它的目录结构和我们源码中src的目录结构是几乎一样的，主要的区别就是所有的java文件都变成了smali文件。smali文件其实也是真正的源代码，只不过它的语法和java完全不同，它有点类似于汇编的语法，是Android虚拟机所使用的寄存器语言，语法结构大概如下所示：&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://img.blog.csdn.net/20160208235859750&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;看上去有点晕头转向是吗？但是如果你一旦能够看得懂smali文件的话，那么你就可以做很恐怖的事情了——你可以随意修改应用程序内的逻辑，将其进行破解！ 
-不过我对这种黑技术并没有什么太大的兴趣，因此我也没有去做具体研究，但即使是这样，也已经可以对程序的逻辑做一定程度的修改了。比如说当我们点击按钮时会弹出&lt;code class=&quot;highlighter-rouge&quot;&gt;you clicked button&lt;/code&gt;这样一句Toast，逻辑是写在MainActivity按钮点击事件的匿名类当中的，因此这段代码反编译之后一定就会MainActivity$1.smali这个文件当中，让我们打开瞧一瞧，部分代码如下所示：&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://img.blog.csdn.net/20160209154620278&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;虽说多数的代码我是看不懂的，但其中第47行实在太明显了，Toast显示的内容不就是在这里定义的么，那么如果我们想把Demo程序hack掉，就可以将这段字符串给改掉，比如说我把它改成Your app is been hacked。 
-关于smali的语法，网上的资料也非常多，如果你对这门技术十分感兴趣的话可以直接上网去搜，这里我只是简单介绍一下，就不再深入讲解相关知识了。 
-改了一处代码后我们再来改一处资源吧，比如这里想要把Demo的应用图标给换掉，那么首先我们要准备好一张新的图片，如下图所示：&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://img.blog.csdn.net/20160209161422695&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;然后从AndroidManifest.xml文件中可以看出，应用图标使用的是ic_launcher.png这张图片，那么我们将上面篮球这张图片命名成ic_launcher.png，然后拷贝到所有以res/mipmap开头的文件夹当中完成替换操作。 
-在做了两处改动之后，我们现在来把反编译后的Demo文件夹重新打包成APK吧，其实非常简单，只需要在cmd中执行如下命令：&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;apktool b Demo -o New_Demo.apk
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;p&gt;其中b是build的意思，表示我们要将Demo文件夹打包成APK文件，-o用于指定新生成的APK文件名，这里新的文件叫作New_Demo.apk。执行结果如下图所示：&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://img.blog.csdn.net/20160209163551554&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;现在你会发现在同级目录下面生成了一个新的APK文件:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://img.blog.csdn.net/20160209175505785&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;不过不要高兴得太早了，目前这个New_Demo.apk还是不能安装的，因为它还没有进行签名。那么如果这是别人的程序的话，我们从哪儿能拿到它原来的签名文件呢？很显然，这是根本没有办法拿到的，因此我们只能拿自己的签名文件来对这个APK文件重新进行签名，但同时也表明我们重新打包出来的软件就是个十足的盗版软件。这里大家学学技术就好了，希望不要有任何人去做什么坏事情。 
-那么这里我就用一个之前生成好的签名文件了，使用Android Studio或者Eclipse都可以非常简单地生成一个签名文件。 
-有了签名文件之后在cmd中执行签名命令就可以进行签名了，命令格式如下：&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore 签名文件名 -storepass 签名密码 待签名的APK文件名 签名的别名
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;p&gt;其中jarsigner命令文件是存放在jdk的bin目录下的，需要将bin目录配置在系统的环境变量当中才可以在任何位置执行此命令。 
-签名之后的APK文件现在已经可以安装到手机上了，不过在此之前Android还极度建议我们对签名后的APK文件进行一次对齐操作，因为这样可以使得我们的程序在Android系统中运行得更快。对齐操作使用的是zipalign工具，该工具存放于&lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;Android SDK&amp;gt;/build-tools/&amp;lt;version&amp;gt;&lt;/code&gt;目录下，将这个目录配置到系统环境变量当中就可以在任何位置执行此命令了。命令格式如下：&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;zipalign 4 New_Demo.apk New_Demo_aligned.apk
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;p&gt;其中4是固定值不能改变，后面指定待对齐的APK文件名和对齐后的APK文件名。运行这段命令之后就会生成一个New_Demo_aligned.apk文件，如下所示：&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://img.blog.csdn.net/20160209175645990&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;这个New_Demo_aligned.apk就是我们重新打包签名对齐后的文件了，现在把它安装到手机上，效果如下图所示：&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://img.blog.csdn.net/20160212105044897&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;可以看到，应用图标已经成功改成了篮球，另外点击按钮后弹出的Toast的提示也变成了我们修改后的文字，说明重新打包操作确实已经成功了。&lt;/p&gt;
-
+&lt;p&gt;&lt;img src=&quot;http://ockr1qfi1.bkt.clouddn.com/Screen%20Capture%20on%202016-08-29%20at%2020-41-16.gif&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
 </description>
-        <pubDate>Tue, 22 Mar 2016 00:00:00 +0800</pubDate>
-        <link>http://mrrobot97.github.io/Android%E5%8F%8D%E7%BC%96%E8%AF%91%E6%95%99%E7%A8%8B/</link>
-        <guid isPermaLink="true">http://mrrobot97.github.io/Android%E5%8F%8D%E7%BC%96%E8%AF%91%E6%95%99%E7%A8%8B/</guid>
+        <pubDate>Mon, 29 Aug 2016 00:00:00 +0800</pubDate>
+        <link>http://mrrobot97.github.io/2016/08/29/%E5%A4%9C%E9%97%B4%E6%A8%A1%E5%BC%8F%E8%BF%87%E6%B8%A1%E5%8A%A8%E7%94%BB%E7%AE%80%E5%8D%95%E5%AE%9E%E7%8E%B0.html</link>
+        <guid isPermaLink="true">http://mrrobot97.github.io/2016/08/29/%E5%A4%9C%E9%97%B4%E6%A8%A1%E5%BC%8F%E8%BF%87%E6%B8%A1%E5%8A%A8%E7%94%BB%E7%AE%80%E5%8D%95%E5%AE%9E%E7%8E%B0.html</guid>
         
         
       </item>
     
       <item>
-        <title>Loading Bitmap Efficiently</title>
-        <description>&lt;h4 id=&quot;androidbitmapoomout-of-memorylistiewbitmap&quot;&gt;Android系统为每个程序都分配了一定的内存，当我们的程序加载比较大的bitmap时十分容易出现OOM(Out Of Memory)的错误，这种错尤其容易出现在用Listiew加载图片时。本篇文章讲述如何高效地加载一个Bitmap，即使其占用的内存足够小.&lt;/h4&gt;
+        <title>HttpURLConnection利用post传参</title>
+        <description>&lt;p&gt;直接上示例代码：&lt;/p&gt;
 
-&lt;p&gt;文章分析及实例代码来源于Google官方给的Training &lt;a href=&quot;http://developer.android.com/training/building-graphics.html&quot;&gt;Displaying Bitmaps Efficiently&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;首先我们获取要加载的图片的宽与高与图片类型，方法如下：&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;BitmapFactory.Options options = new BitmapFactory.Options();
-options.inJustDecodeBounds = true;
-BitmapFactory.decodeResource(getResources(), R.id.myimage, options);
-int imageHeight = options.outHeight;
-int imageWidth = options.outWidth;
-String imageType = options.outMimeType;
-
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;p&gt;然后通过比较图片实际的宽高与我们需要在屏幕上显示的大小，调整BitmapFactory.Options的inSampleSize,注意通过设置options.inJustDecodeBounds=true，我们可以只加载图片的大小和类型，而不会真正地将图片加载到内存中。&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;public static int calculateInSampleSize(
-            BitmapFactory.Options options, int reqWidth, int reqHeight) {
-    // Raw height and width of image
-    final int height = options.outHeight;
-    final int width = options.outWidth;
-    int inSampleSize = 1;
-
-    if (height &amp;gt; reqHeight || width &amp;gt; reqWidth) {
-
-        final int halfHeight = height / 2;
-        final int halfWidth = width / 2;
-
-        // Calculate the largest inSampleSize value that is a power of 2 and keeps both
-        // height and width larger than the requested height and width.
-        while ((halfHeight / inSampleSize) &amp;gt; reqHeight
-                &amp;amp;&amp;amp; (halfWidth / inSampleSize) &amp;gt; reqWidth) {
-            inSampleSize *= 2;
-        }
-    }
-
-    return inSampleSize;
-}
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;p&gt;options.inSampleSize是用来调整图片的压缩比例的，比如inSampleSize=2，就将图片的width和height分别设置为原图片的一半，这样压缩后的图片的体积就只有原来的1/4了。&lt;/p&gt;
-
-&lt;p&gt;最后当我们获取到合适的inSampleSize后再将options.inJustDecodeBounds设置为true，就可以真正地将压缩后的图片加载到内存中去了。&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;public static Bitmap decodeSampledBitmapFromResource(Resources res, int resId,
-        int reqWidth, int reqHeight) {
-
-    // First decode with inJustDecodeBounds=true to check dimensions
-    final BitmapFactory.Options options = new BitmapFactory.Options();
-    options.inJustDecodeBounds = true;
-    BitmapFactory.decodeResource(res, resId, options);
-
-    // Calculate inSampleSize
-    options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
-
-    // Decode bitmap with inSampleSize set
-    options.inJustDecodeBounds = false;
-    return BitmapFactory.decodeResource(res, resId, options);
-}
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;HttpURLConnection conn=null;
+            OutputStreamWriter osw=null;
+            BufferedReader br=null;
+            try {
+                URL url=new URL(address);
+                conn= (HttpURLConnection) url.openConnection();
+                conn.setDoOutput(true);
+                osw=new OutputStreamWriter(conn.getOutputStream());
+                osw.write(&quot;username=&quot;+userText.getText()+&quot;&amp;amp;&quot;+&quot;password=&quot;+passText.getText());
+                osw.close();
+                br=new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                final StringBuilder response =new StringBuilder();
+                String s;
+                while((s=br.readLine())!=null){
+                    response.append(s);
+                }
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        respText.setText(response);
+                    }
+                });
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }finally {
+                if (br!=null){
+                    try {
+                        br.close();
+                        if (conn!=null){
+                            conn.disconnect();
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
 &lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 </description>
-        <pubDate>Sun, 20 Mar 2016 00:00:00 +0800</pubDate>
-        <link>http://mrrobot97.github.io/Loading-Bitmap-Efficiently/</link>
-        <guid isPermaLink="true">http://mrrobot97.github.io/Loading-Bitmap-Efficiently/</guid>
-        
-        
-      </item>
-    
-      <item>
-        <title>Linux常用命令汇总</title>
-        <description>&lt;p&gt;ls:
-	-a 显示所有文件，包括隐藏
-	-l 显示详细信息
-	-d 查看目录属性
-	-h 人性化显示文件大小，即单位为k,m,g
-	-i 显示 inode
-ll = ls -l&lt;/p&gt;
-
-&lt;p&gt;mkdir -p [目录名]
-	-p 递归创建 eg. mkdir test/test2&lt;/p&gt;
-
-&lt;p&gt;ctrl+l 清屏&lt;/p&gt;
-
-&lt;p&gt;cd - 进入上次目录&lt;/p&gt;
-
-&lt;p&gt;命令 + 两次Tab键 : 提示&lt;/p&gt;
-
-&lt;p&gt;rmdir 只能删除空目录(基本不用)&lt;/p&gt;
-
-&lt;p&gt;rm 删除文件
-	-r 删除文件夹
-	-f 强制删除   故 rm -rf 强制删除文件或者目录&lt;/p&gt;
-
-&lt;p&gt;cp 复制  cp  源文件  目的地 (可改名)
-	-r 复制目录
-	-p 连带文件属性复制
-	-d 若源文件是链接文件，则赋值链接属性
-	-a 相当于 -pdr ，即复制后的文件与源文件完全一样&lt;/p&gt;
-
-&lt;p&gt;mv 剪切 用法与cp基本相同，只是剪切目录时不需要-r参数
- 	mv命令还可以用来给文件更改名字  eg. mv asd dsa&lt;/p&gt;
-
-&lt;p&gt;文件搜索命令：
-locate + 文件名
-	在后台数据库中按文件名搜索，搜索速度快，数据库位于  /var/lib/mlocate
-	注意数据库不是实时更新的。
-	updatedb  强制更新数据库&lt;/p&gt;
-
-&lt;p&gt;find [搜索范围] 【搜索条件】
-	-name  搜索结果必须与搜索条件完全一致  eg. find /home -name asd
-	-iname 不区分大小写搜索
-	-user 按照所有者搜索  eg. find /root -user root
-	-nouser 查找没有所有者的文件 通常是垃圾文件
-	-inum 根据inode查找文件 eg. find /root -inum 262421&lt;/p&gt;
-
-&lt;p&gt;grep [选项] 字符串 文件名: 在文件中匹配符合条件的字符串
-	-i 忽略大小写
-	-v 排除指定字符串&lt;/p&gt;
-
-&lt;p&gt;linux中的通配符：
-	* 匹配任意内容
-	？匹配任意一个·字符
-	[] 匹配任意一个中括号内的字符&lt;/p&gt;
-
-&lt;p&gt;命令搜索命令：
-	whereis + 命令名
-	-b 只查找可执行文件
-	-m 只查找帮助文件
-	不能搜索普通文件&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;which + 命令名：显示命令路径，若有别名则打印出别名.
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;p&gt;man + 命令 ：显示命令帮助手册&lt;/p&gt;
-
-&lt;p&gt;help + 内部shell命令（如cd）  查看shell内部命令帮助  只能查看内部命令&lt;/p&gt;
-
-&lt;p&gt;文件压缩与解压缩：
-zip  压缩文件名 源文件 ：压缩单个文件
-zip -r 压缩文件名 源目录 ：压缩目录&lt;/p&gt;
-
-&lt;p&gt;unzip + 压缩文件：解压缩&lt;/p&gt;
-
-&lt;p&gt;gzip 源文件： 压缩为.gz格式的压缩文件，源文件会消失
-gzip -c 源文件  &amp;gt; 压缩文件 ：压缩为.gz格式，源文件会保留  //不常用&lt;/p&gt;
-
-&lt;p&gt;gzip -r + 目录 ：压缩目录下的所有子文件，但是不压缩目录&lt;/p&gt;
-
-&lt;p&gt;gzip -d 压缩文件： 解压缩
-gunzip 压缩文件： 解压缩&lt;/p&gt;
-
-&lt;p&gt;打包命令tar:
-	tar -cvf 打包文件名 源文件
-		-c 打包
-		-v 显示过程
-		-f 指定打包后的文件名
-	tar -zcvf 
-		：打包并压缩为.tar.gz格式
-		末尾解参数 -C 路径  解压到指定路径
-解包：
-	tar -xvf 解压.tar并且显示过程
-		-x: 解包
-		-zxvf 解压缩并解包 .tar.gz文件&lt;/p&gt;
-
-&lt;p&gt;关机、重启：
-	shutdown [选项] 时间
-		-c: 取消前一个关进命令
-		-h: 关机
-		-r: 重启&lt;/p&gt;
-
-&lt;p&gt;挂载：
-	mount : 查询系统中已经挂载的设备
-	-a :根据配置文件/etc/fstab的内容，自动挂载&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;mount [-t  文件系统] [-o 特殊选项] 设备文件名 挂载点
-
-unmount 设备名或挂载点：卸载 fdisk -l :查看外设
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;p&gt;用户操作：
-	w/who 用户名：查看用户登陆信息
-	last :系统所有用户登陆信息
-	lastlog: 系统所有用户最后一次登陆信息&lt;/p&gt;
-
-&lt;p&gt;输出重定向
-	命令 &amp;amp;&amp;gt;文件 ：以覆盖的方式，将正确输出和错误输出都保存到文件中。
-	命令 &amp;amp;»文件 ：以追加的方式，将正确输出和错误输出都保存到文件中。
-	命令»文件1 2»文件2 ：把正确输出追加到文件1，把错误输出追加到文件2.&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;常用快捷操作：  ctrl+c :强制终止当前命令  ctrl+l :清屏  ctrl+a :光标移动到命令行首  ctrl+e :光标移动到命令行尾  ctrl+u :从光标所在位置删除到行首  ctrl+z :把命令放入后台  ctrl+r :在历史命令中搜索
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;p&gt;多命令执行：&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;命令1 ； 命令2   ：两条命令之间没有任何逻辑顺序。
-命令1 &amp;amp;&amp;amp; 命令2   ：命令1正确执行才会执行命令2，若命令1未正确执行，则不执行命令2.
-命令1 || 命令2	：命令1执行失败才会执行命令2，若命令1正确执行，则不执行命令2.
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;p&gt;管道符
-	命令1 | 命令2   ： 命令1的正确输出作为命令2的操作对象。&lt;/p&gt;
-
-&lt;p&gt;查看本机启用的端口
-	netstat:
-		-a :查看所有连接的监听端口
-		-n  :显示IP地址和端口号，而不显示域名和服务名&lt;/p&gt;
-
-&lt;p&gt;配置网络：
-网卡信息文件： vi /etc/sysconfig/network-scripts/ifcfg-eth0
-DNS配置文件：	 vi /etc/resolv.conf&lt;/p&gt;
-
-&lt;p&gt;ifconfig:	查看与临时配置网络
-ifdown+网卡设备名：	禁用该网卡
-ifup+网卡设备名：		启用该网卡
-netstat 
-	-t 列出TCP协议端口
-	-u 列出TCP协议端口
-	-n 不适用域名与服务名，而使用IP地址和端口号 
-	-l 仅列出在监听状态的网络服务
-	-a 列出所有网络连接&lt;/p&gt;
-
-&lt;p&gt;wget + URL 下载文件&lt;/p&gt;
-
-&lt;p&gt;tcpdump 抓包  使用方法见百度&lt;/p&gt;
-
-&lt;p&gt;ssh远程登录：
-	ssh 用户名@ip  远程登录指定linux服务器
-	scp [-r] 用户名@ip:文件路径  本地路径    从指定ip出下载文件到本地 
-	scp [-r] 本地文件 用户名@ip:上传路径   将本地文件上传至指定服务器&lt;/p&gt;
-
-&lt;p&gt;rpm安装包的使用
-	若操作的包是没有安装的，则安装时要使用包全名并且要注意路径。
-	若操作的包是已经安装的，使用包名，因为所有安装过的rpm包都在 /var/lib/rpm下&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;rpm -ivh 包全名
-	-i 安装
-	-v 显示详细信息
-	-h 显示进度
-	- --nodeps 不检测依赖性（可能导致无法使用）
-	-U 升级（包全名）
-
-rpm -q 包名 ：查询是否安装包
-rpm -qa:列出所有已经安装的rpm包
-	-e 卸载 （包名）
-
-rpm -qi 包名
-	-i 查询软件信息
-	-q 查询未安装包信息
-rpm -qf 系统文件：查看系统文件属于哪个包
-rpm -V 已安装的包名：校验rpm包
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;p&gt;yum命令：
-	yum list  查询yum源所有的软件包
-	yum search 关键字：搜寻相关安装包
-	yum -y install 包名：安装包
-		-y :自动回答yes
-	yum -y update 包名:升级包
-	yum -y remove 包名：卸载包
-	yum grouplist:查询组包
-	yum groupinstall 软件组名：安装指定软件组
-	yum groupremove 软件组名：卸载指定软件组&lt;/p&gt;
-
-&lt;p&gt;安装源码包：
-	1.解压源码包。
-	2.进入解压后的源码包目录。
-	3.执行 ./configure –prefix=安装目录(通常在/usr/local/下) 
-		作用：定义需要的功能选项
-			检测系统环境是否合安装要求
-			把定义好的功能选项和检测系统环境的信息都写入MakeFile文件，用于后续的编辑。
-	4.make编译
-		make clean:清楚编译后的缓存文件
-		make install:编译安装&lt;/p&gt;
-
-&lt;p&gt;chmod  读写权限（755……） 文件名 ：更改文件权限
-	-R :递归，适用于目录文件&lt;/p&gt;
-
-&lt;p&gt;chown username filename ：更改文件所有者
-chgro groupname filename:更改文件组所有者&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;						shell编程 &quot;$变量名&quot;字符 ：在原变量后追加字符	
-eg:x=1
-	y=&quot;$x&quot;2
-	则 echo $y   将打印12
-也可  ${变量名}字符    也是在变量后追加字符串
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;p&gt;set :查询系统下所有已经生效的变量
-	-u 当查询没定义的变量时，系统给出错误提示
-unset 变量名 ：删除变量&lt;/p&gt;
-
-&lt;p&gt;用户自定义环境变量
-	export 变量名=变量值 或 变量名=变量值 然后 export 变量名
-env 查看环境变量&lt;/p&gt;
-
-&lt;p&gt;换行符 ： “&quot;   ，若一条命令太长可用换行符转到第二行接着打。&lt;/p&gt;
-
-&lt;p&gt;预定义变量：
-	$? ：最后一次执行命令的返回状态，如果这个值为0，则表明上一个命令执行正确；如果为非零，则表明上一条命令未能正确执行。
-	$$ :返回当前进程的PID号&lt;/p&gt;
-
-&lt;p&gt;read 命令：接收键盘输入&lt;/p&gt;
-
-&lt;p&gt;declare [+/-] [参数] 变量名
-	-：给变量设定类型属性		eg -i  声明为整形
-	+：取消变量的类型属性&lt;/p&gt;
-
-&lt;p&gt;数值运算：
-	$((运算式)) 或 $[运算式]   eg: a=$(($b+$c))&lt;/p&gt;
-
-&lt;p&gt;source + 配置文件 /   . + 配置文件 ：使对配置文件的修改立即生效而不用重启系统&lt;/p&gt;
-
-&lt;p&gt;注意正则表达式与通配符的区别，两者是不同的概念。&lt;/p&gt;
-
-&lt;p&gt;cut :提取字符串
-	cut [选项] 文件名： 提取指定列 （默认以TAB及制表符分割列）
-		-d ：自定义分隔符，默认为制表符。
-		-f ：指定显示的列数&lt;/p&gt;
-
-&lt;p&gt;awk   ‘条件1{动作1}条件2{动作2}条件3{动作三}……’
-	当条件满足时，对应的动作就会执行
-sed (Stream Editor)
-	sed [选项] ‘[动作]’ 文件名&lt;/p&gt;
-
-&lt;p&gt;排序命令 sort
-	sort [选项] 文件名
-		-f 忽略大小写
-		-n 以数值型进行排序，默认使用字符串排序
-		-r 反向排序
-		-t 指定分隔符 默认是制表符
-		-k [n,m] 按照指定的字段范围排序，从第n字段开始，第m字段结束&lt;/p&gt;
-
-&lt;p&gt;wc [选项] 文件名：统计命令
-	-l :只统计行数
-	-w :只统计单词书
-	-m :只统计字符数&lt;/p&gt;
-
-&lt;p&gt;判断文件是否存在：
-  [ 参数 + 文件名 ]&lt;/p&gt;
-</description>
-        <pubDate>Sat, 19 Mar 2016 00:00:00 +0800</pubDate>
-        <link>http://mrrobot97.github.io/linux%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4%E6%B1%87%E6%80%BB/</link>
-        <guid isPermaLink="true">http://mrrobot97.github.io/linux%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4%E6%B1%87%E6%80%BB/</guid>
-        
-        
-      </item>
-    
-      <item>
-        <title>android studio android annotations</title>
-        <description>&lt;p&gt;在android studio 中配置android annotations.
-按照如下代码注释中的分别在全局gradle和局部gradle中添加相应代码即可，留着自己备忘用。&lt;/p&gt;
-
-&lt;p&gt;这是全局gradle的&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;// Top-level build file where you can add configuration options common to all sub-projects/modules.
-
-buildscript {
-    repositories {
-        jcenter()
-    }
-    dependencies {
-        classpath &#39;com.android.tools.build:gradle:1.3.0&#39;
-
-        //annotations
-        classpath &#39;com.neenbedankt.gradle.plugins:android-apt:1.8&#39;
-
-        // NOTE: Do not place your application dependencies here; they belong
-        // in the individual module build.gradle files
-    }
-}
-
-allprojects {
-    repositories {
-        jcenter()
-    }
-}
-
-task clean(type: Delete) {
-    delete rootProject.buildDir
-} 
-
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;p&gt;这是局部gradle的&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;apply plugin: &#39;com.android.application&#39;
-//annotations
-apply plugin: &#39;android-apt&#39;
-def AAVersion = &#39;3.3.2&#39;
-
-android {
-    compileSdkVersion 23
-    buildToolsVersion &quot;23.0.2&quot;
-
-    defaultConfig {
-        applicationId &quot;com.mrrobot.annotations&quot;
-        minSdkVersion 16
-        targetSdkVersion 23
-        versionCode 1
-        versionName &quot;1.0&quot;
-    }
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile(&#39;proguard-android.txt&#39;), &#39;proguard-rules.pro&#39;
-        }
-    }
-}
-
-//annotations
-apt {
-    arguments {
-        androidManifestFile variant.outputs[0]?.processResources?.manifestFile
-
-    }
-}
-
-dependencies {
-    compile fileTree(dir: &#39;libs&#39;, include: [&#39;*.jar&#39;])
-    testCompile &#39;junit:junit:4.12&#39;
-    compile &#39;com.android.support:appcompat-v7:23.1.1&#39;
-
-    //annotations
-    apt &quot;org.androidannotations:androidannotations:$AAVersion&quot;
-    compile &quot;org.androidannotations:androidannotations-api:$AAVersion&quot;
-}
-
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-</description>
-        <pubDate>Sat, 19 Mar 2016 00:00:00 +0800</pubDate>
-        <link>http://mrrobot97.github.io/android-studio-android-annotations/</link>
-        <guid isPermaLink="true">http://mrrobot97.github.io/android-studio-android-annotations/</guid>
-        
-        
-      </item>
-    
-      <item>
-        <title>First blog</title>
-        <description>&lt;p&gt;This is my first blog espacially designed for recording my sduty in android development.&lt;/p&gt;
-
-&lt;p&gt;Mrrobot - an android developer.&lt;/p&gt;
-
-&lt;p&gt;Start from today.&lt;/p&gt;
-</description>
-        <pubDate>Fri, 18 Mar 2016 00:00:00 +0800</pubDate>
-        <link>http://mrrobot97.github.io/first-blog/</link>
-        <guid isPermaLink="true">http://mrrobot97.github.io/first-blog/</guid>
+        <pubDate>Tue, 28 Jun 2016 00:00:00 +0800</pubDate>
+        <link>http://mrrobot97.github.io/2016/06/28/HttpURLConnection%E5%88%A9%E7%94%A8post%E4%BC%A0%E5%8F%82.html</link>
+        <guid isPermaLink="true">http://mrrobot97.github.io/2016/06/28/HttpURLConnection%E5%88%A9%E7%94%A8post%E4%BC%A0%E5%8F%82.html</guid>
         
         
       </item>

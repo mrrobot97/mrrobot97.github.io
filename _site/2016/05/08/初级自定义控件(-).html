@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="http://mrrobot97.github.io/stylesheets/stylesheet.css">
+  <link rel="canonical" href="http://mrrobot97.github.io/2016/05/08/%E5%88%9D%E7%BA%A7%E8%87%AA%E5%AE%9A%E4%B9%89%E6%8E%A7%E4%BB%B6(-).html">
+  <link rel="alternate" type="application/rss+xml" title="Mrrobot" href="http://mrrobot97.github.io/feed.xml">
+  <meta name="description" content="  在看了N多大牛的博客后，本小白的自定义控件总算是入了门，赶紧趁热打铁来写篇博客记录一下，以备后续参考。">
+
+   <title>初级自定义控件(-)</title>
+
+
+
+</head>
+
+
+  <body>
+
+    <header class="page-header">
+     <h1 class="project-name"> <a class="header-link" href="/"> Mrrobot</a></h1>
+     <!--<h3 style="font-weight: lighter;">a blog for <a class="header-link" href="http://canijustgo.com/" target="_blank">canijustgo.com</a></h3>-->
+     <h3><a class="header-link" href="https://twitter.com/Mr_Robot___" target="_blank">follow @mrrobot</a></h3>
+</header>
+
+
+    <section class="main-content">
+      <div class="wrapper">
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+
+    <div class="main-content" itemprop="articleBody">
+  <header class="post-header">
+    <h1 class="post-title" itemprop="name headline">初级自定义控件(-)</h1>
+   <p class="post-meta"><time datetime="2016-05-08T00:00:00+08:00" itemprop="datePublished">May 8, 2016</time> • <span itemprop="author" itemscope itemtype="http://schema.org/Person"><span itemprop="name">mrrobot</span></span></p>
+  </header>
+
+    <blockquote>
+  <p>在看了N多大牛的博客后，本小白的自定义控件总算是入了门，赶紧趁热打铁来写篇博客记录一下，以备后续参考。</p>
+</blockquote>
+
+<p>大致流程：</p>
+
+<ol>
+  <li>在values目录下创建attrs文件，在其中定义我们的自定义控件所需要的属性。</li>
+  <li>在自定义控件中利用TypedArray获取到我们自定义的属性值并赋给控件类的成员变量。</li>
+  <li>重写自定义控件的onMeasure()方法方法以及onDraw()方法。</li>
+  <li>在布局文件中使用我们的自定义View。</li>
+</ol>
+
+<p>接下来我们就照着这个流程来走一遍：
+我们的attrs文件：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="cp">&lt;?xml version="1.0" encoding="utf-8"?&gt;</span>
+<span class="nt">&lt;resources&gt;</span>
+    <span class="nt">&lt;declare-styleable</span> <span class="na">name=</span><span class="s">"CustomTextView"</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;attr</span> <span class="na">name=</span><span class="s">"textColor"</span> <span class="na">format=</span><span class="s">"color"</span><span class="nt">/&gt;</span>
+        <span class="nt">&lt;attr</span> <span class="na">name=</span><span class="s">"textSize"</span> <span class="na">format=</span><span class="s">"dimension"</span><span class="nt">/&gt;</span>
+        <span class="nt">&lt;attr</span> <span class="na">name=</span><span class="s">"text"</span> <span class="na">format=</span><span class="s">"string"</span><span class="nt">/&gt;</span>
+        <span class="nt">&lt;attr</span> <span class="na">name=</span><span class="s">"bgColor"</span> <span class="na">format=</span><span class="s">"color"</span><span class="nt">/&gt;</span>
+        <span class="nt">&lt;attr</span> <span class="na">name=</span><span class="s">"numLength"</span> <span class="na">format=</span><span class="s">"integer"</span><span class="nt">/&gt;</span>
+    <span class="nt">&lt;/declare-styleable&gt;</span>
+
+    <span class="nt">&lt;declare-styleable</span> <span class="na">name=</span><span class="s">"CircleView"</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;attr</span> <span class="na">name=</span><span class="s">"circleColor"</span> <span class="na">format=</span><span class="s">"color"</span><span class="nt">/&gt;</span>
+        <span class="nt">&lt;attr</span> <span class="na">name=</span><span class="s">"circleWidth"</span> <span class="na">format=</span><span class="s">"dimension"</span><span class="nt">/&gt;</span>
+        <span class="nt">&lt;attr</span> <span class="na">name=</span><span class="s">"secondColor"</span> <span class="na">format=</span><span class="s">"color"</span><span class="nt">/&gt;</span>
+        <span class="nt">&lt;attr</span> <span class="na">name=</span><span class="s">"speed"</span> <span class="na">format=</span><span class="s">"integer"</span><span class="nt">/&gt;</span>
+    <span class="nt">&lt;/declare-styleable&gt;</span>
+<span class="nt">&lt;/resources&gt;</span>
+</code></pre>
+</div>
+<p>然后是在构造函数中利用TypedArray来获取我们定义的属性：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>TypedArray ta=context.obtainStyledAttributes(attrs,R.styleable.CircleView);
+        int n=ta.getIndexCount();
+        for (int i=0;i&lt;n;i++){
+            int attr=ta.getIndex(i);
+            switch (attr){
+                case R.styleable.CircleView_circleColor:
+                    color=ta.getColor(attr, Color.parseColor("#ffabcdef"));
+                    break;
+                case R.styleable.CircleView_circleWidth:
+                    circleWidth= (int) ta.getDimension(attr,20);
+                    break;
+                case R.styleable.CircleView_secondColor:
+                    secondColor=ta.getColor(attr,Color.parseColor("#fffedcba"));
+                    break;
+                case R.styleable.CircleView_speed:
+                    speed=ta.getInteger(attr,50);
+                    break;
+                default:
+                    break;
+            }
+        }
+        ta.recycle();
+</code></pre>
+</div>
+
+<p>接下来重写onMeasure()方法与onDraw()方法：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>@Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        int widthMode=MeasureSpec.getMode(widthMeasureSpec);
+        int heightMode=MeasureSpec.getMode(heightMeasureSpec);
+        int width=MeasureSpec.getSize(widthMeasureSpec);
+        int height=MeasureSpec.getSize(heightMeasureSpec);
+        //wrap_content
+        if (widthMode==MeasureSpec.AT_MOST||heightMode==MeasureSpec.AT_MOST){
+            //默认选项
+            radius=40;
+        }
+        radius=Math.min(height,width)/2-circleWidth/2;
+        mRectF=new RectF(circleWidth/2,circleWidth/2,width-circleWidth/2,height-circleWidth/2);
+        super.onMeasure(widthMeasureSpec,heightMeasureSpec);
+    }
+
+    @Override
+    protected void onDraw(Canvas canvas) {
+        mPaint.setAntiAlias(true);
+        //设置圆环的宽度
+        mPaint.setStrokeWidth(circleWidth);
+        //设置空心的
+        mPaint.setStyle(Paint.Style.STROKE);
+        //canvas.drawCircle(getMeasuredWidth()/2,getMeasuredHeight()/2,radius,mPaint);
+
+        //先绘制不变的部分
+        if (changed){
+            mPaint.setColor(color);
+            canvas.drawArc(mRectF,angle,360,false,mPaint);
+            mPaint.setColor(secondColor);
+            canvas.drawArc(mRectF,0,angle,false,mPaint);
+        }else{
+            mPaint.setColor(secondColor);
+            canvas.drawArc(mRectF,angle,360,false,mPaint);
+            mPaint.setColor(color);
+            canvas.drawArc(mRectF,0,angle,false,mPaint);
+        }
+
+    }
+</code></pre>
+</div>
+
+<p>最后是在我们的布局文件中使用我们的自定义控件:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="cp">&lt;?xml version="1.0" encoding="utf-8"?&gt;</span>
+<span class="nt">&lt;RelativeLayout</span>
+    <span class="na">xmlns:android=</span><span class="s">"http://schemas.android.com/apk/res/android"</span>
+    <span class="na">xmlns:tools=</span><span class="s">"http://schemas.android.com/tools"</span>
+    <span class="na">xmlns:yjw=</span><span class="s">"http://schemas.android.com/apk/res-auto"</span>
+    <span class="na">android:layout_width=</span><span class="s">"match_parent"</span>
+    <span class="na">android:layout_height=</span><span class="s">"match_parent"</span>
+    <span class="na">tools:context=</span><span class="s">"com.mrrobot.customtextview.MainActivity"</span>
+    <span class="na">android:gravity=</span><span class="s">"center"</span><span class="nt">&gt;</span>
+
+    <span class="nt">&lt;com.mrrobot.customtextview.CircleView</span>
+        <span class="na">android:layout_centerInParent=</span><span class="s">"true"</span>
+        <span class="na">android:layout_width=</span><span class="s">"200dp"</span>
+        <span class="na">android:layout_height=</span><span class="s">"200dp"</span>
+        <span class="na">yjw:speed=</span><span class="s">"20"</span>
+        <span class="na">yjw:secondColor=</span><span class="s">"@android:color/holo_blue_light"</span>
+        <span class="na">yjw:circleColor=</span><span class="s">"@android:color/holo_orange_light"</span>
+        <span class="na">yjw:circleWidth=</span><span class="s">"20dp"</span><span class="nt">/&gt;</span>
+
+    <span class="nt">&lt;com.mrrobot.customtextview.CircleView</span>
+        <span class="na">android:layout_centerInParent=</span><span class="s">"true"</span>
+        <span class="na">android:layout_width=</span><span class="s">"100dp"</span>
+        <span class="na">android:layout_height=</span><span class="s">"100dp"</span>
+        <span class="na">yjw:speed=</span><span class="s">"20"</span>
+        <span class="na">yjw:secondColor=</span><span class="s">"@android:color/holo_orange_light"</span>
+        <span class="na">yjw:circleColor=</span><span class="s">"@android:color/holo_blue_light"</span>
+        <span class="na">yjw:circleWidth=</span><span class="s">"20dp"</span><span class="nt">/&gt;</span>
+<span class="nt">&lt;/RelativeLayout&gt;</span>
+
+</code></pre>
+</div>
+
+<p>最终效果图：</p>
+
+<p><img src="http://cl.ly/3q2J0M0e3c3u/ezgif.com-video-to-gif-2.gif" alt="" /></p>
+
+<p>附上完整自定义View代码：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>package com.mrrobot.customtextview;
+
+import android.content.Context;
+import android.content.res.TypedArray;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.RectF;
+import android.util.AttributeSet;
+import android.view.View;
+
+/**
+ * Created by mrrobot on 16/5/8.
+ */
+public class CircleView extends View {
+    private Paint mPaint;
+    private int circleWidth;
+    private int color;
+    //原的半径
+    private int radius;
+    private int secondColor;
+    private int speed;
+    private int angle=0;
+    private boolean changed=false;
+    private RectF mRectF;
+    public CircleView(Context context) {
+        this(context,null);
+    }
+
+    public CircleView(Context context, AttributeSet attrs) {
+        this(context, attrs,0);
+    }
+
+    public CircleView(Context context, AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
+        TypedArray ta=context.obtainStyledAttributes(attrs,R.styleable.CircleView);
+        int n=ta.getIndexCount();
+        for (int i=0;i&lt;n;i++){
+            int attr=ta.getIndex(i);
+            switch (attr){
+                case R.styleable.CircleView_circleColor:
+                    color=ta.getColor(attr, Color.parseColor("#ffabcdef"));
+                    break;
+                case R.styleable.CircleView_circleWidth:
+                    circleWidth= (int) ta.getDimension(attr,20);
+                    break;
+                case R.styleable.CircleView_secondColor:
+                    secondColor=ta.getColor(attr,Color.parseColor("#fffedcba"));
+                    break;
+                case R.styleable.CircleView_speed:
+                    speed=ta.getInteger(attr,50);
+                    break;
+                default:
+                    break;
+            }
+        }
+        ta.recycle();
+        mPaint=new Paint();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while(true){
+                    angle++;
+                    if (angle==360){
+                        changed=!changed;
+                        angle=0;
+                    }
+                    try {
+                        Thread.sleep(speed);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    postInvalidate();
+                }
+            }
+        }).start();
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        int widthMode=MeasureSpec.getMode(widthMeasureSpec);
+        int heightMode=MeasureSpec.getMode(heightMeasureSpec);
+        int width=MeasureSpec.getSize(widthMeasureSpec);
+        int height=MeasureSpec.getSize(heightMeasureSpec);
+        //wrap_content
+        if (widthMode==MeasureSpec.AT_MOST||heightMode==MeasureSpec.AT_MOST){
+            //默认选项
+            radius=40;
+        }
+        radius=Math.min(height,width)/2-circleWidth/2;
+        mRectF=new RectF(circleWidth/2,circleWidth/2,width-circleWidth/2,height-circleWidth/2);
+        super.onMeasure(widthMeasureSpec,heightMeasureSpec);
+    }
+
+    @Override
+    protected void onDraw(Canvas canvas) {
+        mPaint.setAntiAlias(true);
+        //设置圆环的宽度
+        mPaint.setStrokeWidth(circleWidth);
+        //设置空心的
+        mPaint.setStyle(Paint.Style.STROKE);
+        //canvas.drawCircle(getMeasuredWidth()/2,getMeasuredHeight()/2,radius,mPaint);
+
+        //先绘制不变的部分
+        if (changed){
+            mPaint.setColor(color);
+            canvas.drawArc(mRectF,angle,360,false,mPaint);
+            mPaint.setColor(secondColor);
+            canvas.drawArc(mRectF,0,angle,false,mPaint);
+        }else{
+            mPaint.setColor(secondColor);
+            canvas.drawArc(mRectF,angle,360,false,mPaint);
+            mPaint.setColor(color);
+            canvas.drawArc(mRectF,0,angle,false,mPaint);
+        }
+
+    }
+}
+
+</code></pre>
+</div>
+
+  </div>
+
+
+<a href="http://mrrobot97.github.io"><h3 style="text-align: center;">- to blog -</h3></a>
+
+<div id="disqus_thread"></div>
+<script>
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+s.src = '//http-mrrobot97-me.disqus.com/embed.js';
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+</article>
+
+
+      </div>
+    </div>
+
+  </body>
+
+    
+
+
+    <!-- 背景特效 -->
+    <script type="text/javascript">
+      !function() {
+    function o(w, v, i) {
+        return w.getAttribute(v) || i
+    }
+    function j(i) {
+        return document.getElementsByTagName(i)
+    }
+    function l() {
+        var i = j("script"), w = i.length, v = i[w - 1];
+        return {
+            l: w,
+            z: o(v, "zIndex", - 1),
+            o: o(v, "opacity", 0.5),
+            c: o(v, "color", "84,106,122"),
+            n: o(v, "count", 70)
+        }
+    }
+    function k() {
+        r = u.width = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth, n = u.height = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight
+    }
+    function b() {
+        e.clearRect(0, 0, r, n);
+        var w = [f].concat(t);
+        var x, v, A, B, z, y;
+        t.forEach(function(i) {
+            i.x += i.xa, i.y += i.ya, i.xa*=i.x > r || i.x < 0?-1 : 1, i.ya*=i.y > n || i.y < 0?-1 : 1, e.fillRect(i.x - 0.5, i.y - 0.5, 1, 1);
+            for (v = 0; v < w.length; v++) {
+                x = w[v];
+                if (i !== x && null !== x.x && null !== x.y) {
+                    B = i.x - x.x, z = i.y - x.y, y = B * B + z * z;
+                    y < x.max && (x === f && y >= x.max / 2 && (i.x -= 0.03 * B, i.y -= 0.03 * z), A = (x.max - y) / x.max, e.beginPath(), e.lineWidth = A / 2, e.strokeStyle = "rgba(" + s.c + "," + (A + 0.2) + ")", e.moveTo(i.x, i.y), e.lineTo(x.x, x.y), e.stroke())
+                }
+            }
+            w.splice(w.indexOf(i), 1)
+        }), m(b)
+    }
+    var u = document.createElement("canvas"), s = l(), c = "c_n" + s.l, e = u.getContext("2d"), r, n, m = window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame || function(i) {
+        window.setTimeout(i, 1000 / 45)
+    }, a = Math.random, f = {
+        x: null,
+        y: null,
+        max: 20000
+    };
+    u.id = c;
+    u.style.cssText = "position:fixed;top:0;left:0;z-index:" + s.z + ";opacity:" + s.o;
+    j("body")[0].appendChild(u);
+    k(), window.onresize = k;
+    window.onmousemove = function(i) {
+        i = i || window.event, f.x = i.clientX, f.y = i.clientY
+    }, window.onmouseout = function() {
+        f.x = null, f.y = null
+    };
+    for (var t = [], p = 0; s.n > p; p++) {
+        var h = a() * r, g = a() * n, q = 2 * a() - 1, d = 2 * a() - 1;
+        t.push({
+            x: h,
+            y: g,
+            xa: q,
+            ya: d,
+            max: 6000
+        })
+    }
+    setTimeout(function() {
+        b()
+    }, 100)
+}();
+    </script>
+
+</html>

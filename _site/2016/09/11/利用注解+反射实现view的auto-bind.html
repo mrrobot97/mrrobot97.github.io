@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="http://mrrobot97.github.io/stylesheets/stylesheet.css">
+  <link rel="canonical" href="http://mrrobot97.github.io/2016/09/11/%E5%88%A9%E7%94%A8%E6%B3%A8%E8%A7%A3+%E5%8F%8D%E5%B0%84%E5%AE%9E%E7%8E%B0view%E7%9A%84auto-bind.html">
+  <link rel="alternate" type="application/rss+xml" title="Mrrobot" href="http://mrrobot97.github.io/feed.xml">
+  <meta name="description" content="  相信都用过JakeWharton大神的ButterKnife框架，有了ButterKnife我们就可以不用再反复地写繁琐的findViewById()了，ButterKnife内部利用的是注解+编译时生成java字节码实现的，没有利用到反射，故在实际使用时不会对应用的性能产生影响。今天我们就简单的利用注解+反...">
+
+   <title>利用注解+反射实现view的auto bind</title>
+
+
+
+</head>
+
+
+  <body>
+
+    <header class="page-header">
+     <h1 class="project-name"> <a class="header-link" href="/"> Mrrobot</a></h1>
+     <!--<h3 style="font-weight: lighter;">a blog for <a class="header-link" href="http://canijustgo.com/" target="_blank">canijustgo.com</a></h3>-->
+     <h3><a class="header-link" href="https://twitter.com/Mr_Robot___" target="_blank">follow @mrrobot</a></h3>
+</header>
+
+
+    <section class="main-content">
+      <div class="wrapper">
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+
+    <div class="main-content" itemprop="articleBody">
+  <header class="post-header">
+    <h1 class="post-title" itemprop="name headline">利用注解+反射实现view的auto bind</h1>
+   <p class="post-meta"><time datetime="2016-09-11T00:00:00+08:00" itemprop="datePublished">Sep 11, 2016</time> • <span itemprop="author" itemscope itemtype="http://schema.org/Person"><span itemprop="name">mrrobot</span></span></p>
+  </header>
+
+    <blockquote>
+  <p>相信都用过JakeWharton大神的<a href="https://github.com/JakeWharton/butterknife">ButterKnife</a>框架，有了ButterKnife我们就可以不用再反复地写繁琐的findViewById()了，ButterKnife内部利用的是注解+编译时生成java字节码实现的，没有利用到反射，故在实际使用时不会对应用的性能产生影响。今天我们就简单的利用注解+反射实现一个简单的view的auto bind，当然只是为了了解一下注解和反射的简单用法。</p>
+</blockquote>
+
+<p>首先我们定义一个注解接口：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>@Target(ElementType.FIELD)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface BindView {
+    public int id();
+}
+
+</code></pre>
+</div>
+
+<p>很简单，只有一个id，因为我们为view绑定控件时只需要一个int类型的id即可。</p>
+
+<p>然后是我们的注解处理类：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>public class Binder {
+    public static void bind(Object object, View view){
+        Field[] fields=object.getClass().getDeclaredFields();
+        for (Field field:fields){
+            if (field.isAnnotationPresent(BindView.class)){
+                BindView bindView=field.getAnnotation(BindView.class);
+                if (bindView!=null){
+                    field.setAccessible(true);
+                    try {
+                        field.set(object,view.findViewById(bindView.id()));
+                    } catch (IllegalAccessException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+    }
+}
+</code></pre>
+</div>
+
+<p>我们需要将注解所在的object以及需要绑定到的view作为参数传进去。</p>
+
+<p>然后就可以使用啦！</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>public class MainActivity extends AppCompatActivity {
+
+    @BindView(id=R.id.text_view)
+    private TextView mTextView;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        Binder.bind(this,this.findViewById(android.R.id.content));
+        mTextView.setText("This is not a hello world");
+    }
+}
+</code></pre>
+</div>
+
+<p>这里我们只需要@BindView(id=…)，然后在setContentView()后调用Binder.bind()即可使用我们的mTextView了。</p>
+
+<p>当然利用反射是会对应用性能产生影响的，实际使用中我们还是应该使用ButterKnife。</p>
+
+  </div>
+
+
+<a href="http://mrrobot97.github.io"><h3 style="text-align: center;">- to blog -</h3></a>
+
+<div id="disqus_thread"></div>
+<script>
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+s.src = '//http-mrrobot97-me.disqus.com/embed.js';
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+</article>
+
+
+      </div>
+    </div>
+
+  </body>
+
+    
+
+
+    <!-- 背景特效 -->
+    <script type="text/javascript">
+      !function() {
+    function o(w, v, i) {
+        return w.getAttribute(v) || i
+    }
+    function j(i) {
+        return document.getElementsByTagName(i)
+    }
+    function l() {
+        var i = j("script"), w = i.length, v = i[w - 1];
+        return {
+            l: w,
+            z: o(v, "zIndex", - 1),
+            o: o(v, "opacity", 0.5),
+            c: o(v, "color", "84,106,122"),
+            n: o(v, "count", 70)
+        }
+    }
+    function k() {
+        r = u.width = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth, n = u.height = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight
+    }
+    function b() {
+        e.clearRect(0, 0, r, n);
+        var w = [f].concat(t);
+        var x, v, A, B, z, y;
+        t.forEach(function(i) {
+            i.x += i.xa, i.y += i.ya, i.xa*=i.x > r || i.x < 0?-1 : 1, i.ya*=i.y > n || i.y < 0?-1 : 1, e.fillRect(i.x - 0.5, i.y - 0.5, 1, 1);
+            for (v = 0; v < w.length; v++) {
+                x = w[v];
+                if (i !== x && null !== x.x && null !== x.y) {
+                    B = i.x - x.x, z = i.y - x.y, y = B * B + z * z;
+                    y < x.max && (x === f && y >= x.max / 2 && (i.x -= 0.03 * B, i.y -= 0.03 * z), A = (x.max - y) / x.max, e.beginPath(), e.lineWidth = A / 2, e.strokeStyle = "rgba(" + s.c + "," + (A + 0.2) + ")", e.moveTo(i.x, i.y), e.lineTo(x.x, x.y), e.stroke())
+                }
+            }
+            w.splice(w.indexOf(i), 1)
+        }), m(b)
+    }
+    var u = document.createElement("canvas"), s = l(), c = "c_n" + s.l, e = u.getContext("2d"), r, n, m = window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame || function(i) {
+        window.setTimeout(i, 1000 / 45)
+    }, a = Math.random, f = {
+        x: null,
+        y: null,
+        max: 20000
+    };
+    u.id = c;
+    u.style.cssText = "position:fixed;top:0;left:0;z-index:" + s.z + ";opacity:" + s.o;
+    j("body")[0].appendChild(u);
+    k(), window.onresize = k;
+    window.onmousemove = function(i) {
+        i = i || window.event, f.x = i.clientX, f.y = i.clientY
+    }, window.onmouseout = function() {
+        f.x = null, f.y = null
+    };
+    for (var t = [], p = 0; s.n > p; p++) {
+        var h = a() * r, g = a() * n, q = 2 * a() - 1, d = 2 * a() - 1;
+        t.push({
+            x: h,
+            y: g,
+            xa: q,
+            ya: d,
+            max: 6000
+        })
+    }
+    setTimeout(function() {
+        b()
+    }, 100)
+}();
+    </script>
+
+</html>

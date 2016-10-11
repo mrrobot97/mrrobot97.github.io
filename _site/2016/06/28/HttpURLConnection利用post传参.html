@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="http://mrrobot97.github.io/stylesheets/stylesheet.css">
+  <link rel="canonical" href="http://mrrobot97.github.io/2016/06/28/HttpURLConnection%E5%88%A9%E7%94%A8post%E4%BC%A0%E5%8F%82.html">
+  <link rel="alternate" type="application/rss+xml" title="Mrrobot" href="http://mrrobot97.github.io/feed.xml">
+  <meta name="description" content="直接上示例代码：">
+
+   <title>HttpURLConnection利用post传参</title>
+
+
+
+</head>
+
+
+  <body>
+
+    <header class="page-header">
+     <h1 class="project-name"> <a class="header-link" href="/"> Mrrobot</a></h1>
+     <!--<h3 style="font-weight: lighter;">a blog for <a class="header-link" href="http://canijustgo.com/" target="_blank">canijustgo.com</a></h3>-->
+     <h3><a class="header-link" href="https://twitter.com/Mr_Robot___" target="_blank">follow @mrrobot</a></h3>
+</header>
+
+
+    <section class="main-content">
+      <div class="wrapper">
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+
+    <div class="main-content" itemprop="articleBody">
+  <header class="post-header">
+    <h1 class="post-title" itemprop="name headline">HttpURLConnection利用post传参</h1>
+   <p class="post-meta"><time datetime="2016-06-28T00:00:00+08:00" itemprop="datePublished">Jun 28, 2016</time> • <span itemprop="author" itemscope itemtype="http://schema.org/Person"><span itemprop="name">mrrobot</span></span></p>
+  </header>
+
+    <p>直接上示例代码：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>HttpURLConnection conn=null;
+            OutputStreamWriter osw=null;
+            BufferedReader br=null;
+            try {
+                URL url=new URL(address);
+                conn= (HttpURLConnection) url.openConnection();
+                conn.setDoOutput(true);
+                osw=new OutputStreamWriter(conn.getOutputStream());
+                osw.write("username="+userText.getText()+"&amp;"+"password="+passText.getText());
+                osw.close();
+                br=new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                final StringBuilder response =new StringBuilder();
+                String s;
+                while((s=br.readLine())!=null){
+                    response.append(s);
+                }
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        respText.setText(response);
+                    }
+                });
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }finally {
+                if (br!=null){
+                    try {
+                        br.close();
+                        if (conn!=null){
+                            conn.disconnect();
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+</code></pre>
+</div>
+
+  </div>
+
+
+<a href="http://mrrobot97.github.io"><h3 style="text-align: center;">- to blog -</h3></a>
+
+<div id="disqus_thread"></div>
+<script>
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+s.src = '//http-mrrobot97-me.disqus.com/embed.js';
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+</article>
+
+
+      </div>
+    </div>
+
+  </body>
+
+    
+
+
+    <!-- 背景特效 -->
+    <script type="text/javascript">
+      !function() {
+    function o(w, v, i) {
+        return w.getAttribute(v) || i
+    }
+    function j(i) {
+        return document.getElementsByTagName(i)
+    }
+    function l() {
+        var i = j("script"), w = i.length, v = i[w - 1];
+        return {
+            l: w,
+            z: o(v, "zIndex", - 1),
+            o: o(v, "opacity", 0.5),
+            c: o(v, "color", "84,106,122"),
+            n: o(v, "count", 70)
+        }
+    }
+    function k() {
+        r = u.width = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth, n = u.height = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight
+    }
+    function b() {
+        e.clearRect(0, 0, r, n);
+        var w = [f].concat(t);
+        var x, v, A, B, z, y;
+        t.forEach(function(i) {
+            i.x += i.xa, i.y += i.ya, i.xa*=i.x > r || i.x < 0?-1 : 1, i.ya*=i.y > n || i.y < 0?-1 : 1, e.fillRect(i.x - 0.5, i.y - 0.5, 1, 1);
+            for (v = 0; v < w.length; v++) {
+                x = w[v];
+                if (i !== x && null !== x.x && null !== x.y) {
+                    B = i.x - x.x, z = i.y - x.y, y = B * B + z * z;
+                    y < x.max && (x === f && y >= x.max / 2 && (i.x -= 0.03 * B, i.y -= 0.03 * z), A = (x.max - y) / x.max, e.beginPath(), e.lineWidth = A / 2, e.strokeStyle = "rgba(" + s.c + "," + (A + 0.2) + ")", e.moveTo(i.x, i.y), e.lineTo(x.x, x.y), e.stroke())
+                }
+            }
+            w.splice(w.indexOf(i), 1)
+        }), m(b)
+    }
+    var u = document.createElement("canvas"), s = l(), c = "c_n" + s.l, e = u.getContext("2d"), r, n, m = window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame || function(i) {
+        window.setTimeout(i, 1000 / 45)
+    }, a = Math.random, f = {
+        x: null,
+        y: null,
+        max: 20000
+    };
+    u.id = c;
+    u.style.cssText = "position:fixed;top:0;left:0;z-index:" + s.z + ";opacity:" + s.o;
+    j("body")[0].appendChild(u);
+    k(), window.onresize = k;
+    window.onmousemove = function(i) {
+        i = i || window.event, f.x = i.clientX, f.y = i.clientY
+    }, window.onmouseout = function() {
+        f.x = null, f.y = null
+    };
+    for (var t = [], p = 0; s.n > p; p++) {
+        var h = a() * r, g = a() * n, q = 2 * a() - 1, d = 2 * a() - 1;
+        t.push({
+            x: h,
+            y: g,
+            xa: q,
+            ya: d,
+            max: 6000
+        })
+    }
+    setTimeout(function() {
+        b()
+    }, 100)
+}();
+    </script>
+
+</html>

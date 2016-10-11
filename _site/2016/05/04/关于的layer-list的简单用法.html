@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="http://mrrobot97.github.io/stylesheets/stylesheet.css">
+  <link rel="canonical" href="http://mrrobot97.github.io/2016/05/04/%E5%85%B3%E4%BA%8E%E7%9A%84layer-list%E7%9A%84%E7%AE%80%E5%8D%95%E7%94%A8%E6%B3%95.html">
+  <link rel="alternate" type="application/rss+xml" title="Mrrobot" href="http://mrrobot97.github.io/feed.xml">
+  <meta name="description" content="今天看别人博客时第一次见到了layer-list的用法。layer-list的用途是将多张png图片按照指定的顺序一层层地叠放在一起，这是其最常见的用法。">
+
+   <title>关于的layer-list的简单用法</title>
+
+
+
+</head>
+
+
+  <body>
+
+    <header class="page-header">
+     <h1 class="project-name"> <a class="header-link" href="/"> Mrrobot</a></h1>
+     <!--<h3 style="font-weight: lighter;">a blog for <a class="header-link" href="http://canijustgo.com/" target="_blank">canijustgo.com</a></h3>-->
+     <h3><a class="header-link" href="https://twitter.com/Mr_Robot___" target="_blank">follow @mrrobot</a></h3>
+</header>
+
+
+    <section class="main-content">
+      <div class="wrapper">
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+
+    <div class="main-content" itemprop="articleBody">
+  <header class="post-header">
+    <h1 class="post-title" itemprop="name headline">关于的layer-list的简单用法</h1>
+   <p class="post-meta"><time datetime="2016-05-04T00:00:00+08:00" itemprop="datePublished">May 4, 2016</time> • <span itemprop="author" itemscope itemtype="http://schema.org/Person"><span itemprop="name">mrrobot</span></span></p>
+  </header>
+
+    <p>今天看别人博客时第一次见到了layer-list的用法。layer-list的用途是将多张png图片按照指定的顺序一层层地叠放在一起，这是其最常见的用法。</p>
+
+<p>比如我们有七张png图片，分别为：</p>
+
+<p><img src="http://cl.ly/2a0H130f0o1j/eel_mask1.png" alt="" />
+<img src="http://cl.ly/3X3Z021P0P3f/eel_mask2.png" alt="" />
+<img src="http://cl.ly/3H3a0S1U0R0X/eel_mask3.png" alt="" />
+<img src="http://cl.ly/2F2Z0w3Y2W21/eel_mask4.png" alt="" />
+<img src="http://cl.ly/0B1G221T0933/eel_mask5.png" alt="" />
+<img src="http://cl.ly/3l2l461K1y0w/eel_mask6.png" alt="" />
+<img src="http://cl.ly/1T0J2R0K3T3F/eel_mask7.png" alt="" /></p>
+
+<p>现在我们在项目想要将他们合成一张图片，</p>
+
+<p>在drawable目录下新建一个eel.xml文件：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="cp">&lt;?xml version="1.0" encoding="utf-8"?&gt;</span>
+<span class="nt">&lt;layer-list</span> <span class="na">xmlns:android=</span><span class="s">"http://schemas.android.com/apk/res/android"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;item</span>
+        <span class="na">android:drawable=</span><span class="s">"@drawable/eel_mask1"</span><span class="nt">/&gt;</span>
+    <span class="nt">&lt;item</span>
+        <span class="na">android:drawable=</span><span class="s">"@drawable/eel_mask2"</span><span class="nt">/&gt;</span>
+    <span class="nt">&lt;item</span>
+        <span class="na">android:drawable=</span><span class="s">"@drawable/eel_mask3"</span><span class="nt">/&gt;</span>
+    <span class="nt">&lt;item</span>
+        <span class="na">android:drawable=</span><span class="s">"@drawable/eel_mask4"</span><span class="nt">/&gt;</span>
+    <span class="nt">&lt;item</span>
+        <span class="na">android:drawable=</span><span class="s">"@drawable/eel_mask5"</span><span class="nt">/&gt;</span>
+    <span class="nt">&lt;item</span>
+        <span class="na">android:drawable=</span><span class="s">"@drawable/eel_mask6"</span><span class="nt">/&gt;</span>
+    <span class="nt">&lt;item</span>
+        <span class="na">android:drawable=</span><span class="s">"@drawable/eel_mask7"</span><span class="nt">/&gt;</span>
+<span class="nt">&lt;/layer-list&gt;</span>
+</code></pre>
+</div>
+<p>效果图为：</p>
+
+<p><img src="http://cl.ly/0s3m243m102E/snake.tiff" alt="" /></p>
+
+<p>在UIxml文件中，我们可以像引用正常资源一样引用我们新建的eel.xml文件，就像引用图片资源一样。</p>
+
+<p>在项目中，我们用LayerDrawable来引用这个资源。</p>
+
+<p>当然，这里只是介绍了一下Layer-list最基本的用法，还有很多属性和用法，详情参见各大搜索引擎。</p>
+
+  </div>
+
+
+<a href="http://mrrobot97.github.io"><h3 style="text-align: center;">- to blog -</h3></a>
+
+<div id="disqus_thread"></div>
+<script>
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+s.src = '//http-mrrobot97-me.disqus.com/embed.js';
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+</article>
+
+
+      </div>
+    </div>
+
+  </body>
+
+    
+
+
+    <!-- 背景特效 -->
+    <script type="text/javascript">
+      !function() {
+    function o(w, v, i) {
+        return w.getAttribute(v) || i
+    }
+    function j(i) {
+        return document.getElementsByTagName(i)
+    }
+    function l() {
+        var i = j("script"), w = i.length, v = i[w - 1];
+        return {
+            l: w,
+            z: o(v, "zIndex", - 1),
+            o: o(v, "opacity", 0.5),
+            c: o(v, "color", "84,106,122"),
+            n: o(v, "count", 70)
+        }
+    }
+    function k() {
+        r = u.width = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth, n = u.height = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight
+    }
+    function b() {
+        e.clearRect(0, 0, r, n);
+        var w = [f].concat(t);
+        var x, v, A, B, z, y;
+        t.forEach(function(i) {
+            i.x += i.xa, i.y += i.ya, i.xa*=i.x > r || i.x < 0?-1 : 1, i.ya*=i.y > n || i.y < 0?-1 : 1, e.fillRect(i.x - 0.5, i.y - 0.5, 1, 1);
+            for (v = 0; v < w.length; v++) {
+                x = w[v];
+                if (i !== x && null !== x.x && null !== x.y) {
+                    B = i.x - x.x, z = i.y - x.y, y = B * B + z * z;
+                    y < x.max && (x === f && y >= x.max / 2 && (i.x -= 0.03 * B, i.y -= 0.03 * z), A = (x.max - y) / x.max, e.beginPath(), e.lineWidth = A / 2, e.strokeStyle = "rgba(" + s.c + "," + (A + 0.2) + ")", e.moveTo(i.x, i.y), e.lineTo(x.x, x.y), e.stroke())
+                }
+            }
+            w.splice(w.indexOf(i), 1)
+        }), m(b)
+    }
+    var u = document.createElement("canvas"), s = l(), c = "c_n" + s.l, e = u.getContext("2d"), r, n, m = window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame || function(i) {
+        window.setTimeout(i, 1000 / 45)
+    }, a = Math.random, f = {
+        x: null,
+        y: null,
+        max: 20000
+    };
+    u.id = c;
+    u.style.cssText = "position:fixed;top:0;left:0;z-index:" + s.z + ";opacity:" + s.o;
+    j("body")[0].appendChild(u);
+    k(), window.onresize = k;
+    window.onmousemove = function(i) {
+        i = i || window.event, f.x = i.clientX, f.y = i.clientY
+    }, window.onmouseout = function() {
+        f.x = null, f.y = null
+    };
+    for (var t = [], p = 0; s.n > p; p++) {
+        var h = a() * r, g = a() * n, q = 2 * a() - 1, d = 2 * a() - 1;
+        t.push({
+            x: h,
+            y: g,
+            xa: q,
+            ya: d,
+            max: 6000
+        })
+    }
+    setTimeout(function() {
+        b()
+    }, 100)
+}();
+    </script>
+
+</html>

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="http://mrrobot97.github.io/stylesheets/stylesheet.css">
+  <link rel="canonical" href="http://mrrobot97.github.io/2016/05/19/%E5%8A%A8%E6%80%81%E6%B7%BB%E5%8A%A0Fragment.html">
+  <link rel="alternate" type="application/rss+xml" title="Mrrobot" href="http://mrrobot97.github.io/feed.xml">
+  <meta name="description" content="利用代码动态生成的Fragment需要通过FragmentManager来动态地添加到应用中，这里利用的是FragmentTransaction.add()方法：public abstract FragmentTransaction add (int containerViewId, Fragment fragm...">
+
+   <title>动态添加Fragment</title>
+
+
+
+</head>
+
+
+  <body>
+
+    <header class="page-header">
+     <h1 class="project-name"> <a class="header-link" href="/"> Mrrobot</a></h1>
+     <!--<h3 style="font-weight: lighter;">a blog for <a class="header-link" href="http://canijustgo.com/" target="_blank">canijustgo.com</a></h3>-->
+     <h3><a class="header-link" href="https://twitter.com/Mr_Robot___" target="_blank">follow @mrrobot</a></h3>
+</header>
+
+
+    <section class="main-content">
+      <div class="wrapper">
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+
+    <div class="main-content" itemprop="articleBody">
+  <header class="post-header">
+    <h1 class="post-title" itemprop="name headline">动态添加Fragment</h1>
+   <p class="post-meta"><time datetime="2016-05-19T00:00:00+08:00" itemprop="datePublished">May 19, 2016</time> • <span itemprop="author" itemscope itemtype="http://schema.org/Person"><span itemprop="name">mrrobot97</span></span></p>
+  </header>
+
+    <p>利用代码动态生成的Fragment需要通过FragmentManager来动态地添加到应用中，这里利用的是FragmentTransaction.add()方法：
+<code class="highlighter-rouge">public abstract FragmentTransaction add (int containerViewId, Fragment fragment, String tag)</code>
+containerViewId是要添加到的布局父容器的id，tag可以随便写。</p>
+
+<p>当要显示某一个Fragment到父容器中时，利用FragmentTransaction.show()方法：
+<code class="highlighter-rouge">public abstract FragmentTransaction show (Fragment fragment)</code></p>
+
+<p>而隐藏某一个Fragment时就调用hide方法：
+<code class="highlighter-rouge">public abstract FragmentTransaction hide (Fragment fragment)</code></p>
+
+<p>FragmentTransaction对象可以通过FragmentManager.beginTransaction()方法获得：
+<code class="highlighter-rouge">public abstract FragmentTransaction beginTransaction ()</code></p>
+
+<p>注意在所有的FragmentTransaction方法完成后，一定要调用<code class="highlighter-rouge">FragmentTransaction.commit()</code>方法，否则之前的方法全部不生效。</p>
+
+<p>此外，还可以为每个Fragment在show()时与在hide()时设置一个过渡动画：
+<code class="highlighter-rouge">public abstract FragmentTransaction setCustomAnimations (int enter, int exit)</code>
+这里的enter与exit都是在res/anim/anim.xml文件中定义的动画，eg:
+fadein.xml</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="cp">&lt;?xml version="1.0" encoding="utf-8"?&gt;</span>
+<span class="nt">&lt;set</span> <span class="na">xmlns:android=</span><span class="s">"http://schemas.android.com/apk/res/android"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;translate</span> <span class="na">android:fromXDelta=</span><span class="s">"100%p"</span> <span class="na">android:toXDelta=</span><span class="s">"0"</span>
+               <span class="na">android:duration=</span><span class="s">"1000"</span><span class="nt">/&gt;</span>
+    <span class="nt">&lt;alpha</span> <span class="na">android:fromAlpha=</span><span class="s">"0.0"</span> <span class="na">android:toAlpha=</span><span class="s">"1.0"</span>
+           <span class="na">android:duration=</span><span class="s">"1000"</span> <span class="nt">/&gt;</span>
+<span class="nt">&lt;/set&gt;</span>
+</code></pre>
+</div>
+
+<p>fadeout.xml</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="cp">&lt;?xml version="1.0" encoding="utf-8"?&gt;</span>
+<span class="nt">&lt;set</span> <span class="na">xmlns:android=</span><span class="s">"http://schemas.android.com/apk/res/android"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;translate</span> <span class="na">android:fromXDelta=</span><span class="s">"0%p"</span> <span class="na">android:toXDelta=</span><span class="s">"100%p"</span>
+               <span class="na">android:duration=</span><span class="s">"1000"</span><span class="nt">/&gt;</span>
+    <span class="nt">&lt;alpha</span> <span class="na">android:fromAlpha=</span><span class="s">"1.0"</span> <span class="na">android:toAlpha=</span><span class="s">"0.0"</span>
+           <span class="na">android:duration=</span><span class="s">"1000"</span> <span class="nt">/&gt;</span>
+<span class="nt">&lt;/set&gt;</span>
+</code></pre>
+</div>
+
+  </div>
+
+
+<a href="http://mrrobot97.github.io"><h3 style="text-align: center;">- to blog -</h3></a>
+
+<div id="disqus_thread"></div>
+<script>
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+s.src = '//http-mrrobot97-me.disqus.com/embed.js';
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+</article>
+
+
+      </div>
+    </div>
+
+  </body>
+
+    
+
+
+    <!-- 背景特效 -->
+    <script type="text/javascript">
+      !function() {
+    function o(w, v, i) {
+        return w.getAttribute(v) || i
+    }
+    function j(i) {
+        return document.getElementsByTagName(i)
+    }
+    function l() {
+        var i = j("script"), w = i.length, v = i[w - 1];
+        return {
+            l: w,
+            z: o(v, "zIndex", - 1),
+            o: o(v, "opacity", 0.5),
+            c: o(v, "color", "84,106,122"),
+            n: o(v, "count", 70)
+        }
+    }
+    function k() {
+        r = u.width = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth, n = u.height = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight
+    }
+    function b() {
+        e.clearRect(0, 0, r, n);
+        var w = [f].concat(t);
+        var x, v, A, B, z, y;
+        t.forEach(function(i) {
+            i.x += i.xa, i.y += i.ya, i.xa*=i.x > r || i.x < 0?-1 : 1, i.ya*=i.y > n || i.y < 0?-1 : 1, e.fillRect(i.x - 0.5, i.y - 0.5, 1, 1);
+            for (v = 0; v < w.length; v++) {
+                x = w[v];
+                if (i !== x && null !== x.x && null !== x.y) {
+                    B = i.x - x.x, z = i.y - x.y, y = B * B + z * z;
+                    y < x.max && (x === f && y >= x.max / 2 && (i.x -= 0.03 * B, i.y -= 0.03 * z), A = (x.max - y) / x.max, e.beginPath(), e.lineWidth = A / 2, e.strokeStyle = "rgba(" + s.c + "," + (A + 0.2) + ")", e.moveTo(i.x, i.y), e.lineTo(x.x, x.y), e.stroke())
+                }
+            }
+            w.splice(w.indexOf(i), 1)
+        }), m(b)
+    }
+    var u = document.createElement("canvas"), s = l(), c = "c_n" + s.l, e = u.getContext("2d"), r, n, m = window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame || function(i) {
+        window.setTimeout(i, 1000 / 45)
+    }, a = Math.random, f = {
+        x: null,
+        y: null,
+        max: 20000
+    };
+    u.id = c;
+    u.style.cssText = "position:fixed;top:0;left:0;z-index:" + s.z + ";opacity:" + s.o;
+    j("body")[0].appendChild(u);
+    k(), window.onresize = k;
+    window.onmousemove = function(i) {
+        i = i || window.event, f.x = i.clientX, f.y = i.clientY
+    }, window.onmouseout = function() {
+        f.x = null, f.y = null
+    };
+    for (var t = [], p = 0; s.n > p; p++) {
+        var h = a() * r, g = a() * n, q = 2 * a() - 1, d = 2 * a() - 1;
+        t.push({
+            x: h,
+            y: g,
+            xa: q,
+            ya: d,
+            max: 6000
+        })
+    }
+    setTimeout(function() {
+        b()
+    }, 100)
+}();
+    </script>
+
+</html>
