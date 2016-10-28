@@ -5,6 +5,8 @@ author: mrrobot
 ---
 >Dribbble是一个优秀的设计师网站，这里有上万优秀设计师为移动开发人员提供了海量精美的UI资源。Dribbble很早就开放了API，也有许多优秀的第三方客户端，本着学习的目的，我在课余时间写了这个还很粗糙的客户端。目前的功能还很简陋，用户体验也不是很完善，主要是因为Dribbble的API服务器在国外，国内加载资源很慢。不过，我会慢慢更新的，一点一点把它变得更好。
 
+[项目github地址](https://github.com/mrrobot97/Designer)
+
 先看一下预览图：
 
 ![](http://ockr1qfi1.bkt.clouddn.com/screener_20161029%2800_13_49%29.jpg)
