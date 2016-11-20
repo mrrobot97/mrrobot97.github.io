@@ -7,7 +7,7 @@
     <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" href="http://mrrobot97.github.io/stylesheets/stylesheet.css">
   <link rel="canonical" href="http://mrrobot97.github.io/2016/06/22/%E4%B8%BAViewPager%E8%AE%BE%E7%BD%AE%E7%82%B9%E5%87%BB%E4%BA%8B%E4%BB%B6.html">
-  <link rel="alternate" type="application/rss+xml" title="Mrrobot" href="http://mrrobot97.github.io/feed.xml">
+  <link rel="alternate" type="application/rss+xml" title="mrrobot97's blog" href="http://mrrobot97.github.io/feed.xml">
   <meta name="description" content="由于ViewPager要监听用户的手势操作，故直接为ViewPager设置OnClickListener是不起作用的，因为点击事件被ViewPager内部消耗了。因此想要监听ViewPager的点击事件，我们应该利用ViewPager的setOnTouchListener()方法，在该方法中检测点击事件，然后做出...">
 
    <title>为ViewPager设置点击事件</title>
@@ -20,9 +20,10 @@
   <body>
 
     <header class="page-header">
-     <h1 class="project-name"> <a class="header-link" href="/"> Mrrobot</a></h1>
-     <!--<h3 style="font-weight: lighter;">a blog for <a class="header-link" href="http://canijustgo.com/" target="_blank">canijustgo.com</a></h3>-->
-     <h3><a class="header-link" href="https://twitter.com/Mr_Robot___" target="_blank">follow @mrrobot</a></h3>
+
+	<link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?"
+     <h1 class="project-name"> <a class="header-link" href="/"> mrrobot97's blog</a></h1>
+     <h3><a class="header-link" href="https://github.com/mrrobot97" target="_blank">follow me on github@mrrobot97</a></h3>
 </header>
 
 
@@ -87,9 +88,6 @@ s.setAttribute('data-timestamp', +new Date());
     </div>
 
   </body>
-
-    
-
 
     <!-- 背景特效 -->
     <script type="text/javascript">
@@ -160,5 +158,8 @@ s.setAttribute('data-timestamp', +new Date());
     }, 100)
 }();
     </script>
+
+
+    
 
 </html>

@@ -6,11 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" href="http://mrrobot97.github.io/stylesheets/stylesheet.css">
-  <link rel="canonical" href="http://mrrobot97.github.io/2016/06/28/HttpURLConnection%E5%88%A9%E7%94%A8post%E4%BC%A0%E5%8F%82.html">
+  <link rel="canonical" href="http://mrrobot97.github.io/2016/11/05/Dribbble%E7%AC%AC%E4%B8%89%E6%96%B9%E5%BC%80%E6%BA%90%E5%AE%A2%E6%88%B7%E7%AB%AFDesigner.html">
   <link rel="alternate" type="application/rss+xml" title="mrrobot97's blog" href="http://mrrobot97.github.io/feed.xml">
-  <meta name="description" content="直接上示例代码：">
+  <meta name="description" content="  Dribbble是一个优秀的设计师网站，这里有上万优秀设计师为移动开发人员提供了海量精美的UI资源。Dribbble很早就开放了API，也有许多优秀的第三方客户端，本着学习的目的，我在课余时间写了这个还很粗糙的客户端。目前的功能还很简陋，用户体验也不是很完善，主要是因为Dribbble的API服务器在国外，国...">
 
-   <title>HttpURLConnection利用post传参</title>
+   <title>Dribbble第三方开源客户端Designer</title>
 
 
 
@@ -33,52 +33,76 @@
 
     <div class="main-content" itemprop="articleBody">
   <header class="post-header">
-    <h1 class="post-title" itemprop="name headline">HttpURLConnection利用post传参</h1>
-   <p class="post-meta"><time datetime="2016-06-28T00:00:00+08:00" itemprop="datePublished">Jun 28, 2016</time> • <span itemprop="author" itemscope itemtype="http://schema.org/Person"><span itemprop="name">mrrobot</span></span></p>
+    <h1 class="post-title" itemprop="name headline">Dribbble第三方开源客户端Designer</h1>
+   <p class="post-meta"><time datetime="2016-11-05T00:00:00+08:00" itemprop="datePublished">Nov 5, 2016</time> • <span itemprop="author" itemscope itemtype="http://schema.org/Person"><span itemprop="name">mrrobot97</span></span></p>
   </header>
 
-    <p>直接上示例代码：</p>
+    <blockquote>
+  <p>Dribbble是一个优秀的设计师网站，这里有上万优秀设计师为移动开发人员提供了海量精美的UI资源。Dribbble很早就开放了API，也有许多优秀的第三方客户端，本着学习的目的，我在课余时间写了这个还很粗糙的客户端。目前的功能还很简陋，用户体验也不是很完善，主要是因为Dribbble的API服务器在国外，国内加载资源很慢。不过，我会慢慢更新的，一点一点把它变得更好。</p>
+</blockquote>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>HttpURLConnection conn=null;
-            OutputStreamWriter osw=null;
-            BufferedReader br=null;
-            try {
-                URL url=new URL(address);
-                conn= (HttpURLConnection) url.openConnection();
-                conn.setDoOutput(true);
-                osw=new OutputStreamWriter(conn.getOutputStream());
-                osw.write("username="+userText.getText()+"&amp;"+"password="+passText.getText());
-                osw.close();
-                br=new BufferedReader(new InputStreamReader(conn.getInputStream()));
-                final StringBuilder response =new StringBuilder();
-                String s;
-                while((s=br.readLine())!=null){
-                    response.append(s);
-                }
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        respText.setText(response);
-                    }
-                });
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }finally {
-                if (br!=null){
-                    try {
-                        br.close();
-                        if (conn!=null){
-                            conn.disconnect();
-                        }
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
+<p><a href="https://github.com/mrrobot97/Designer">项目github地址</a></p>
+
+<p>先看一下预览图：</p>
+
+<p><img src="http://ockr1qfi1.bkt.clouddn.com/screener_20161029%2800_13_49%29.jpg" alt="" /></p>
+
+<p><img src="http://ockr1qfi1.bkt.clouddn.com/screener_20161028%2823_54_36%29.jpg" alt="" /></p>
+
+<p><img src="http://ockr1qfi1.bkt.clouddn.com/screener_20161029%2800_14_23%29.png" alt="" /></p>
+
+<p><img src="http://ockr1qfi1.bkt.clouddn.com/screener_20161029%2800_15_02%29.png" alt="" /></p>
+
+<p><img src="http://ockr1qfi1.bkt.clouddn.com/screener_20161029%2800_15_24%29.png" alt="" /></p>
+
+<p><img src="http://ockr1qfi1.bkt.clouddn.com/screener_20161029%2800_15_39%29.png" alt="" /></p>
+
+<p>主要使用的技术和开源项目:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>1.	MVP设计模式。
+2.	RxJAVA
+3.	Retrofit
+4.	OkHttp
+5.	Glide
 </code></pre>
 </div>
+
+<p>feature:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>1.支持页面滑动返回
+2.支持离线缓存浏览
+3.支持JAVA 8
+4.支持Oauth2.0认证登录
+</code></pre>
+</div>
+
+<p>todo list：</p>
+
+<ol>
+  <li><del>使用数据库离线缓存,节省客户端流量。</del> (已使用OKHttp离线缓存代替)
+    <ol>
+      <li>使用palette动态改变背景色，增加美观性。</li>
+      <li>使用Dribbble提供的Oauth2认证允许用户登录，并对每个设计进行评论，点赞，收藏等功能。(已初步实现Oauth2.0认证登陆)</li>
+      <li>改善图片加载速度，提供友好的用户反馈。</li>
+      <li>发现并消灭BUG，提高软件使用的稳定性。</li>
+    </ol>
+  </li>
+</ol>
+
+<p>欢迎fork、issue、star。</p>
+
+<h1 id="changelog">ChangeLog</h1>
+
+<h2 id="version-011">version 0.1.1</h2>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>1.加入Oauth2.0登录入口，用户可以登录并查看自己的个人信息。
+2.利用OKHttp加入离线缓存，没有网也可以愉快的玩耍了。
+</code></pre>
+</div>
+
+<h2 id="version-011-apk-downloadhttpockr1qfi1bktclouddncomrelease011apk"><a href="http://ockr1qfi1.bkt.clouddn.com/release0.1.1.apk">version 0.1.1 apk download</a></h2>
+
+<h2 id="version-010-apk-downloadhttpockr1qfi1bktclouddncomdesignerapk"><a href="http://ockr1qfi1.bkt.clouddn.com/Designer.apk">version 0.1.0 apk download</a></h2>
 
   </div>
 

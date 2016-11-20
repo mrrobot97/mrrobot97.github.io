@@ -1,13 +1,517 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Mrrobot</title>
+    <title>mrrobot97&#39;s blog</title>
     <description>Record my study in android.</description>
     <link>http://mrrobot97.github.io/</link>
     <atom:link href="http://mrrobot97.github.io/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Wed, 12 Oct 2016 19:30:40 +0800</pubDate>
-    <lastBuildDate>Wed, 12 Oct 2016 19:30:40 +0800</lastBuildDate>
+    <pubDate>Sun, 20 Nov 2016 23:29:55 +0800</pubDate>
+    <lastBuildDate>Sun, 20 Nov 2016 23:29:55 +0800</lastBuildDate>
     <generator>Jekyll v3.1.2</generator>
+    
+      <item>
+        <title>Dribbble第三方开源客户端Designer</title>
+        <description>&lt;blockquote&gt;
+  &lt;p&gt;Dribbble是一个优秀的设计师网站，这里有上万优秀设计师为移动开发人员提供了海量精美的UI资源。Dribbble很早就开放了API，也有许多优秀的第三方客户端，本着学习的目的，我在课余时间写了这个还很粗糙的客户端。目前的功能还很简陋，用户体验也不是很完善，主要是因为Dribbble的API服务器在国外，国内加载资源很慢。不过，我会慢慢更新的，一点一点把它变得更好。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://github.com/mrrobot97/Designer&quot;&gt;项目github地址&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;先看一下预览图：&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://ockr1qfi1.bkt.clouddn.com/screener_20161029%2800_13_49%29.jpg&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://ockr1qfi1.bkt.clouddn.com/screener_20161028%2823_54_36%29.jpg&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://ockr1qfi1.bkt.clouddn.com/screener_20161029%2800_14_23%29.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://ockr1qfi1.bkt.clouddn.com/screener_20161029%2800_15_02%29.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://ockr1qfi1.bkt.clouddn.com/screener_20161029%2800_15_24%29.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://ockr1qfi1.bkt.clouddn.com/screener_20161029%2800_15_39%29.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;主要使用的技术和开源项目:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;1.	MVP设计模式。
+2.	RxJAVA
+3.	Retrofit
+4.	OkHttp
+5.	Glide
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;feature:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;1.支持页面滑动返回
+2.支持离线缓存浏览
+3.支持JAVA 8
+4.支持Oauth2.0认证登录
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;todo list：&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;&lt;del&gt;使用数据库离线缓存,节省客户端流量。&lt;/del&gt; (已使用OKHttp离线缓存代替)
+    &lt;ol&gt;
+      &lt;li&gt;使用palette动态改变背景色，增加美观性。&lt;/li&gt;
+      &lt;li&gt;使用Dribbble提供的Oauth2认证允许用户登录，并对每个设计进行评论，点赞，收藏等功能。(已初步实现Oauth2.0认证登陆)&lt;/li&gt;
+      &lt;li&gt;改善图片加载速度，提供友好的用户反馈。&lt;/li&gt;
+      &lt;li&gt;发现并消灭BUG，提高软件使用的稳定性。&lt;/li&gt;
+    &lt;/ol&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;欢迎fork、issue、star。&lt;/p&gt;
+
+&lt;h1 id=&quot;changelog&quot;&gt;ChangeLog&lt;/h1&gt;
+
+&lt;h2 id=&quot;version-011&quot;&gt;version 0.1.1&lt;/h2&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;1.加入Oauth2.0登录入口，用户可以登录并查看自己的个人信息。
+2.利用OKHttp加入离线缓存，没有网也可以愉快的玩耍了。
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;h2 id=&quot;version-011-apk-downloadhttpockr1qfi1bktclouddncomrelease011apk&quot;&gt;&lt;a href=&quot;http://ockr1qfi1.bkt.clouddn.com/release0.1.1.apk&quot;&gt;version 0.1.1 apk download&lt;/a&gt;&lt;/h2&gt;
+
+&lt;h2 id=&quot;version-010-apk-downloadhttpockr1qfi1bktclouddncomdesignerapk&quot;&gt;&lt;a href=&quot;http://ockr1qfi1.bkt.clouddn.com/Designer.apk&quot;&gt;version 0.1.0 apk download&lt;/a&gt;&lt;/h2&gt;
+</description>
+        <pubDate>Sat, 05 Nov 2016 00:00:00 +0800</pubDate>
+        <link>http://mrrobot97.github.io/2016/11/05/Dribbble%E7%AC%AC%E4%B8%89%E6%96%B9%E5%BC%80%E6%BA%90%E5%AE%A2%E6%88%B7%E7%AB%AFDesigner.html</link>
+        <guid isPermaLink="true">http://mrrobot97.github.io/2016/11/05/Dribbble%E7%AC%AC%E4%B8%89%E6%96%B9%E5%BC%80%E6%BA%90%E5%AE%A2%E6%88%B7%E7%AB%AFDesigner.html</guid>
+        
+        
+      </item>
+    
+      <item>
+        <title>使用MonkeyRunner进行Android应用自动化测试</title>
+        <description>&lt;blockquote&gt;
+  &lt;p&gt;MonkeyRunner是谷歌官方SDK tools 中为我们提供的一个程序自动化测试工具，需要开发者编写相应的python自动测试脚本，开发者可以自定义测试流程，功能很全面，可以模拟各种事件。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;monkeyrunner位于SDK/tools/monkeyrunner,这是一个可执行脚本，我们编写自己的测试脚本然后用monkeyrunner运行即可。&lt;/p&gt;
+
+&lt;p&gt;谷歌提供了一个python库com.android.monkeyrunner，便于我们编写测试脚本。看一个脚本demo:
+monkeyrunner.py&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;from com.android.monkeyrunner import MonkeyRunner, MonkeyDevice, MonkeyImage
+
+
+device = MonkeyRunner.waitForConnection()
+
+package = &#39;me.mrrobot97.swipeback&#39;
+
+activity = &#39;me.mrrobot97.swipeback.MainActivity&#39;
+
+runComponent = package + &#39;/&#39; + activity
+
+device.startActivity(component=runComponent)
+
+MonkeyRunner.sleep(1)
+
+for i in range(0, 5):
+	device.touch(720, 1280, &#39;DOWN_AND_UP&#39;)
+	MonkeyRunner.sleep(0.5)
+
+for i in range(0, 5):
+	device.drag((1, 1280), (720, 1280), 0.5, 50)
+	MonkeyRunner.sleep(0.7)
+
+img=device.takeSnapshot()
+
+img.writeToFile(&#39;screen.png&#39;,&#39;png&#39;)
+
+print &#39;finished&#39;
+
+
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;三个module分别为MonkeyRunner,MonkeyDevice,MonkeyImage，每一个都包含了许多与APP交互的API，可以在网上查到相应的文档。&lt;/p&gt;
+
+&lt;p&gt;终端运行:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt; monkeyrunner monkeyrunner.py 
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;即可在虚拟机或真机中观察到效果:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://ockr1qfi1.bkt.clouddn.com/auto-test.gif&quot; alt=&quot;Demo&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;关于MonkeyRunner具体的用法请上网查API文档。&lt;/p&gt;
+</description>
+        <pubDate>Sun, 16 Oct 2016 00:00:00 +0800</pubDate>
+        <link>http://mrrobot97.github.io/2016/10/16/%E4%BD%BF%E7%94%A8MonkeyRunner%E8%BF%9B%E8%A1%8CAndroid%E5%BA%94%E7%94%A8%E8%87%AA%E5%8A%A8%E5%8C%96%E6%B5%8B%E8%AF%95.html</link>
+        <guid isPermaLink="true">http://mrrobot97.github.io/2016/10/16/%E4%BD%BF%E7%94%A8MonkeyRunner%E8%BF%9B%E8%A1%8CAndroid%E5%BA%94%E7%94%A8%E8%87%AA%E5%8A%A8%E5%8C%96%E6%B5%8B%E8%AF%95.html</guid>
+        
+        
+      </item>
+    
+      <item>
+        <title>动手写一个高仿微信的滑动返回SwipeBackActivity</title>
+        <description>&lt;blockquote&gt;
+  &lt;p&gt;本文来源于&lt;a href=&quot;https://github.com/XBeats/and_swipeback&quot;&gt;这个开源项目&lt;/a&gt;，由于作者只给出了用法和基本原理，因此才有了本文的产生。本文去除了原项目中较琐碎和不必要的一些内容，只实现了基本的Activity滑动返回功能。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;先看效果图：&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://ockr1qfi1.bkt.clouddn.com/swipebackdemo.gif&quot; alt=&quot;demo&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;效果还是挺不错的。&lt;/p&gt;
+
+&lt;p&gt;基本原理：利用Application类的registerActivityLifecycleCallbacks(ActivityLifecycleCallbacks)方法，可以记录全局所有Activity的生命周期，因此我们可以利用这点来存储我们所有的Activity于一个栈中，每次滑动返回时从栈中取出前一个Activtity,然后分离出其中id为&lt;code class=&quot;highlighter-rouge&quot;&gt;Window.ID_ANDROID_CONTENT&lt;/code&gt;的FrameLayout，这个FrameLayout就是我们setContentView中的那个view的父view,利用这个FrameLayout就可以获取Activity界面显示的View。然后我们监听手势事件，在滑动的时候将前一个Activity的View加载进来并不断更改其偏移量即可。&lt;/p&gt;
+
+&lt;p&gt;首先是实现ActivityLifecycleCallbacks接口，并在其中用一个栈存储我们所有的Activity:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;public class ActivityLifeCycleHelper implements Application.ActivityLifecycleCallbacks {
+    private Stack&amp;lt;Activity&amp;gt; mActivities;
+
+    public ActivityLifeCycleHelper(){
+        mActivities=new Stack&amp;lt;&amp;gt;();
+    }
+
+    @Override
+    public void onActivityCreated(Activity activity, Bundle bundle) {
+        mActivities.add(activity);
+    }
+
+    @Override
+    public void onActivityStarted(Activity activity) {
+
+    }
+
+    @Override
+    public void onActivityResumed(Activity activity) {
+
+    }
+
+    @Override
+    public void onActivityPaused(Activity activity) {
+
+    }
+
+    @Override
+    public void onActivityStopped(Activity activity) {
+
+    }
+
+    @Override
+    public void onActivitySaveInstanceState(Activity activity, Bundle bundle) {
+
+    }
+
+    @Override
+    public void onActivityDestroyed(Activity activity) {
+        mActivities.remove(activity);
+    }
+
+    public Activity getPreActivity(){
+        int size=mActivities.size();
+        if(size&amp;lt;2) return null;
+        else return mActivities.get(size-2);
+    }
+
+    public void removeActivity(Activity activity){
+        mActivities.remove(activity);
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;看得出这个类很简单，只是在Activity创建的时候加入栈中，销毁的时候移除。
+然后就是在Application中调用registerActivityLifecycleCallbacks()方法了:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;public class MyApplication extends Application {
+    public ActivityLifeCycleHelper getHelper() {
+        return mHelper;
+    }
+
+    private ActivityLifeCycleHelper mHelper;
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        mHelper=new ActivityLifeCycleHelper();
+        //store all the activities
+        registerActivityLifecycleCallbacks(mHelper);
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;然后定义一个最基本的SwipeBackActivity,当然要继承自AppCompactActivity，这个类我们要做的就是重写它的dispatchTouchEvent()方法，这是因为我们要监听边界滑动返回事件，肯定要拦截其中的一些触摸事件。&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;public class SwipeBackActivity extends AppCompatActivity {
+    private TouchHelepr mTouchHelepr;
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        if(mTouchHelepr==null)
+            mTouchHelepr=new TouchHelepr(getWindow());
+        return super.dispatchTouchEvent(ev)&amp;amp;&amp;amp;mTouchHelepr.processTouchEvent(ev);
+    }
+}
+
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;这里有一个我们自己写的类TouchHelper，具体的逻辑操作就在这里面实现了。接下来就是重点类TouchHelper了。
+首先我们定义三个状态:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;	private boolean isIdle=true;
+    private boolean isSlinding=false;
+    private boolean isAnimating=false;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;isIdle,表示当前为静止状态。&lt;/li&gt;
+  &lt;li&gt;isSliding,表示当前用户手指移动，我们的View随之滑动。&lt;/li&gt;
+  &lt;li&gt;isAnimating，表示用户手指松开，View要么恢复原状，要么移动至最右并消失，这是一个Animation过程，isAnimating=true表示当前处于这种动画过程中。&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;然后是几个成员变量:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;	private Window mWindow;
+    private ViewGroup preContentView;
+    private ViewGroup curContentView;
+    private ViewGroup curView;
+    private ViewGroup preView;
+    private Activity preActivity; 
+    
+    //左边触发的宽度
+    private int triggerWidth=50;
+	//阴影宽度
+    private int SHADOW_WIDTH=30;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;mWindow用于初始化TouchHelper，并且这个window就包含了context,activity等信息。&lt;/p&gt;
+
+&lt;p&gt;curContentView、preContentView分别表示当前、前一个Activity中外层的FrameLayout。&lt;/p&gt;
+
+&lt;p&gt;curView、preView分别表示当前、前一个Activity的界面View。&lt;/p&gt;
+
+&lt;p&gt;然后就是处理手势的代码了：&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;private Context getContext(){
+        return mWindow.getContext();
+    }
+
+//决定是否拦截事件
+    public boolean processTouchEvent(MotionEvent event){
+        if(isAnimating) return true;
+        float x=event.getRawX();
+        switch (event.getAction()){
+            case MotionEvent.ACTION_DOWN:
+                if(x&amp;lt;=triggerWidth){
+                    isIdle=false;
+                    isSlinding=true;
+                    startSlide();
+                    return true;
+                }
+                break;
+            case MotionEvent.ACTION_POINTER_DOWN:
+                if(isSlinding) return true;
+                break;
+            case MotionEvent.ACTION_MOVE:
+                if(isSlinding){
+                    if(event.getActionIndex()!=0) return true;
+                    sliding(x);
+                }
+                break;
+            case MotionEvent.ACTION_CANCEL:
+            case MotionEvent.ACTION_UP:
+                if(!isSlinding) return false;
+                int width=getContext().getResources().getDisplayMetrics().widthPixels;
+                isAnimating=true;
+                isSlinding=false;
+                startAnimating(width/x&amp;lt;=3,x);
+                return true;
+            default:
+                break;
+        }
+        return false;
+    }
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;在函数processTouchEvent()中所有要拦截的地方我们都return true,这样子View就不会受到触摸事件了，其余的则应返回false,表示将触摸事件分发给子View去处理。&lt;/p&gt;
+
+&lt;p&gt;其中状态更改的代码比较简单，就不解释了。主要说说其中随着状态更改而进行的几个操作函数:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;startSlide()&lt;/li&gt;
+  &lt;li&gt;sliding(x)&lt;/li&gt;
+  &lt;li&gt;startAnimating(width/x&amp;lt;=3,x)&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;startSlide(),顾名思义，开始滑动，先看看代码：&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;private void startSlide() {
+        preActivity=((MyApplication)getContext().getApplicationContext()).getHelper().getPreActivity();
+        if(preActivity==null) return;
+        preContentView=(ViewGroup) preActivity.getWindow().findViewById(Window.ID_ANDROID_CONTENT);
+        preView= (ViewGroup) preContentView.getChildAt(0);
+        preContentView.removeView(preView);
+        curContentView=(ViewGroup) mWindow.findViewById(Window.ID_ANDROID_CONTENT);
+        curView= (ViewGroup) curContentView.getChildAt(0);
+        preView.setX(-preView.getWidth()/3);
+        curContentView.addView(preView,0);
+        //        if(mShadowView==null){
+//            mShadowView=new ShadowView(getContext());
+//        }
+//        FrameLayout.LayoutParams params=new FrameLayout.LayoutParams(SHADOW_WIDTH, FrameLayout.LayoutParams.MATCH_PARENT);
+//        curContentView.addView(mShadowView,1,params);
+//        mShadowView.setX(-SHADOW_WIDTH);
+    }
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;在startSlide()中，我们给几个成员变量赋值，并且将preView添加到curContentView中，并赋予其一个初始偏移量。这里要特别注意addView(view,index)中的index参数，index参数越大，代表越靠后绘制。这里添加preView时的index为0，表示最先绘制preView，否则preView会显示在curView的上面，这样就不正确了。注释部分稍后再讲。&lt;/p&gt;
+
+&lt;p&gt;然后看看sliding()方法:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;private void sliding(float rawX) {
+        if(preActivity==null) return;
+        curView.setX(rawX);
+        preView.setX(-preView.getWidth()/3+rawX/3);
+        //mShadowView.setX(-SHADOW_WIDTH+rawX);
+    }
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;这个函数就简单多了，这是随着用户手指的位置动态地更改curView、preView而已。注释稍后讲。&lt;/p&gt;
+
+&lt;p&gt;然后是startAnimating()方法:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;private void startAnimating(final boolean isFinishing, float x) {
+        int width=getContext().getResources().getDisplayMetrics().widthPixels;
+        ValueAnimator animator=ValueAnimator.ofFloat(x,isFinishing?width:0);
+        animator.setInterpolator(new DecelerateInterpolator());
+        animator.setDuration(200);
+        animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator valueAnimator) {
+                sliding((Float) valueAnimator.getAnimatedValue());
+            }
+        });
+        animator.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animator) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animator) {
+                doEndWorks(isFinishing);
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animator) {
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animator) {
+
+            }
+        });
+        animator.start();
+    }
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;当用户松开手指时的位置的x坐标小于屏幕宽度的1/3时，恢复原状，否则将preView完全显示，这里利用ValueAnimator来实现动画。注意在动画完成后我们还要做一些收尾工作，就是方法doEndWorks():&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;private void doEndWorks(boolean isFinishing) {
+        if(preActivity==null) return;
+        if(isFinishing){
+            //更改当前activity的底view为preView,防止当前activity finish时的白屏闪烁
+            BackView view=new BackView(getContext());
+            view.cacheView(preView);
+            curContentView.addView(view,0);
+        }
+        //curContentView.removeView(mShadowView);
+        if(curContentView==null||preContentView==null) return;
+        curContentView.removeView(preView);
+        preContentView.addView(preView);
+        if(isFinishing){
+            ((Activity)getContext()).finish();
+            ((Activity)getContext()).overridePendingTransition(0,0);
+        }
+        isAnimating=false;
+        isSlinding=false;
+        isIdle=true;
+        preView=null;
+        curView=null;
+    }
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;收尾工作中我们将状态修正，该移除的View移除，该添加的View添加。若preView完全显示，就finish当前activity,注意还要利用&lt;code class=&quot;highlighter-rouge&quot;&gt;((Activity)getContext()).overridePendingTransition(0,0)&lt;/code&gt;取消默认的activity更换动画，这样才能实现暗度陈仓的目的。你应该已经看到了这里还有一个BackView，这个BackView其实就是preView的一个副本，我们将BackView添加到curContentView的最底部，覆盖那个白色底部，否则动画完成后会有一个白屏闪烁现象。&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;//用于防止白屏闪烁
+class BackView extends View{
+
+    private View mView;
+    public BackView(Context context) {
+        super(context);
+    }
+
+    public void cacheView(View view){
+        mView=view;
+        invalidate();
+    }
+
+    @Override
+    protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+        if(mView!=null){
+            mView.draw(canvas);
+            mView=null;
+        }
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;这样实现的效果就是如下:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://ockr1qfi1.bkt.clouddn.com/withouwshadowview.gif&quot; alt=&quot;demo&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;你应该注意要这个和第一个demo显示的不太一样，因为这里没有阴影效果，体现不出层次感，不够美观，那么接下来我们只需要在添加一点点代码就可以添加这样的一个阴影效果.&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;class ShadowView extends View{
+
+    private Drawable mDrawable;
+
+    public ShadowView(Context context) {
+        super(context);
+        int[] colors=new int[]{0x00000000, 0x17000000, 0x43000000};
+        mDrawable=new GradientDrawable(GradientDrawable.Orientation.LEFT_RIGHT,colors);
+    }
+
+    @Override
+    protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+        mDrawable.setBounds(0,0,getMeasuredWidth(),getMeasuredHeight());
+        mDrawable.draw(canvas);
+    }
+}
+
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;这个就是要绘制上去的阴影效果，很简单，将前面几个方法中注释的代码部分还原即可。&lt;/p&gt;
+
+&lt;p&gt;这样，就完成了我们所有的代码~~~&lt;/p&gt;
+
+&lt;p&gt;喜欢的话，去给&lt;a href=&quot;https://github.com/XBeats/and_swipeback&quot;&gt;原项目&lt;/a&gt;start吧，当然如果你能给我的文章一个喜欢话我会更开心的~&lt;/p&gt;
+</description>
+        <pubDate>Sat, 15 Oct 2016 00:00:00 +0800</pubDate>
+        <link>http://mrrobot97.github.io/2016/10/15/%E5%8A%A8%E6%89%8B%E5%86%99%E4%B8%80%E4%B8%AA%E9%AB%98%E4%BB%BF%E5%BE%AE%E4%BF%A1%E7%9A%84%E6%BB%91%E5%8A%A8%E8%BF%94%E5%9B%9ESwipeBackActivity.html</link>
+        <guid isPermaLink="true">http://mrrobot97.github.io/2016/10/15/%E5%8A%A8%E6%89%8B%E5%86%99%E4%B8%80%E4%B8%AA%E9%AB%98%E4%BB%BF%E5%BE%AE%E4%BF%A1%E7%9A%84%E6%BB%91%E5%8A%A8%E8%BF%94%E5%9B%9ESwipeBackActivity.html</guid>
+        
+        
+      </item>
     
       <item>
         <title>使用Android Studio 进行NDK开发基础</title>
@@ -876,372 +1380,6 @@ public @interface BindView {
         <pubDate>Sun, 11 Sep 2016 00:00:00 +0800</pubDate>
         <link>http://mrrobot97.github.io/2016/09/11/%E5%88%A9%E7%94%A8%E6%B3%A8%E8%A7%A3+%E5%8F%8D%E5%B0%84%E5%AE%9E%E7%8E%B0view%E7%9A%84auto-bind.html</link>
         <guid isPermaLink="true">http://mrrobot97.github.io/2016/09/11/%E5%88%A9%E7%94%A8%E6%B3%A8%E8%A7%A3+%E5%8F%8D%E5%B0%84%E5%AE%9E%E7%8E%B0view%E7%9A%84auto-bind.html</guid>
-        
-        
-      </item>
-    
-      <item>
-        <title>为RecyclerView添加Header、Footer、加载更多的通用原理</title>
-        <description>&lt;blockquote&gt;
-  &lt;p&gt;RecyclerView固然好用，但是官方并没有为其提供像ListView的addHeaderView()、addFooterView()等方法，固我们需要自己来实现。本文以一个简单例子介绍其通用原理，对题干中的三项都试用。&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;方法就是：继承RecyclerView.Adapter，然后在其内部进行自己的逻辑实现。这里以在RecyclerView的尾部添加一个加载更多的FooterView为例进行介绍。&lt;/p&gt;
-
-&lt;p&gt;继承RecyclerView.Adapter，则需要重写三个方法：&lt;/p&gt;
-
-&lt;p&gt;1.onCreateViewHolder(ViewGroup parent, int viewType)&lt;/p&gt;
-
-&lt;p&gt;2.onBindViewHolder(RecyclerView.ViewHolder holder, int position)&lt;/p&gt;
-
-&lt;p&gt;3.getItemCount()&lt;/p&gt;
-
-&lt;p&gt;注意到在onCreateViewHolder方法中有一个参数viewType,我们就是利用这个参数进行改造。首先声明两个ViewType:&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;private static final int VIEW_TYPE_NORMAL=0;
-
-private static final int VIEW_TYPE_BUTTON=1;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;p&gt;既然有两种viewType，自然就需要有两个布局文件，一个对应我们普通item的layout,一个对应我们的footerview的layout.同理有两个ViewHolder&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;public static class ViewHolder extends RecyclerView.ViewHolder{
-        public TextView mTextView;
-
-        public ViewHolder(View itemView) {
-            super(itemView);
-            mTextView= (TextView) itemView.findViewById(R.id.text_view);
-        }
-    }
-
-    public  class LoadMoreHolder extends RecyclerView.ViewHolder{
-        private Button mButton;
-        private RelativeLayout mLayout;
-        public LoadMoreHolder(View itemView) {
-            super(itemView);
-            mLayout= (RelativeLayout) itemView.findViewById(R.id.relative_layout);
-            mButton= (Button) itemView.findViewById(R.id.load_more_bt);
-            mButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if (mListener!=null){
-                        mListener.loadMore();
-                    }
-                }
-            });
-        }
-    }
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;p&gt;这里我们必须主动重写一个函数getItemViewType(int position)，我们需要根据position来决定我们的viewType，这里我添加的是footerview，所以实现逻辑是这样的：&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;@Override
-    public int getItemViewType(int position) {
-        if (position&amp;lt;mData.size()){
-            return VIEW_TYPE_NORMAL;
-        }
-        return VIEW_TYPE_BUTTON;
-    }
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;p&gt;然后是onCreateViewHolder，在这里根据viewType来生成不同的view以及ViewHolder&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;@Override
-    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        if (viewType==VIEW_TYPE_NORMAL){
-            View view= LayoutInflater.from(mContext).inflate(R.layout.item_layout,null);
-            ViewHolder holder=new ViewHolder(view);
-            return holder;
-        }else{
-            View view=LayoutInflater.from(mContext).inflate(R.layout.load_more_button_layout,null);
-            LoadMoreHolder holder=new LoadMoreHolder(view);
-            return holder;
-        }
-
-    }
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;p&gt;然后是onBindViewHolder&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;@Override
-    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-        if (position&amp;lt;mData.size()){
-            ((ViewHolder)holder).mTextView.setText(mData.get(position));
-        }
-    }
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;p&gt;在getItemCount函数中注意要+1，因为我们手动为RecyclerView添加了一个footerview&lt;/p&gt;
-
-&lt;p&gt;到这里为止，我们的Adapter已经能正常为LinearLayoutManager样式的RecyclerView工作了，
-若还想要在GridLayoutManager和StaggeredLayoutManager时正常使用，还需重写下面两个函数：&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;@Override
-    public void onAttachedToRecyclerView(RecyclerView recyclerView) {
-        super.onAttachedToRecyclerView(recyclerView);
-        RecyclerView.LayoutManager manager=recyclerView.getLayoutManager();
-        if (manager instanceof GridLayoutManager){
-            final RecyclerView.LayoutManager finalManager = manager;
-            ((GridLayoutManager) manager).setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
-                @Override
-                public int getSpanSize(int position) {
-                    return position&amp;lt;mData.size()?((GridLayoutManager) finalManager).getSpanCount():1;
-                }
-            });
-        }
-    }
-
-    @Override
-    public void onViewAttachedToWindow(RecyclerView.ViewHolder holder) {
-        super.onViewAttachedToWindow(holder);
-        if (holder instanceof LoadMoreHolder){
-            ViewGroup.LayoutParams lp=((LoadMoreHolder) holder).mLayout.getLayoutParams();
-            if (lp!=null&amp;amp;&amp;amp;lp instanceof StaggeredGridLayoutManager.LayoutParams){
-                ((StaggeredGridLayoutManager.LayoutParams)lp).setFullSpan(true);
-            }
-        }
-    }
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;p&gt;应该能看懂，不解释了。&lt;/p&gt;
-
-&lt;p&gt;样例全部代码:
-&lt;a href=&quot;https://github.com/mrrobot97/LoadMoreRecyclerView&quot;&gt;Github样例代码&lt;/a&gt;&lt;/p&gt;
-</description>
-        <pubDate>Sat, 10 Sep 2016 00:00:00 +0800</pubDate>
-        <link>http://mrrobot97.github.io/2016/09/10/%E4%B8%BARecyclerView%E6%B7%BB%E5%8A%A0Header-Footer-%E5%8A%A0%E8%BD%BD%E6%9B%B4%E5%A4%9A%E7%9A%84%E9%80%9A%E7%94%A8%E5%8E%9F%E7%90%86.html</link>
-        <guid isPermaLink="true">http://mrrobot97.github.io/2016/09/10/%E4%B8%BARecyclerView%E6%B7%BB%E5%8A%A0Header-Footer-%E5%8A%A0%E8%BD%BD%E6%9B%B4%E5%A4%9A%E7%9A%84%E9%80%9A%E7%94%A8%E5%8E%9F%E7%90%86.html</guid>
-        
-        
-      </item>
-    
-      <item>
-        <title>夜间模式过渡动画简单实现</title>
-        <description>&lt;blockquote&gt;
-  &lt;p&gt;众所周知，知乎的夜间模式切换时有一个挺不错的过渡效果，本文就简单说明一下这个过渡是怎么实现的。&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;原理就是：在切换至夜间模式，即给各个view更换底色之前，先给当前屏幕截一张图，然后将这张图显示在view的最上面，然后不断改变其透明度直至透明 ，然后再改变各个view的底色。至于屏幕截图，使用View的
-getDrawingCache()函数来实现的，不过要注意这个函数返回的是一张
-&amp;gt;A non-scaled bitmap representing this view&lt;/p&gt;
-
-&lt;p&gt;的图片，所以我们需要一这个Bitmap为src在创建一个Bitmap.&lt;/p&gt;
-
-&lt;p&gt;代码实现：&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;
-package me.mrrobot97.nightmode;
-
-import android.animation.Animator;
-import android.animation.ObjectAnimator;
-import android.app.Activity;
-import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
-import android.os.Bundle;
-import android.util.TypedValue;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.Window;
-import android.view.animation.LinearInterpolator;
-import android.widget.Button;
-import android.widget.RelativeLayout;
-
-public class MainActivity extends Activity {
-    private Button changeBt;
-    private boolean isNight=false;
-    private RelativeLayout layout;
-
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
-        setTheme(R.style.DayTheme);
-        setContentView(R.layout.activity_main);
-        changeBt= (Button) findViewById(R.id.change_bt);
-        layout= (RelativeLayout) findViewById(R.id.relative_layout);
-        changeBt.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                showAnim();
-                changeTheme();
-                refreshUI();
-            }
-        });
-    }
-
-    private void refreshUI() {
-        TypedValue backgroundColor=new TypedValue();
-        TypedValue buttonColor=new TypedValue();
-        Resources.Theme theme=getTheme();
-        theme.resolveAttribute(R.attr.colorBackground,backgroundColor,true);
-        theme.resolveAttribute(R.attr.colorButton,buttonColor,true);
-        layout.setBackgroundResource(backgroundColor.resourceId);
-        changeBt.setBackgroundResource(buttonColor.resourceId);
-    }
-
-    private void showAnim() {
-        //获取一个屏幕截图,然后通过更改其透明度来实现过渡动画
-        final View decorView=getWindow().getDecorView();
-        decorView.setDrawingCacheEnabled(true);
-        decorView.buildDrawingCache(true);
-        Bitmap nonScaleBitmap=decorView.getDrawingCache();
-        Bitmap screenCapture= Bitmap.createBitmap(nonScaleBitmap);
-        decorView.setDrawingCacheEnabled(false);
-        if (decorView instanceof ViewGroup&amp;amp;&amp;amp;screenCapture!=null){
-            final View view=new View(this);
-            view.setBackgroundDrawable(new BitmapDrawable(getResources(),screenCapture));
-            ViewGroup.LayoutParams lp=new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT
-                    , ViewGroup.LayoutParams.MATCH_PARENT);
-            ((ViewGroup) decorView).addView(view,lp);
-            ObjectAnimator animator=ObjectAnimator.ofFloat(view,&quot;alpha&quot;,1f,0);
-            animator.setInterpolator(new LinearInterpolator());
-            animator.setDuration(300);
-            animator.addListener(new Animator.AnimatorListener() {
-                @Override
-                public void onAnimationStart(Animator animator) {
-
-                }
-
-                @Override
-                public void onAnimationEnd(Animator animator) {
-                    ((ViewGroup) decorView).removeView(view);
-                }
-
-                @Override
-                public void onAnimationCancel(Animator animator) {
-
-                }
-
-                @Override
-                public void onAnimationRepeat(Animator animator) {
-
-                }
-            });
-            animator.start();
-        }
-
-    }
-
-    private void changeTheme() {
-        isNight=!isNight;
-        if (isNight){
-            setTheme(R.style.NightTheme);
-        }else{
-            setTheme(R.style.DayTheme);
-        }
-    }
-}
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;p&gt;我的style文件是这样的：&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&amp;lt;resources&amp;gt;
-
-    &amp;lt;!-- Base application theme. --&amp;gt;
-    &amp;lt;style name=&quot;AppTheme&quot; parent=&quot;Theme.AppCompat.Light.DarkActionBar&quot;&amp;gt;
-        &amp;lt;!-- Customize your theme here. --&amp;gt;
-        &amp;lt;item name=&quot;colorPrimary&quot;&amp;gt;@color/colorPrimary&amp;lt;/item&amp;gt;
-        &amp;lt;item name=&quot;colorPrimaryDark&quot;&amp;gt;@color/colorPrimaryDark&amp;lt;/item&amp;gt;
-        &amp;lt;item name=&quot;colorAccent&quot;&amp;gt;@color/colorAccent&amp;lt;/item&amp;gt;
-    &amp;lt;/style&amp;gt;
-
-    &amp;lt;style name=&quot;DayTheme&quot; parent=&quot;Theme.AppCompat.Light.DarkActionBar&quot;&amp;gt;
-        &amp;lt;item name=&quot;colorPrimary&quot;&amp;gt;@color/colorPrimary&amp;lt;/item&amp;gt;
-        &amp;lt;item name=&quot;colorPrimaryDark&quot;&amp;gt;@color/colorPrimaryDark&amp;lt;/item&amp;gt;
-        &amp;lt;item name=&quot;colorAccent&quot;&amp;gt;@color/colorAccent&amp;lt;/item&amp;gt;
-        &amp;lt;item name=&quot;colorBackground&quot;&amp;gt;@android:color/white&amp;lt;/item&amp;gt;
-        &amp;lt;item name=&quot;colorButton&quot;&amp;gt;@android:color/white&amp;lt;/item&amp;gt;
-    &amp;lt;/style&amp;gt;
-
-    &amp;lt;style name=&quot;NightTheme&quot; parent=&quot;Theme.AppCompat.Light.DarkActionBar&quot;&amp;gt;
-        &amp;lt;item name=&quot;colorPrimary&quot;&amp;gt;@color/color3F3F3F&amp;lt;/item&amp;gt;
-        &amp;lt;item name=&quot;colorPrimaryDark&quot;&amp;gt;@color/color3A3A3A&amp;lt;/item&amp;gt;
-        &amp;lt;item name=&quot;colorAccent&quot;&amp;gt;@color/color868686&amp;lt;/item&amp;gt;
-        &amp;lt;item name=&quot;colorBackground&quot;&amp;gt;@color/color868686&amp;lt;/item&amp;gt;
-        &amp;lt;item name=&quot;colorButton&quot;&amp;gt;@color/color868686&amp;lt;/item&amp;gt;
-    &amp;lt;/style&amp;gt;
-
-&amp;lt;/resources&amp;gt;
-
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;p&gt;其中colorBackground、colorButton是我在attrs.xml中自定义的两个属性&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;cp&quot;&gt;&amp;lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&amp;gt;&lt;/span&gt;
-&lt;span class=&quot;nt&quot;&gt;&amp;lt;resources&amp;gt;&lt;/span&gt;
-    &lt;span class=&quot;nt&quot;&gt;&amp;lt;attr&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;name=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;colorBackground&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;format=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;color&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&amp;lt;/attr&amp;gt;&lt;/span&gt;
-    &lt;span class=&quot;nt&quot;&gt;&amp;lt;attr&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;name=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;colorButton&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;format=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;color&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&amp;lt;/attr&amp;gt;&lt;/span&gt;
-&lt;span class=&quot;nt&quot;&gt;&amp;lt;/resources&amp;gt;&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;p&gt;最终效果:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://ockr1qfi1.bkt.clouddn.com/Screen%20Capture%20on%202016-08-29%20at%2020-41-16.gif&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-</description>
-        <pubDate>Mon, 29 Aug 2016 00:00:00 +0800</pubDate>
-        <link>http://mrrobot97.github.io/2016/08/29/%E5%A4%9C%E9%97%B4%E6%A8%A1%E5%BC%8F%E8%BF%87%E6%B8%A1%E5%8A%A8%E7%94%BB%E7%AE%80%E5%8D%95%E5%AE%9E%E7%8E%B0.html</link>
-        <guid isPermaLink="true">http://mrrobot97.github.io/2016/08/29/%E5%A4%9C%E9%97%B4%E6%A8%A1%E5%BC%8F%E8%BF%87%E6%B8%A1%E5%8A%A8%E7%94%BB%E7%AE%80%E5%8D%95%E5%AE%9E%E7%8E%B0.html</guid>
-        
-        
-      </item>
-    
-      <item>
-        <title>HttpURLConnection利用post传参</title>
-        <description>&lt;p&gt;直接上示例代码：&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;HttpURLConnection conn=null;
-            OutputStreamWriter osw=null;
-            BufferedReader br=null;
-            try {
-                URL url=new URL(address);
-                conn= (HttpURLConnection) url.openConnection();
-                conn.setDoOutput(true);
-                osw=new OutputStreamWriter(conn.getOutputStream());
-                osw.write(&quot;username=&quot;+userText.getText()+&quot;&amp;amp;&quot;+&quot;password=&quot;+passText.getText());
-                osw.close();
-                br=new BufferedReader(new InputStreamReader(conn.getInputStream()));
-                final StringBuilder response =new StringBuilder();
-                String s;
-                while((s=br.readLine())!=null){
-                    response.append(s);
-                }
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        respText.setText(response);
-                    }
-                });
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }finally {
-                if (br!=null){
-                    try {
-                        br.close();
-                        if (conn!=null){
-                            conn.disconnect();
-                        }
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-</description>
-        <pubDate>Tue, 28 Jun 2016 00:00:00 +0800</pubDate>
-        <link>http://mrrobot97.github.io/2016/06/28/HttpURLConnection%E5%88%A9%E7%94%A8post%E4%BC%A0%E5%8F%82.html</link>
-        <guid isPermaLink="true">http://mrrobot97.github.io/2016/06/28/HttpURLConnection%E5%88%A9%E7%94%A8post%E4%BC%A0%E5%8F%82.html</guid>
         
         
       </item>

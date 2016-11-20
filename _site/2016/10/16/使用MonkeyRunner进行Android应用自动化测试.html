@@ -6,11 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" href="http://mrrobot97.github.io/stylesheets/stylesheet.css">
-  <link rel="canonical" href="http://mrrobot97.github.io/2016/06/28/HttpURLConnection%E5%88%A9%E7%94%A8post%E4%BC%A0%E5%8F%82.html">
+  <link rel="canonical" href="http://mrrobot97.github.io/2016/10/16/%E4%BD%BF%E7%94%A8MonkeyRunner%E8%BF%9B%E8%A1%8CAndroid%E5%BA%94%E7%94%A8%E8%87%AA%E5%8A%A8%E5%8C%96%E6%B5%8B%E8%AF%95.html">
   <link rel="alternate" type="application/rss+xml" title="mrrobot97's blog" href="http://mrrobot97.github.io/feed.xml">
-  <meta name="description" content="直接上示例代码：">
+  <meta name="description" content="  MonkeyRunner是谷歌官方SDK tools 中为我们提供的一个程序自动化测试工具，需要开发者编写相应的python自动测试脚本，开发者可以自定义测试流程，功能很全面，可以模拟各种事件。">
 
-   <title>HttpURLConnection利用post传参</title>
+   <title>使用MonkeyRunner进行Android应用自动化测试</title>
 
 
 
@@ -33,52 +33,65 @@
 
     <div class="main-content" itemprop="articleBody">
   <header class="post-header">
-    <h1 class="post-title" itemprop="name headline">HttpURLConnection利用post传参</h1>
-   <p class="post-meta"><time datetime="2016-06-28T00:00:00+08:00" itemprop="datePublished">Jun 28, 2016</time> • <span itemprop="author" itemscope itemtype="http://schema.org/Person"><span itemprop="name">mrrobot</span></span></p>
+    <h1 class="post-title" itemprop="name headline">使用MonkeyRunner进行Android应用自动化测试</h1>
+   <p class="post-meta"><time datetime="2016-10-16T00:00:00+08:00" itemprop="datePublished">Oct 16, 2016</time> • <span itemprop="author" itemscope itemtype="http://schema.org/Person"><span itemprop="name">mrrobot97</span></span></p>
   </header>
 
-    <p>直接上示例代码：</p>
+    <blockquote>
+  <p>MonkeyRunner是谷歌官方SDK tools 中为我们提供的一个程序自动化测试工具，需要开发者编写相应的python自动测试脚本，开发者可以自定义测试流程，功能很全面，可以模拟各种事件。</p>
+</blockquote>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>HttpURLConnection conn=null;
-            OutputStreamWriter osw=null;
-            BufferedReader br=null;
-            try {
-                URL url=new URL(address);
-                conn= (HttpURLConnection) url.openConnection();
-                conn.setDoOutput(true);
-                osw=new OutputStreamWriter(conn.getOutputStream());
-                osw.write("username="+userText.getText()+"&amp;"+"password="+passText.getText());
-                osw.close();
-                br=new BufferedReader(new InputStreamReader(conn.getInputStream()));
-                final StringBuilder response =new StringBuilder();
-                String s;
-                while((s=br.readLine())!=null){
-                    response.append(s);
-                }
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        respText.setText(response);
-                    }
-                });
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }finally {
-                if (br!=null){
-                    try {
-                        br.close();
-                        if (conn!=null){
-                            conn.disconnect();
-                        }
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
+<p>monkeyrunner位于SDK/tools/monkeyrunner,这是一个可执行脚本，我们编写自己的测试脚本然后用monkeyrunner运行即可。</p>
+
+<p>谷歌提供了一个python库com.android.monkeyrunner，便于我们编写测试脚本。看一个脚本demo:
+monkeyrunner.py</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>from com.android.monkeyrunner import MonkeyRunner, MonkeyDevice, MonkeyImage
+
+
+device = MonkeyRunner.waitForConnection()
+
+package = 'me.mrrobot97.swipeback'
+
+activity = 'me.mrrobot97.swipeback.MainActivity'
+
+runComponent = package + '/' + activity
+
+device.startActivity(component=runComponent)
+
+MonkeyRunner.sleep(1)
+
+for i in range(0, 5):
+	device.touch(720, 1280, 'DOWN_AND_UP')
+	MonkeyRunner.sleep(0.5)
+
+for i in range(0, 5):
+	device.drag((1, 1280), (720, 1280), 0.5, 50)
+	MonkeyRunner.sleep(0.7)
+
+img=device.takeSnapshot()
+
+img.writeToFile('screen.png','png')
+
+print 'finished'
+
+
 </code></pre>
 </div>
+
+<p>三个module分别为MonkeyRunner,MonkeyDevice,MonkeyImage，每一个都包含了许多与APP交互的API，可以在网上查到相应的文档。</p>
+
+<p>终端运行:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code> monkeyrunner monkeyrunner.py 
+</code></pre>
+</div>
+
+<p>即可在虚拟机或真机中观察到效果:</p>
+
+<p><img src="http://ockr1qfi1.bkt.clouddn.com/auto-test.gif" alt="Demo" /></p>
+
+<p>关于MonkeyRunner具体的用法请上网查API文档。</p>
 
   </div>
 
