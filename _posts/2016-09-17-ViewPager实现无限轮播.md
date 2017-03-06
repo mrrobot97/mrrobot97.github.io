@@ -4,7 +4,7 @@ author: mrrobot97
 title: ViewPager实现无限轮播
 ---
 
->Android自带的ViewGroup有翻页功能，支持用户手势滑动，但是不支持循环滚动，因此我们就在PagerAdapter的基础上为其增加循环滚动的功能就行了。
+>Android自带的ViewPager有翻页功能，支持用户手势滑动，但是不支持循环滚动，因此我们就在PagerAdapter的基础上为其增加循环滚动的功能就行了。
 
 自定义Adapter继承自PagerAdapter，我们需要重写四个方法:
 
