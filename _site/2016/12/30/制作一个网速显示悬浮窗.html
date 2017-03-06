@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="http://mrrobot97.github.io/stylesheets/stylesheet.css">
+  <link rel="canonical" href="http://mrrobot97.github.io/2016/12/30/%E5%88%B6%E4%BD%9C%E4%B8%80%E4%B8%AA%E7%BD%91%E9%80%9F%E6%98%BE%E7%A4%BA%E6%82%AC%E6%B5%AE%E7%AA%97.html">
+  <link rel="alternate" type="application/rss+xml" title="mrrobot97's blog" href="http://mrrobot97.github.io/feed.xml">
+  <meta name="description" content="  2016转眼就要过去了，刚刚参加完学院举办的元旦晚会，看了看系里的大牛的各种事迹，内心感慨万分。回来继续安心做我的小码农，顺便更一下将近一个月没有更新的博客。">
+
+   <title>制作一个网速显示悬浮窗</title>
+
+
+
+</head>
+
+
+  <body>
+
+    <header class="page-header">
+
+	<link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?"
+     <h1 class="project-name"> <a class="header-link" href="/"> mrrobot97's blog</a></h1>
+     <h3><a class="header-link" href="https://github.com/mrrobot97" target="_blank">follow me on github@mrrobot97</a></h3>
+</header>
+
+
+    <section class="main-content">
+      <div class="wrapper">
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+
+    <div class="main-content" itemprop="articleBody">
+  <header class="post-header">
+    <h1 class="post-title" itemprop="name headline">制作一个网速显示悬浮窗</h1>
+   <p class="post-meta"><time datetime="2016-12-30T00:00:00+08:00" itemprop="datePublished">Dec 30, 2016</time> • <span itemprop="author" itemscope itemtype="http://schema.org/Person"><span itemprop="name">mrrobot97</span></span></p>
+  </header>
+
+    <blockquote>
+  <p>2016转眼就要过去了，刚刚参加完学院举办的元旦晚会，看了看系里的大牛的各种事迹，内心感慨万分。回来继续安心做我的小码农，顺便更一下将近一个月没有更新的博客。</p>
+</blockquote>
+
+<p>这次带来的是一个悬浮窗网速显示计，先看下效果：</p>
+
+<p><img src="http://ockr1qfi1.bkt.clouddn.com/demo2.gif" alt="demo" /></p>
+
+<p>这里主要是在桌面上显示一个悬浮窗，利用了WindowManager以及Service,接下来看看如何实现这样一个效果：
+首先APP必须获得在桌面上显示悬浮窗的机会，很多第三方ROM都限制了这一权限，我们首先就是要申请改权限，代码如下：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>public boolean checkDrawOverlayPermission() {
+        if (!Settings.canDrawOverlays(this)) {
+            Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                    Uri.parse("package:" + getPackageName()));
+            startActivityForResult(intent, REQUEST_CODE);
+            return false;
+        }
+        return true;
+    }
+</code></pre>
+</div>
+
+<p>该函数首先检查APP是否有显示悬浮窗的权限，如果没有，就跳转到该APP设置悬浮窗权限的界面，如下图所示：</p>
+
+<p><img src="http://ockr1qfi1.bkt.clouddn.com/662ABA6C-D700-4CEC-A883-18714BCDBCEB.png" alt="" /></p>
+
+<p>然后先编写我们的悬浮窗，布局很简单，就是两个TextView：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="cp">&lt;?xml version="1.0" encoding="utf-8"?&gt;</span>
+<span class="nt">&lt;RelativeLayout</span> <span class="na">xmlns:android=</span><span class="s">"http://schemas.android.com/apk/res/android"</span>
+    <span class="na">android:orientation=</span><span class="s">"vertical"</span> <span class="na">android:layout_width=</span><span class="s">"match_parent"</span>
+    <span class="na">android:layout_height=</span><span class="s">"match_parent"</span>
+    <span class="na">android:background=</span><span class="s">"#88000000"</span><span class="nt">&gt;</span>
+
+
+    <span class="nt">&lt;TextView</span>
+        <span class="na">android:layout_marginLeft=</span><span class="s">"3dp"</span>
+        <span class="na">android:layout_marginRight=</span><span class="s">"3dp"</span>
+        <span class="na">android:id=</span><span class="s">"@+id/speed_up"</span>
+        <span class="na">android:text=</span><span class="s">"upload speed"</span>
+        <span class="na">android:gravity=</span><span class="s">"left"</span>
+        <span class="na">android:textSize=</span><span class="s">"10dp"</span>
+        <span class="na">android:layout_centerHorizontal=</span><span class="s">"true"</span>
+        <span class="na">android:textColor=</span><span class="s">"@android:color/white"</span>
+        <span class="na">android:layout_width=</span><span class="s">"wrap_content"</span>
+        <span class="na">android:layout_height=</span><span class="s">"wrap_content"</span> <span class="nt">/&gt;</span>
+
+    <span class="nt">&lt;TextView</span>
+        <span class="na">android:layout_marginLeft=</span><span class="s">"3dp"</span>
+        <span class="na">android:layout_marginRight=</span><span class="s">"3dp"</span>
+        <span class="na">android:id=</span><span class="s">"@+id/speed_down"</span>
+        <span class="na">android:layout_below=</span><span class="s">"@id/speed_up"</span>
+        <span class="na">android:text=</span><span class="s">"download speed"</span>
+        <span class="na">android:gravity=</span><span class="s">"left"</span>
+        <span class="na">android:textSize=</span><span class="s">"10dp"</span>
+        <span class="na">android:layout_centerHorizontal=</span><span class="s">"true"</span>
+        <span class="na">android:textColor=</span><span class="s">"@android:color/white"</span>
+        <span class="na">android:layout_width=</span><span class="s">"wrap_content"</span>
+        <span class="na">android:layout_height=</span><span class="s">"wrap_content"</span> <span class="nt">/&gt;</span>
+
+<span class="nt">&lt;/RelativeLayout&gt;</span>
+</code></pre>
+</div>
+
+<p>SpeedView:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>public class SpeedView extends FrameLayout {
+    private Context mContext;
+    public TextView downText;
+    public TextView upText;
+    private WindowManager windowManager;
+    private int statusBarHeight;
+    private float preX,preY,x,y;
+
+    public SpeedView(Context context) {
+        super(context);
+        mContext=context;
+        init();
+    }
+
+    private void init() {
+        statusBarHeight=WindowUtil.statusBarHeight;
+        windowManager= (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
+        //a view inflate itself, that's funny
+        inflate(mContext,R.layout.speed_layout,this);
+        downText= (TextView) findViewById(R.id.speed_down);
+        upText= (TextView) findViewById(R.id.speed_up);
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        switch (event.getAction()){
+            case MotionEvent.ACTION_DOWN:
+                preX=event.getRawX();preY=event.getRawY()-statusBarHeight;
+                return true;
+            case MotionEvent.ACTION_MOVE:
+                x=event.getRawX();y=event.getRawY()-statusBarHeight;
+                WindowManager.LayoutParams params= (WindowManager.LayoutParams) getLayoutParams();
+                params.x+=x-preX;
+                params.y+=y-preY;
+                windowManager.updateViewLayout(this,params);
+                preX=x;preY=y;
+                return true;
+            default:
+                break;
+
+        }
+        return super.onTouchEvent(event);
+    }
+
+
+</code></pre>
+</div>
+<p>在SpeedView里我们重写了onTouchEvent事件，这样就能响应我们的拖拽事件了，注意这里更新SpeedView的位置是通过改变WindowManager.LayoutParam的x和y来实现的，调用<code class="highlighter-rouge">windowManager.updateViewLayout(this,params)</code>来更新位置。</p>
+
+<p>因为我们的网速显示悬浮窗要脱离于Activity的生命周期而独立存在，因此需要通过Service来实现：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>public class SpeedCalculationService extends Service {
+    private WindowUtil windowUtil;
+    private boolean changed=false;
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        WindowUtil.initX= (int) SharedPreferencesUtils.getFromSpfs(this,INIT_X,0);
+        WindowUtil.initY= (int) SharedPreferencesUtils.getFromSpfs(this,INIT_Y,0);
+        windowUtil=new WindowUtil(this);
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        changed=intent.getBooleanExtra(MainActivity.CHANGED,false);
+        if(changed){
+            windowUtil.onSettingChanged();
+        }else{
+            if(!windowUtil.isShowing()){
+                windowUtil.showSpeedView();
+            }
+            SharedPreferencesUtils.putToSpfs(this,MainActivity.IS_SHOWN,true);
+        }
+        //return super.onStartCommand(intent, flags, startId);
+        return START_STICKY;
+    }
+
+
+
+    @Nullable
+    @Override
+    public IBinder onBind(Intent intent) {
+        return null;
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        WindowManager.LayoutParams params= (WindowManager.LayoutParams) windowUtil.speedView.getLayoutParams();
+        SharedPreferencesUtils.putToSpfs(this, INIT_X,params.x);
+        SharedPreferencesUtils.putToSpfs(this, INIT_Y,params.y);
+        if(windowUtil.isShowing()){
+            windowUtil.closeSpeedView();
+            SharedPreferencesUtils.putToSpfs(this,MainActivity.IS_SHOWN,false);
+        }
+        Log.d("yjw","service destroy");
+    }
+}
+</code></pre>
+</div>
+
+<p>这里的WindowUtil其实就是一个工具类，帮助我们控制悬浮窗SpeedView的显示与隐藏：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>public class WindowUtil {
+    public static int statusBarHeight=0;
+    //记录悬浮窗的位置
+    public static int initX,initY;
+    private WindowManager windowManager;
+    public SpeedView speedView;
+    private WindowManager.LayoutParams params;
+    private Context context;
+
+    public boolean isShowing() {
+        return isShowing;
+    }
+
+    private boolean isShowing=false;
+
+    public static final int INTERVAL=2000;
+    private long preRxBytes,preSeBytes;
+    private long rxBytes,seBytes;
+    private Handler handler=new Handler(){
+        @Override
+        public void dispatchMessage(Message msg) {
+            super.dispatchMessage(msg);
+            calculateNetSpeed();
+            sendEmptyMessageDelayed(0,INTERVAL);
+        }
+    };
+
+    public void onSettingChanged(){
+        String setting= (String) SharedPreferencesUtils.getFromSpfs(context,MainActivity.SETTING,MainActivity.BOTH);
+        if(setting.equals(MainActivity.BOTH)){
+            speedView.upText.setVisibility(View.VISIBLE);
+            speedView.downText.setVisibility(View.VISIBLE);
+        }else if(setting.equals(MainActivity.UP)){
+            speedView.upText.setVisibility(View.VISIBLE);
+            speedView.downText.setVisibility(View.GONE);
+        }else{
+            speedView.upText.setVisibility(View.GONE);
+            speedView.downText.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void calculateNetSpeed() {
+        rxBytes=TrafficStats.getTotalRxBytes();
+        seBytes=TrafficStats.getTotalTxBytes()-rxBytes;
+        double downloadSpeed=(rxBytes-preRxBytes)/2;
+        double uploadSpeed=(seBytes-preSeBytes)/2;
+        preRxBytes=rxBytes;
+        preSeBytes=seBytes;
+        //根据范围决定显示单位
+        String upSpeed=null;
+        String downSpeed=null;
+
+        NumberFormat df= java.text.NumberFormat.getNumberInstance();
+        df.setMaximumFractionDigits(2);
+
+        if(downloadSpeed&gt;1024*1024){
+            downloadSpeed/=(1024*1024);
+            downSpeed=df.format(downloadSpeed)+"MB/s";
+        }else if(downloadSpeed&gt;1024){
+            downloadSpeed/=(1024);
+            downSpeed=df.format(downloadSpeed)+"B/s";
+        }else{
+            downSpeed=df.format(downloadSpeed)+"B/s";
+        }
+
+        if(uploadSpeed&gt;1024*1024){
+            uploadSpeed/=(1024*1024);
+            upSpeed=df.format(uploadSpeed)+"MB/s";
+        }else if(uploadSpeed&gt;1024){
+            uploadSpeed/=(1024);
+            upSpeed=df.format(uploadSpeed)+"kB/s";
+        }else{
+            upSpeed=df.format(uploadSpeed)+"B/s";
+        }
+
+        updateSpeed("↓ "+downSpeed,"↑ "+upSpeed);
+    }
+
+    public WindowUtil(Context context) {
+        this.context = context;
+        windowManager= (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        speedView=new SpeedView(context);
+        params=new WindowManager.LayoutParams();
+        params=new WindowManager.LayoutParams();
+        params.x=initX;
+        params.y=initY;
+        params.width=params.height=WindowManager.LayoutParams.WRAP_CONTENT;
+        params.type=WindowManager.LayoutParams.TYPE_PHONE;
+        params.gravity= Gravity.LEFT|Gravity.TOP;
+        params.format= PixelFormat.RGBA_8888;
+        params.flags=WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE| WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
+                //设置悬浮窗可以拖拽至状态栏的位置
+//        | WindowManager.LayoutParams.FLAG_FULLSCREEN| WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
+
+    }
+
+    public void showSpeedView(){
+        windowManager.addView(speedView,params);
+        isShowing=true;
+        preRxBytes= TrafficStats.getTotalRxBytes();
+        preSeBytes=TrafficStats.getTotalTxBytes()-preRxBytes;
+        handler.sendEmptyMessage(0);
+    }
+
+    public void closeSpeedView(){
+        windowManager.removeView(speedView);
+        isShowing=false;
+    }
+
+    public void updateSpeed(String downSpeed,String upSpeed){
+        speedView.upText.setText(upSpeed);
+        speedView.downText.setText(downSpeed);
+    }
+}
+
+</code></pre>
+</div>
+
+<p>WindowUtil类中也包含了一个很重要的方法，那就是计算网速。这里计算网速的方法很简单，Android提供了一个类<code class="highlighter-rouge">TrafficStats</code>,这个类里面为我们提供了好多接口，我们用到了其中的两个:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>1.public static long getTotalTxBytes ()
+Return number of bytes transmitted since device boot. Counts packets across all network interfaces, and always increases monotonically since device boot. Statistics are measured at the network layer, so they include both TCP and UDP usage.
+2.public static long getTotalRxPackets ()
+Return number of packets received since device boot. Counts packets across all network interfaces, and always increases monotonically since device boot. Statistics are measured at the network layer, so they include both TCP and UDP usage.
+</code></pre>
+</div>
+
+<p>可以看出，getTotalTxBytes()方法返回系统自开机到现在为止所一共传输的数据的字节数，包括上传的数据和下载的数据；而getTotalRxPackets()方法返回的是系统自开机到现在为止所一共接收到也就是下载的数据的字节数，用getTotalTxBytes()-getTotalRxPackets()自然就是系统开机到现在为止所上传的数据的字节数。</p>
+
+<p>这样每隔一定时间，我们计算一下系统自开机到目前所接受的数据包的字节数和所发送的数据的字节数的变化量，用变化量除以时间，就是这段时间的平均网速了。</p>
+
+<p>为了每个一段时间计算一下网速，我们利用了一个Handler来实现这个定时任务</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>private Handler handler=new Handler(){
+        @Override
+        public void dispatchMessage(Message msg) {
+            super.dispatchMessage(msg);
+            calculateNetSpeed();
+            sendEmptyMessageDelayed(0,INTERVAL);
+        }
+    };
+</code></pre>
+</div>
+
+<p>这里要注意将SpeedView添加到屏幕上，也就是添加到WindowManager里的时候，这个WindowManager.LayoutParams十分重要，其参数都是有用的，这里就不细讲了,详细介绍请移步<a href="https://developer.android.com/reference/android/view/WindowManager.LayoutParams.html">官方文档</a>.</p>
+
+<p>最后要将我们的悬浮窗设置为开机自启动的，利用一个BroadcastReceiver就可以了：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>public class MyBroadcastReceiver extends BroadcastReceiver {
+    @Override
+    public void onReceive(Context context, Intent intent) {
+        Log.d("yjw","receiver receive boot broadcast");
+        boolean isShown= (boolean) SharedPreferencesUtils.getFromSpfs(context,MainActivity.IS_SHOWN,false);
+        if(isShown){
+            context.startService(new Intent(context,SpeedCalculationService.class));
+        }
+    }
+}
+</code></pre>
+</div>
+<p>在Manifest里这样注册我们的BroadcastReceiver：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code> &lt;receiver android:name="me.mrrobot97.netspeed.MyBroadcastReceiver"&gt;
+            &lt;intent-filter&gt;
+                &lt;action android:name="android.intent.action.BOOT_COMPLETED" /&gt;
+                &lt;category android:name="android.intent.category.HOME" /&gt;
+            &lt;/intent-filter&gt;
+        &lt;/receiver&gt;
+</code></pre>
+</div>
+
+<p>这样当系统启动完成，就会开启我们的Service。注意这里<intent-filter>中的<category>不可省略，亲测省略后BroadcastReceiver无法接收到系统广播。</category></intent-filter></p>
+
+<p>最后还有一点，在Manifest的MainActivity条目中加一个属性：<code class="highlighter-rouge">android:excludeFromRecents="true"</code></p>
+
+<p>这样我们的ManiActivity就不会显示在最近任务列表，防止用户清空任务列表时将我们的Sercvice进程终结了。</p>
+
+<p>完整的项目地址<a href="https://github.com/mrrobot97/NetSpeed">Github</a></p>
+
+
+  </div>
+
+
+<a href="http://mrrobot97.github.io"><h3 style="text-align: center;">- to blog -</h3></a>
+
+<div id="disqus_thread"></div>
+<script>
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+s.src = '//http-mrrobot97-me.disqus.com/embed.js';
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+</article>
+
+
+      </div>
+    </div>
+
+  </body>
+
+    <!-- 背景特效 -->
+    <script type="text/javascript">
+      !function() {
+    function o(w, v, i) {
+        return w.getAttribute(v) || i
+    }
+    function j(i) {
+        return document.getElementsByTagName(i)
+    }
+    function l() {
+        var i = j("script"), w = i.length, v = i[w - 1];
+        return {
+            l: w,
+            z: o(v, "zIndex", - 1),
+            o: o(v, "opacity", 0.5),
+            c: o(v, "color", "84,106,122"),
+            n: o(v, "count", 70)
+        }
+    }
+    function k() {
+        r = u.width = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth, n = u.height = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight
+    }
+    function b() {
+        e.clearRect(0, 0, r, n);
+        var w = [f].concat(t);
+        var x, v, A, B, z, y;
+        t.forEach(function(i) {
+            i.x += i.xa, i.y += i.ya, i.xa*=i.x > r || i.x < 0?-1 : 1, i.ya*=i.y > n || i.y < 0?-1 : 1, e.fillRect(i.x - 0.5, i.y - 0.5, 1, 1);
+            for (v = 0; v < w.length; v++) {
+                x = w[v];
+                if (i !== x && null !== x.x && null !== x.y) {
+                    B = i.x - x.x, z = i.y - x.y, y = B * B + z * z;
+                    y < x.max && (x === f && y >= x.max / 2 && (i.x -= 0.03 * B, i.y -= 0.03 * z), A = (x.max - y) / x.max, e.beginPath(), e.lineWidth = A / 2, e.strokeStyle = "rgba(" + s.c + "," + (A + 0.2) + ")", e.moveTo(i.x, i.y), e.lineTo(x.x, x.y), e.stroke())
+                }
+            }
+            w.splice(w.indexOf(i), 1)
+        }), m(b)
+    }
+    var u = document.createElement("canvas"), s = l(), c = "c_n" + s.l, e = u.getContext("2d"), r, n, m = window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame || function(i) {
+        window.setTimeout(i, 1000 / 45)
+    }, a = Math.random, f = {
+        x: null,
+        y: null,
+        max: 20000
+    };
+    u.id = c;
+    u.style.cssText = "position:fixed;top:0;left:0;z-index:" + s.z + ";opacity:" + s.o;
+    j("body")[0].appendChild(u);
+    k(), window.onresize = k;
+    window.onmousemove = function(i) {
+        i = i || window.event, f.x = i.clientX, f.y = i.clientY
+    }, window.onmouseout = function() {
+        f.x = null, f.y = null
+    };
+    for (var t = [], p = 0; s.n > p; p++) {
+        var h = a() * r, g = a() * n, q = 2 * a() - 1, d = 2 * a() - 1;
+        t.push({
+            x: h,
+            y: g,
+            xa: q,
+            ya: d,
+            max: 6000
+        })
+    }
+    setTimeout(function() {
+        b()
+    }, 100)
+}();
+    </script>
+
+
+    
+
+</html>

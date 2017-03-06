@@ -5,9 +5,647 @@
     <description>Record my study in android.</description>
     <link>http://mrrobot97.github.io/</link>
     <atom:link href="http://mrrobot97.github.io/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Sun, 20 Nov 2016 23:29:55 +0800</pubDate>
-    <lastBuildDate>Sun, 20 Nov 2016 23:29:55 +0800</lastBuildDate>
+    <pubDate>Mon, 06 Mar 2017 20:37:10 +0800</pubDate>
+    <lastBuildDate>Mon, 06 Mar 2017 20:37:10 +0800</lastBuildDate>
     <generator>Jekyll v3.1.2</generator>
+    
+      <item>
+        <title>自己写一个简易版本的EventBus</title>
+        <description>&lt;blockquote&gt;
+  &lt;p&gt;大名鼎鼎的&lt;a href=&quot;https://github.com/greenrobot/EventBus&quot;&gt;EventBus&lt;/a&gt;很多人一定都用过，这个框架通过利用注解+反射，很好的实现了事件订阅者与发布者的解耦。今天我们就手动实现一个简易版本的EventBus。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;先写我们的EventBus类，模仿真正的EventBus类，我们这个类里面包含的也是标准的几个方法:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;1.void register(Object subscriber)
+2.void unregister(Object subscriber)
+3.void post(Object eventType)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;EventBus里的方法只有这几个（因为我们是简易版本的嘛）。当然我们的EventBus是一个单例模式类，我用的是双重检测null的那种：&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;private static EventBus defaultInstance;
+
+public static EventBus getDefault(){
+        if(defaultInstance==null){
+            synchronized (EventBus.class){
+                if(defaultInstance==null) defaultInstance=new EventBus();
+            }
+        }
+        return defaultInstance;
+    }
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;接下来是一个很重要的成员变量:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;private HashMap&amp;lt;Class&amp;lt;?&amp;gt;,ArrayList&amp;lt;Subscription&amp;gt;&amp;gt; subscriptionsByEventType=new HashMap&amp;lt;&amp;gt;();
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;解释一下：HashMap的key为Class对象，其实就是订阅者中各种onEvent*函数的参数的Class对象，用过EventBus的都知道我们可以利用不同的参数对象实现不同事件的订阅。而HashMap的value是一个ArrayList,其中就是存储针对不同的参数对象的订阅。利用这个HashMap，可以轻易地找到所有订阅某一参数类型事件的所有订阅者。订阅信息就包含在类Subscription中。&lt;/p&gt;
+
+&lt;p&gt;我们分析一下Subscription类中应该包含哪些信息:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;1.事件的订阅者，即subscriber。
+2.订阅的事件,即method。
+3.事件应该发生的线程，即ThreadMode。
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;综上，我们的类Subscription如下：&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;public class Subscription {
+    public Method method;
+    public Object subscriber;
+    public ThreadMode mode;
+
+    public Subscription(Method method, Object subscriber, ThreadMode mode) {
+        this.method = method;
+        this.subscriber = subscriber;
+        this.mode = mode;
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;其中ThreadMode就是一个简单的枚举，作为演示我只设置了两个值:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;public enum ThreadMode {
+    MainThread,PostThread
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;即post事件所在的线程以及主线程main。&lt;/p&gt;
+
+&lt;p&gt;EventBus的成员变量暂时就这些，还有一个稍后再讲，接下来就是成员方法的实现，我们一个一个来，首先是register方法。先看一下register的全部代码:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;public void register(Object subscriber){
+        //根据反射机制，查找subscriber中所有已onEvent开头的method
+        Class&amp;lt;?&amp;gt; clazz=subscriber.getClass();
+        Method[] methods=clazz.getMethods();
+        for(Method method:methods){
+            String name=method.getName();
+            if(name.startsWith(&quot;onEvent&quot;)){
+                Class&amp;lt;?&amp;gt; param=method.getParameterTypes()[0];
+                ArrayList&amp;lt;Subscription&amp;gt; subscriptions=subscriptionsByEventType.get(param);
+                if(subscriptions==null){
+                    subscriptions=new ArrayList&amp;lt;&amp;gt;();
+                    subscriptionsByEventType.put(param,subscriptions);
+                }
+                //根据函数名字决定线程
+                if(name.substring(&quot;onEvent&quot;.length()).length()==0){
+                    //onEvent 默认为postThread
+                    subscriptions.add(new Subscription(method,subscriber, ThreadMode.PostThread));
+                }else{
+                    //onEventMainThread
+                    subscriptions.add(new Subscription(method,subscriber, ThreadMode.MainThread));
+                }
+            }
+        }
+    }
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;首先利用反射获取订阅者所在类中所有以”onEvent”开头的方法，获取方法的参数，根据参数类型去subscriptionsByEventType查找对应的ArrayList&lt;subscription&gt;,如果找不到，说明当前还没有订阅者订阅该类型的事件，就新建一个ArrayList&lt;subscription&gt;，并将该参数类型与新建的ArrayList插入到HashMap中。&lt;/subscription&gt;&lt;/subscription&gt;&lt;/p&gt;
+
+&lt;p&gt;接下来就是构建Subscription,这里默认onEvent()为发生在PostThread,而onEventMainThread()发生在主线程main中。这样，register方法就结束，是不是很简单呢？&lt;/p&gt;
+
+&lt;p&gt;unregister:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;public void unregister(Object subscriber){
+        Class&amp;lt;?&amp;gt; clazz=subscriber.getClass();
+        Method[] methods=clazz.getMethods();
+        for(Method method:methods){
+            String name=method.getName();
+            if(name.startsWith(&quot;onEvent&quot;)){
+                Class&amp;lt;?&amp;gt; param=method.getParameterTypes()[0];
+                ArrayList&amp;lt;Subscription&amp;gt; subscriptions=subscriptionsByEventType.get(param);
+                if(subscriptions!=null){
+                    for(Subscription subscription:subscriptions){
+                        if(subscription.subscriber==subscriber) subscriptions.remove(subscription);
+                    }
+                }
+            }
+        }
+    }
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;懂了register怎么写的写unregister就简单多了，同样利用反射找到onEvent*方法，获取参数类型，然后将该订阅者的所有订阅事件Sunscription从HashMap中去除即可。&lt;/p&gt;
+
+&lt;p&gt;最后是post方法：&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;public void post(Object eventType){
+        Class&amp;lt;?&amp;gt; clazz=eventType.getClass();
+        ArrayList&amp;lt;Subscription&amp;gt; subscriptions=subscriptionsByEventType.get(clazz);
+        if(subscriptions==null) Log.d(TAG,&quot;EventBus: no subscriber has subscribed to this event&quot;);
+        else{
+            for(Subscription subscription:subscriptions){
+                switch (subscription.mode){
+                    case MainThread:
+                        mainThreadHandler.post(subscription,eventType);
+                        break;
+                    case PostThread:
+                        try {
+                            subscription.method.invoke(subscription.subscriber,eventType);
+                        } catch (IllegalAccessException e) {
+                            e.printStackTrace();
+                        } catch (InvocationTargetException e) {
+                            e.printStackTrace();
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+    }
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;post中要做的事情是根据参数类型，从HashMap中取出所有订阅该事件的Subscription,然后依次执行每一个订阅。根据订阅事件发生的线程，这里分为两种情况。PostThread很简单，直接在post函数里执行即可，具体方法为利用Method.Invoke(Object obj,Object…args);&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;subscription.method.invoke(subscription.subscriber,eventType);
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;接下来是要执行应该发生在MainThread中的订阅事件，提到主线程，我们就联想到了Handler，我们可以创建一个与主线程关联的Handler，然后将事件的处理交给Handler。&lt;/p&gt;
+
+&lt;p&gt;MainThreadHandler:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;public class MainThreadHandler extends Handler {
+    private Subscription subscription;
+    private Object eventType;
+
+    public MainThreadHandler(Looper looper) {
+        super(looper);
+    }
+
+    @Override
+    public void handleMessage(Message msg) {
+        try {
+            subscription.method.invoke(subscription.subscriber,eventType);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void post(Subscription subscription,Object eventType){
+        this.subscription=subscription;
+        this.eventType=eventType;
+        sendMessage(Message.obtain());
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;然后在建立EventBus的时候建立MainThreadHandler：&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;private EventBus(){
+        mainThreadHandler=new MainThreadHandler(Looper.getMainLooper());
+    };
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;至此，我们的EventBus全部完成，是不是很简单呢？接下来就是测试。&lt;/p&gt;
+
+&lt;p&gt;我在MainActivity的界面中放了两个 Button，分别对应发生在MainThread以及子线程中。&lt;/p&gt;
+
+&lt;p&gt;写了两个订阅函数，订阅事件类型都是ToastEvent：&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;public class ToastEvent {
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;MainActivity.java:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;public class MainActivity extends AppCompatActivity {
+    Button bt;
+    Button btAsync;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        EventBus.getDefault().register(this);
+        bt= (Button) findViewById(R.id.bt);
+        btAsync= (Button) findViewById(R.id.btAsync);
+        bt.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                EventBus.getDefault().post(new ToastEvent());
+            }
+        });
+        btAsync.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        EventBus.getDefault().post(new ToastEvent());
+                    }
+                }).start();
+            }
+        });
+    }
+
+    public void onEvent(ToastEvent event){
+        Log.d(&quot;YJW&quot;,&quot;onEvent: &quot;+ Thread.currentThread().getName());
+    }
+
+    public void onEventMainThread(ToastEvent event){
+        Toast.makeText(this, &quot;Haha on MainThread&quot;, Toast.LENGTH_SHORT).show();
+        Log.d(&quot;YJW&quot;,&quot;onEventMainThread: &quot;+ Thread.currentThread().getName());
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        EventBus.getDefault().unregister(this);
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://ockr1qfi1.bkt.clouddn.com/pic1.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://ockr1qfi1.bkt.clouddn.com/pic2.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;点击两个Button都出现Toast,并打印相应日志，上两条日志为上面的Button，下面两条日志对应下面的Button，测试功能正常。&lt;/p&gt;
+
+&lt;p&gt;至此，大功告成。特别说明：真正的EventBus原理大致如此，不过更复杂，做了很多优化与特殊处理，还利用了注解。但作为演示，此demo足够了。&lt;/p&gt;
+
+&lt;p&gt;#&lt;a href=&quot;https://github.com/mrrobot97/EventBus&quot;&gt;全部源代码点此&lt;/a&gt;&lt;/p&gt;
+</description>
+        <pubDate>Sun, 26 Feb 2017 00:00:00 +0800</pubDate>
+        <link>http://mrrobot97.github.io/2017/02/26/%E8%87%AA%E5%B7%B1%E5%86%99%E4%B8%80%E4%B8%AA%E7%AE%80%E6%98%93%E7%89%88%E6%9C%AC%E7%9A%84EventBus.html</link>
+        <guid isPermaLink="true">http://mrrobot97.github.io/2017/02/26/%E8%87%AA%E5%B7%B1%E5%86%99%E4%B8%80%E4%B8%AA%E7%AE%80%E6%98%93%E7%89%88%E6%9C%AC%E7%9A%84EventBus.html</guid>
+        
+        
+      </item>
+    
+      <item>
+        <title>制作一个网速显示悬浮窗</title>
+        <description>&lt;blockquote&gt;
+  &lt;p&gt;2016转眼就要过去了，刚刚参加完学院举办的元旦晚会，看了看系里的大牛的各种事迹，内心感慨万分。回来继续安心做我的小码农，顺便更一下将近一个月没有更新的博客。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;这次带来的是一个悬浮窗网速显示计，先看下效果：&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://ockr1qfi1.bkt.clouddn.com/demo2.gif&quot; alt=&quot;demo&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;这里主要是在桌面上显示一个悬浮窗，利用了WindowManager以及Service,接下来看看如何实现这样一个效果：
+首先APP必须获得在桌面上显示悬浮窗的机会，很多第三方ROM都限制了这一权限，我们首先就是要申请改权限，代码如下：&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;public boolean checkDrawOverlayPermission() {
+        if (!Settings.canDrawOverlays(this)) {
+            Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                    Uri.parse(&quot;package:&quot; + getPackageName()));
+            startActivityForResult(intent, REQUEST_CODE);
+            return false;
+        }
+        return true;
+    }
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;该函数首先检查APP是否有显示悬浮窗的权限，如果没有，就跳转到该APP设置悬浮窗权限的界面，如下图所示：&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://ockr1qfi1.bkt.clouddn.com/662ABA6C-D700-4CEC-A883-18714BCDBCEB.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;然后先编写我们的悬浮窗，布局很简单，就是两个TextView：&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;cp&quot;&gt;&amp;lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;RelativeLayout&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;xmlns:android=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;http://schemas.android.com/apk/res/android&quot;&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;android:orientation=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;vertical&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;android:layout_width=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;match_parent&quot;&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;android:layout_height=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;match_parent&quot;&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;android:background=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;#88000000&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+
+
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;TextView&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;android:layout_marginLeft=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;3dp&quot;&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;android:layout_marginRight=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;3dp&quot;&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;android:id=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;@+id/speed_up&quot;&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;android:text=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;upload speed&quot;&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;android:gravity=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;left&quot;&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;android:textSize=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;10dp&quot;&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;android:layout_centerHorizontal=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;true&quot;&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;android:textColor=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;@android:color/white&quot;&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;android:layout_width=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;wrap_content&quot;&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;android:layout_height=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;wrap_content&quot;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt;
+
+    &lt;span class=&quot;nt&quot;&gt;&amp;lt;TextView&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;android:layout_marginLeft=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;3dp&quot;&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;android:layout_marginRight=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;3dp&quot;&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;android:id=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;@+id/speed_down&quot;&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;android:layout_below=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;@id/speed_up&quot;&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;android:text=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;download speed&quot;&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;android:gravity=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;left&quot;&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;android:textSize=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;10dp&quot;&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;android:layout_centerHorizontal=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;true&quot;&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;android:textColor=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;@android:color/white&quot;&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;android:layout_width=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;wrap_content&quot;&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;android:layout_height=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;wrap_content&quot;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;/&amp;gt;&lt;/span&gt;
+
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;/RelativeLayout&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;SpeedView:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;public class SpeedView extends FrameLayout {
+    private Context mContext;
+    public TextView downText;
+    public TextView upText;
+    private WindowManager windowManager;
+    private int statusBarHeight;
+    private float preX,preY,x,y;
+
+    public SpeedView(Context context) {
+        super(context);
+        mContext=context;
+        init();
+    }
+
+    private void init() {
+        statusBarHeight=WindowUtil.statusBarHeight;
+        windowManager= (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
+        //a view inflate itself, that&#39;s funny
+        inflate(mContext,R.layout.speed_layout,this);
+        downText= (TextView) findViewById(R.id.speed_down);
+        upText= (TextView) findViewById(R.id.speed_up);
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        switch (event.getAction()){
+            case MotionEvent.ACTION_DOWN:
+                preX=event.getRawX();preY=event.getRawY()-statusBarHeight;
+                return true;
+            case MotionEvent.ACTION_MOVE:
+                x=event.getRawX();y=event.getRawY()-statusBarHeight;
+                WindowManager.LayoutParams params= (WindowManager.LayoutParams) getLayoutParams();
+                params.x+=x-preX;
+                params.y+=y-preY;
+                windowManager.updateViewLayout(this,params);
+                preX=x;preY=y;
+                return true;
+            default:
+                break;
+
+        }
+        return super.onTouchEvent(event);
+    }
+
+
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;在SpeedView里我们重写了onTouchEvent事件，这样就能响应我们的拖拽事件了，注意这里更新SpeedView的位置是通过改变WindowManager.LayoutParam的x和y来实现的，调用&lt;code class=&quot;highlighter-rouge&quot;&gt;windowManager.updateViewLayout(this,params)&lt;/code&gt;来更新位置。&lt;/p&gt;
+
+&lt;p&gt;因为我们的网速显示悬浮窗要脱离于Activity的生命周期而独立存在，因此需要通过Service来实现：&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;public class SpeedCalculationService extends Service {
+    private WindowUtil windowUtil;
+    private boolean changed=false;
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        WindowUtil.initX= (int) SharedPreferencesUtils.getFromSpfs(this,INIT_X,0);
+        WindowUtil.initY= (int) SharedPreferencesUtils.getFromSpfs(this,INIT_Y,0);
+        windowUtil=new WindowUtil(this);
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        changed=intent.getBooleanExtra(MainActivity.CHANGED,false);
+        if(changed){
+            windowUtil.onSettingChanged();
+        }else{
+            if(!windowUtil.isShowing()){
+                windowUtil.showSpeedView();
+            }
+            SharedPreferencesUtils.putToSpfs(this,MainActivity.IS_SHOWN,true);
+        }
+        //return super.onStartCommand(intent, flags, startId);
+        return START_STICKY;
+    }
+
+
+
+    @Nullable
+    @Override
+    public IBinder onBind(Intent intent) {
+        return null;
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        WindowManager.LayoutParams params= (WindowManager.LayoutParams) windowUtil.speedView.getLayoutParams();
+        SharedPreferencesUtils.putToSpfs(this, INIT_X,params.x);
+        SharedPreferencesUtils.putToSpfs(this, INIT_Y,params.y);
+        if(windowUtil.isShowing()){
+            windowUtil.closeSpeedView();
+            SharedPreferencesUtils.putToSpfs(this,MainActivity.IS_SHOWN,false);
+        }
+        Log.d(&quot;yjw&quot;,&quot;service destroy&quot;);
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;这里的WindowUtil其实就是一个工具类，帮助我们控制悬浮窗SpeedView的显示与隐藏：&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;public class WindowUtil {
+    public static int statusBarHeight=0;
+    //记录悬浮窗的位置
+    public static int initX,initY;
+    private WindowManager windowManager;
+    public SpeedView speedView;
+    private WindowManager.LayoutParams params;
+    private Context context;
+
+    public boolean isShowing() {
+        return isShowing;
+    }
+
+    private boolean isShowing=false;
+
+    public static final int INTERVAL=2000;
+    private long preRxBytes,preSeBytes;
+    private long rxBytes,seBytes;
+    private Handler handler=new Handler(){
+        @Override
+        public void dispatchMessage(Message msg) {
+            super.dispatchMessage(msg);
+            calculateNetSpeed();
+            sendEmptyMessageDelayed(0,INTERVAL);
+        }
+    };
+
+    public void onSettingChanged(){
+        String setting= (String) SharedPreferencesUtils.getFromSpfs(context,MainActivity.SETTING,MainActivity.BOTH);
+        if(setting.equals(MainActivity.BOTH)){
+            speedView.upText.setVisibility(View.VISIBLE);
+            speedView.downText.setVisibility(View.VISIBLE);
+        }else if(setting.equals(MainActivity.UP)){
+            speedView.upText.setVisibility(View.VISIBLE);
+            speedView.downText.setVisibility(View.GONE);
+        }else{
+            speedView.upText.setVisibility(View.GONE);
+            speedView.downText.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void calculateNetSpeed() {
+        rxBytes=TrafficStats.getTotalRxBytes();
+        seBytes=TrafficStats.getTotalTxBytes()-rxBytes;
+        double downloadSpeed=(rxBytes-preRxBytes)/2;
+        double uploadSpeed=(seBytes-preSeBytes)/2;
+        preRxBytes=rxBytes;
+        preSeBytes=seBytes;
+        //根据范围决定显示单位
+        String upSpeed=null;
+        String downSpeed=null;
+
+        NumberFormat df= java.text.NumberFormat.getNumberInstance();
+        df.setMaximumFractionDigits(2);
+
+        if(downloadSpeed&amp;gt;1024*1024){
+            downloadSpeed/=(1024*1024);
+            downSpeed=df.format(downloadSpeed)+&quot;MB/s&quot;;
+        }else if(downloadSpeed&amp;gt;1024){
+            downloadSpeed/=(1024);
+            downSpeed=df.format(downloadSpeed)+&quot;B/s&quot;;
+        }else{
+            downSpeed=df.format(downloadSpeed)+&quot;B/s&quot;;
+        }
+
+        if(uploadSpeed&amp;gt;1024*1024){
+            uploadSpeed/=(1024*1024);
+            upSpeed=df.format(uploadSpeed)+&quot;MB/s&quot;;
+        }else if(uploadSpeed&amp;gt;1024){
+            uploadSpeed/=(1024);
+            upSpeed=df.format(uploadSpeed)+&quot;kB/s&quot;;
+        }else{
+            upSpeed=df.format(uploadSpeed)+&quot;B/s&quot;;
+        }
+
+        updateSpeed(&quot;↓ &quot;+downSpeed,&quot;↑ &quot;+upSpeed);
+    }
+
+    public WindowUtil(Context context) {
+        this.context = context;
+        windowManager= (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        speedView=new SpeedView(context);
+        params=new WindowManager.LayoutParams();
+        params=new WindowManager.LayoutParams();
+        params.x=initX;
+        params.y=initY;
+        params.width=params.height=WindowManager.LayoutParams.WRAP_CONTENT;
+        params.type=WindowManager.LayoutParams.TYPE_PHONE;
+        params.gravity= Gravity.LEFT|Gravity.TOP;
+        params.format= PixelFormat.RGBA_8888;
+        params.flags=WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE| WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
+                //设置悬浮窗可以拖拽至状态栏的位置
+//        | WindowManager.LayoutParams.FLAG_FULLSCREEN| WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
+
+    }
+
+    public void showSpeedView(){
+        windowManager.addView(speedView,params);
+        isShowing=true;
+        preRxBytes= TrafficStats.getTotalRxBytes();
+        preSeBytes=TrafficStats.getTotalTxBytes()-preRxBytes;
+        handler.sendEmptyMessage(0);
+    }
+
+    public void closeSpeedView(){
+        windowManager.removeView(speedView);
+        isShowing=false;
+    }
+
+    public void updateSpeed(String downSpeed,String upSpeed){
+        speedView.upText.setText(upSpeed);
+        speedView.downText.setText(downSpeed);
+    }
+}
+
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;WindowUtil类中也包含了一个很重要的方法，那就是计算网速。这里计算网速的方法很简单，Android提供了一个类&lt;code class=&quot;highlighter-rouge&quot;&gt;TrafficStats&lt;/code&gt;,这个类里面为我们提供了好多接口，我们用到了其中的两个:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;1.public static long getTotalTxBytes ()
+Return number of bytes transmitted since device boot. Counts packets across all network interfaces, and always increases monotonically since device boot. Statistics are measured at the network layer, so they include both TCP and UDP usage.
+2.public static long getTotalRxPackets ()
+Return number of packets received since device boot. Counts packets across all network interfaces, and always increases monotonically since device boot. Statistics are measured at the network layer, so they include both TCP and UDP usage.
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;可以看出，getTotalTxBytes()方法返回系统自开机到现在为止所一共传输的数据的字节数，包括上传的数据和下载的数据；而getTotalRxPackets()方法返回的是系统自开机到现在为止所一共接收到也就是下载的数据的字节数，用getTotalTxBytes()-getTotalRxPackets()自然就是系统开机到现在为止所上传的数据的字节数。&lt;/p&gt;
+
+&lt;p&gt;这样每隔一定时间，我们计算一下系统自开机到目前所接受的数据包的字节数和所发送的数据的字节数的变化量，用变化量除以时间，就是这段时间的平均网速了。&lt;/p&gt;
+
+&lt;p&gt;为了每个一段时间计算一下网速，我们利用了一个Handler来实现这个定时任务&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;private Handler handler=new Handler(){
+        @Override
+        public void dispatchMessage(Message msg) {
+            super.dispatchMessage(msg);
+            calculateNetSpeed();
+            sendEmptyMessageDelayed(0,INTERVAL);
+        }
+    };
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;这里要注意将SpeedView添加到屏幕上，也就是添加到WindowManager里的时候，这个WindowManager.LayoutParams十分重要，其参数都是有用的，这里就不细讲了,详细介绍请移步&lt;a href=&quot;https://developer.android.com/reference/android/view/WindowManager.LayoutParams.html&quot;&gt;官方文档&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;最后要将我们的悬浮窗设置为开机自启动的，利用一个BroadcastReceiver就可以了：&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;public class MyBroadcastReceiver extends BroadcastReceiver {
+    @Override
+    public void onReceive(Context context, Intent intent) {
+        Log.d(&quot;yjw&quot;,&quot;receiver receive boot broadcast&quot;);
+        boolean isShown= (boolean) SharedPreferencesUtils.getFromSpfs(context,MainActivity.IS_SHOWN,false);
+        if(isShown){
+            context.startService(new Intent(context,SpeedCalculationService.class));
+        }
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;在Manifest里这样注册我们的BroadcastReceiver：&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt; &amp;lt;receiver android:name=&quot;me.mrrobot97.netspeed.MyBroadcastReceiver&quot;&amp;gt;
+            &amp;lt;intent-filter&amp;gt;
+                &amp;lt;action android:name=&quot;android.intent.action.BOOT_COMPLETED&quot; /&amp;gt;
+                &amp;lt;category android:name=&quot;android.intent.category.HOME&quot; /&amp;gt;
+            &amp;lt;/intent-filter&amp;gt;
+        &amp;lt;/receiver&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;这样当系统启动完成，就会开启我们的Service。注意这里&lt;intent-filter&gt;中的&lt;category&gt;不可省略，亲测省略后BroadcastReceiver无法接收到系统广播。&lt;/category&gt;&lt;/intent-filter&gt;&lt;/p&gt;
+
+&lt;p&gt;最后还有一点，在Manifest的MainActivity条目中加一个属性：&lt;code class=&quot;highlighter-rouge&quot;&gt;android:excludeFromRecents=&quot;true&quot;&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;这样我们的ManiActivity就不会显示在最近任务列表，防止用户清空任务列表时将我们的Sercvice进程终结了。&lt;/p&gt;
+
+&lt;p&gt;完整的项目地址&lt;a href=&quot;https://github.com/mrrobot97/NetSpeed&quot;&gt;Github&lt;/a&gt;&lt;/p&gt;
+
+</description>
+        <pubDate>Fri, 30 Dec 2016 00:00:00 +0800</pubDate>
+        <link>http://mrrobot97.github.io/2016/12/30/%E5%88%B6%E4%BD%9C%E4%B8%80%E4%B8%AA%E7%BD%91%E9%80%9F%E6%98%BE%E7%A4%BA%E6%82%AC%E6%B5%AE%E7%AA%97.html</link>
+        <guid isPermaLink="true">http://mrrobot97.github.io/2016/12/30/%E5%88%B6%E4%BD%9C%E4%B8%80%E4%B8%AA%E7%BD%91%E9%80%9F%E6%98%BE%E7%A4%BA%E6%82%AC%E6%B5%AE%E7%AA%97.html</guid>
+        
+        
+      </item>
     
       <item>
         <title>Dribbble第三方开源客户端Designer</title>
@@ -814,7 +1452,7 @@ JNIEXPORT jstring JNICALL Java_me_mrrobot97_hellojni_HelloJNI_getStringFromC
       <item>
         <title>ViewPager实现无限轮播</title>
         <description>&lt;blockquote&gt;
-  &lt;p&gt;Android自带的ViewGroup有翻页功能，支持用户手势滑动，但是不支持循环滚动，因此我们就在PagerAdapter的基础上为其增加循环滚动的功能就行了。&lt;/p&gt;
+  &lt;p&gt;Android自带的ViewPager有翻页功能，支持用户手势滑动，但是不支持循环滚动，因此我们就在PagerAdapter的基础上为其增加循环滚动的功能就行了。&lt;/p&gt;
 &lt;/blockquote&gt;
 
 &lt;p&gt;自定义Adapter继承自PagerAdapter，我们需要重写四个方法:&lt;/p&gt;
@@ -1022,364 +1660,6 @@ JNIEXPORT jstring JNICALL Java_me_mrrobot97_hellojni_HelloJNI_getStringFromC
         <pubDate>Sat, 17 Sep 2016 00:00:00 +0800</pubDate>
         <link>http://mrrobot97.github.io/2016/09/17/Android%E6%96%AD%E7%82%B9%E7%BB%AD%E4%BC%A0%E5%8E%9F%E7%90%86%E5%8F%8A%E5%AE%9E%E7%8E%B0.html</link>
         <guid isPermaLink="true">http://mrrobot97.github.io/2016/09/17/Android%E6%96%AD%E7%82%B9%E7%BB%AD%E4%BC%A0%E5%8E%9F%E7%90%86%E5%8F%8A%E5%AE%9E%E7%8E%B0.html</guid>
-        
-        
-      </item>
-    
-      <item>
-        <title>从零开始制作图片裁减器</title>
-        <description>&lt;blockquote&gt;
-  &lt;p&gt;这篇文章讲的是制作一个比较简单的自定义View—图片裁减器，为了降低难度，我只实现了矩形的裁减。&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;先看看效果图:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://ockr1qfi1.bkt.clouddn.com/Screen%2520Capture%2520on%25202016-09-16%2520at%252017-21-09.gif&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;在开始码代码之前先想一下我们的裁减器TailorView都需要实现哪些功能：&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;1.打开系统相册，从中选中一张图片交给我们的Activity.
-2.将图片加载到一个ImageView上.
-3.显示一个矩形裁减框，并且可以放大、缩小、拖动.
-4.将图片中在裁减框范围之外的部分加上一个黑色滤镜.
-5.获取并生成裁减器框内部分的图片并生成Bitmap.
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;p&gt;好了，然后我们就开始码代码喽~&lt;/p&gt;
-
-&lt;p&gt;首先是打开相册并选择一张图片，这件事我们交个一个Activity：MainActivity，这也是我们的入口Activity。注意由于我们需要取得位于SD卡上的图片文件，故需要再AndroidManifest文件中声明如下权限：&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&amp;lt;uses-permission android:name=&quot;android.permission.READ_EXTERNAL_STORAGE&quot;/&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;p&gt;同时由于我的测试机型是Android6.0.1的，故还需要再运行时动态监测权限并申请权限。方便起见，我们打开应用的第一时间就申请权限：&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
-                != PackageManager.PERMISSION_GRANTED){
-            ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}
-                    ,READ_EXTERNAL_STORAGE_REQUEST_CODE);
-        }
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;p&gt;这就是在运行时动态申请权限的代码，这里我只申请了READ_EXTERNAL_STROAGE,其他权限同样处理方法。&lt;/p&gt;
-
-&lt;p&gt;那么我们怎样才知道用户是否授予了权限呢？很简单，只需要重写Activity的onRequestPermissionsResult方法即可，然后在里面判断用户是否给予了权限：&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;@Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if(requestCode==READ_EXTERNAL_STORAGE_REQUEST_CODE&amp;amp;&amp;amp;grantResults.length&amp;gt;0){
-            //do something
-        }
-    }
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;p&gt;注意这里的READ_EXTERNAL_STORAGE_REQUEST_CODE和申请权限时的是同一个，都是我们自定义的常量。&lt;/p&gt;
-
-&lt;p&gt;好了，权限的问题我们已经搞定了，接下来就是调用系统相册了，很简单，只需一个Intent即可：&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Intent intent = new Intent(Intent.ACTION_PICK,
-       android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-startActivityForResult(intent, IMAGE_CODE);
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;p&gt;然后就会自动打开系统相册，并且当你选择了一张图片的时候，就会返回。&lt;/p&gt;
-
-&lt;p&gt;接下来就是获取这张我们选择的图片,这里需要重写onActivityResult方法，因为我们调用系统相册时利用的是startActivityForResult(),故当Activity返回时会调用onActivityResult方法，连同返回的数据。&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;@Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode==IMAGE_CODE&amp;amp;&amp;amp;resultCode==RESULT_OK&amp;amp;&amp;amp;data!=null){
-            Uri selectedImage=data.getData();
-            String[] filePathColumn={MediaStore.Images.Media.DATA};
-            Cursor cursor=getContentResolver().query(selectedImage,
-                    filePathColumn,null,null,null);
-            if(cursor!=null){
-                cursor.moveToFirst();
-                String picturePath=
-                	cursor.getString(cursor.getColumnIndex(filePathColumn[0]));
-                cursor.close();
-                Intent intent=new Intent(this,TailorActivity.class);
-                intent.putExtra(&quot;picturePath&quot;,picturePath);
-                startActivityForResult(intent,IMAGE_TAILORED);
-            }
-        }
-    }
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;p&gt;同样，这里的IMAGE_CODE就是startActivityForResylt中的IMAGE_CODE.这样我们就获取了图片的绝对路径，接下来就是加载这个图片到ImageView中了。这里我新建了一个Activity:TailorActivity,并在其布局里放了一个占据全屏的ImageView，我们将图片路径一并传给Activity:TailorActivity即可。&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Intent intent=new Intent(this,TailorActivity.class);
-                intent.putExtra(&quot;picturePath&quot;,picturePath);
-                startActivityForResult(intent,IMAGE_TAILORED);
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;p&gt;在TailorActivity先从Intent中取出路径，并加载图片：&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;mBitmap= BitmapFactory.decodeFile(imagePath);
-        mImageView.setImageBitmap(mBitmap);
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;p&gt;接下来就是今天的主角：自定义View—-TailorView&lt;/p&gt;
-
-&lt;p&gt;我先说一下这个View的结构：TailorView内部维护四个Point类，每个Point很简单只包含一个坐标x和y,这四个Point对应着我们要在屏幕上绘制的裁减框的四个角。我们每次draw的时候先根据这四个Point的位置画出四条线，就是裁减框的边界，然后绘制四个小的实心圆，当用户拖拽任意个=一个实心圆时，我们的裁剪框做出相应的大小改变。当用户点击裁剪框中间的部分时，裁剪框跟随者用户手指左右平移。&lt;/p&gt;
-
-&lt;p&gt;其中裁剪框放大、缩小、平移的逻辑都是在View的onTouchEvent中实现的。
-先看看我们的onDraw:&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;@Override
-    protected void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
-        //drawLines
-        mPaint.setStyle(Paint.Style.STROKE);
-        for (int i=0;i&amp;lt;4;i++){
-            canvas.drawLine(points[i].getX(),points[i].getY()
-                    ,points[(i+1)%4].getX(),points[(i+1)%4].getY(),mPaint);
-        }
-        mPaint.setStyle(Paint.Style.FILL);
-        //draw points
-        for (int i=0;i&amp;lt;4;i++){
-            canvas.drawCircle(points[i].getX(),points[i].getY(),mRadius,mPaint);
-        }
-    }
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;p&gt;这样很轻松的就绘制除了四个边和四个实心角。&lt;/p&gt;
-
-&lt;p&gt;由于我们的TailorView有一个默认初始大小，因此在xml布局文件中使用的时候都不需要指定宽高了，我们也不用重写onMeasure（）方法了，算是偷了个懒。&lt;/p&gt;
-
-&lt;p&gt;我们要对我们的TailorView做出一些限制：&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;1.四个点的顺序不能乱，因为后面我们还要靠这四个点的顺序来构造一个Rect，这个Rect就是不会被黑色滤镜覆盖的范围。
-
-2.我们的TailorView所能移动的地方存在一个边界，就是ImageView中显示的图片的实际边界。
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;p&gt;四个点的顺序不能乱，那就在onTouchEvent中检测四个点的相对坐标即可：&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;
-//check if points gets collide
-    private boolean pointsCross(int x, int y, int selectedIndex) {
-        if ((selectedIndex==0&amp;amp;&amp;amp;points[1].x-x&amp;lt;=mTouchSlop)
-                ||(selectedIndex==0&amp;amp;&amp;amp;points[3].y-y&amp;lt;=mTouchSlop)) return true;
-        if ((selectedIndex==1&amp;amp;&amp;amp;x-points[0].x&amp;lt;=mTouchSlop)
-                ||(selectedIndex==1&amp;amp;&amp;amp;points[2].y-y&amp;lt;=mTouchSlop)) return true;
-        if ((selectedIndex==2&amp;amp;&amp;amp;y-points[1].y&amp;lt;=mTouchSlop)
-                ||(selectedIndex==2&amp;amp;&amp;amp;x-points[3].x&amp;lt;=mTouchSlop)) return true;
-        if ((selectedIndex==3&amp;amp;&amp;amp;points[2].x-x&amp;lt;=mTouchSlop)
-                ||(selectedIndex==3&amp;amp;&amp;amp;y-points[0].y&amp;lt;=mTouchSlop)) return true;
-        return false;
-
-    }
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;p&gt;可以看出，我的做法是当相邻两个点的某一方向上的距离小于mTouchSlop时，即视为冲突，就无法再任由用户移动了。&lt;/p&gt;
-
-&lt;p&gt;然后是我自定义了一个Bounds类，也很简单，就是包含x1,x2,y1,y1，即为边界的左上和右下点的坐标,在初始化的时候我们利用ImageView中Bitmp的实际边界，给我们的mBound进行赋值。然后同样在onTouchEvent中进行移动的时候，检测是否和边界冲突，倘若冲突，就停止移动：&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;private boolean checkOutBounds(int x, int y) {
-        return mBounds.x1&amp;lt;=x&amp;amp;&amp;amp;mBounds.x2&amp;gt;=x&amp;amp;&amp;amp;mBounds.y1&amp;lt;=y&amp;amp;&amp;amp;mBounds.y2&amp;gt;=y;
-    }
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;p&gt;然后就是判断点击的点是在裁剪框内部还是在四个边角上：&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;private boolean inCenter(int x,int y){
-        for(int i=0;i&amp;lt;4;i++){
-            if (inCircle(x,y,points[i])) return false;
-        }
-        return mRect.contains(x,y);
-    }
-
-    private boolean inCircle(int x,int y,Point p){
-        return Math.hypot(x-p.getX(),y-p.getY())&amp;lt;=checkLength;
-    }
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;p&gt;当用户点击的是边框内部的时候，我们就随用户的移动移动整个裁剪框：&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;//move the whole rect
-    private void moveWhole(int delX,int delY){
-        for (int i=0;i&amp;lt;4;i++){
-            if (!checkOutBounds(points[i].x+delX,points[i].y+delY)) return;
-        }
-        for (int i=0;i&amp;lt;4;i++){
-            points[i].x+=delX;
-            points[i].y+=delY;
-        }
-        mRect=new Rect(points[0].getX(),points[0].getY(),points[2].getX(),points[2].getY());
-        mListener.onRectPositionChange();
-    }
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;p&gt;当用户点击的是某个边角时，相应的需要改变其相邻的两个Point的x或y：&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;if (shouldMove){
-        p.setX(x).setY(y);
-        //change the relative two circle&#39;s position
-        if (selectedIndex%2==0){
-             points[(selectedIndex+1)%4].setY(y);
-             points[(selectedIndex+3)%4].setX(x);
-        }else{
-             points[(selectedIndex+1)%4].setX(x);
-             points[(selectedIndex+3)%4].setY(y);
-            }
-         if (mListener!=null){
-             mListener.onRectPositionChange();
-             }
-            mRect=new Rect(points[0].getX(),points[0].getY(),points[2].getX(),points[2].getY());
-  }
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;p&gt;这样，裁剪框的逻辑基本就实现了，完整的代码我会放在后面。&lt;/p&gt;
-
-&lt;p&gt;然后是我们的另一个自定义View—FilterView，其功能就是给出了裁剪框以外的部分加上一个黑色滤镜，这个就很好实现了，我们只需要让FilterView充满屏幕，然后绘制一个半透明黑色背景色即可。
-直接看onDraw方法吧：&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;@Override
-    protected void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
-        //draw filter color except the rect consists the four points
-        mPaint.setAlpha(alpha);
-        canvas.drawRect(0,0,mWidth,mRect.top,mPaint);
-        canvas.drawRect(0,mRect.bottom,mWidth,mHeight,mPaint);
-        canvas.drawRect(0,mRect.top,mRect.left,mRect.bottom,mPaint);
-        canvas.drawRect(mRect.right,mRect.top,mWidth,mRect.bottom,mPaint);
-    }
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;p&gt;这里的alpha我的取值是0xAA。&lt;/p&gt;
-
-&lt;p&gt;这里的mRect就是从TailorView那里取得的Rect，注意我们的TailorView的Rect在不停的改变，因此我们需要定义一个接口Listener对其实现监听：&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;public interface RectPositionChangeListener{
-        void onRectPositionChange();
-    }
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;p&gt;然后我们给TailorView设置一个Listener，在其内部每当Rect变化时就调用onRectPOsitionChange（）方法即可。&lt;/p&gt;
-
-&lt;p&gt;最后就是我们截取图片的功能了，思路是先利用View的getDrawingCache方法获取屏幕截图，然后再利用Rect的坐标从截图中生成一张新的图片：&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;//return a screen capture bitmap unscaled
-    public static Bitmap getScreenCapture(Activity activity){
-        View view=activity.getWindow().getDecorView();
-        view.setDrawingCacheEnabled(true);
-        view.buildDrawingCache();
-        Bitmap bitmap=view.getDrawingCache();
-        int []wh=getScreenWidthAndHeight(activity);
-        Bitmap scaled=Bitmap.createBitmap(bitmap,0,0,wh[0],wh[1]);
-        view.setDrawingCacheEnabled(false);
-        view.destroyDrawingCache();
-        return scaled;
-    }
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;//this screen bitmap contain the statusBar, remember to minus its height.
-        Bitmap screen=ScreenUtils.getScreenCapture(this);
-        Rect rect=mTailorView.getRect();
-        Bitmap bitmap=Bitmap.createBitmap(screen,rect.left,rect.top+mTailorView.statusBarHeight
-                ,rect.right-rect.left,rect.bottom-rect.top);
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;p&gt;注意这个截图是包含状态栏的，故需要对坐标进行一下处理。&lt;/p&gt;
-
-&lt;p&gt;至此，我们的自定义图片裁减器就基本完成了，当然有很多缺点和bug，但作为一个自定义View学习Demo还是足够了。&lt;/p&gt;
-
-&lt;p&gt;文章中都是抽离出了部分代码，可能阅读起来不太容易理解，&lt;a href=&quot;https://github.com/mrrobot97/ImageTailor&quot;&gt;完整的源代码见此&lt;/a&gt;,加上注释理解起来应该好很多。&lt;/p&gt;
-</description>
-        <pubDate>Fri, 16 Sep 2016 00:00:00 +0800</pubDate>
-        <link>http://mrrobot97.github.io/2016/09/16/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E5%9B%BE%E7%89%87%E8%A3%81%E5%87%8F%E5%99%A8.html</link>
-        <guid isPermaLink="true">http://mrrobot97.github.io/2016/09/16/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E5%9B%BE%E7%89%87%E8%A3%81%E5%87%8F%E5%99%A8.html</guid>
-        
-        
-      </item>
-    
-      <item>
-        <title>利用注解+反射实现view的auto bind</title>
-        <description>&lt;blockquote&gt;
-  &lt;p&gt;相信都用过JakeWharton大神的&lt;a href=&quot;https://github.com/JakeWharton/butterknife&quot;&gt;ButterKnife&lt;/a&gt;框架，有了ButterKnife我们就可以不用再反复地写繁琐的findViewById()了，ButterKnife内部利用的是注解+编译时生成java字节码实现的，没有利用到反射，故在实际使用时不会对应用的性能产生影响。今天我们就简单的利用注解+反射实现一个简单的view的auto bind，当然只是为了了解一下注解和反射的简单用法。&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;首先我们定义一个注解接口：&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;@Target(ElementType.FIELD)
-@Retention(RetentionPolicy.RUNTIME)
-public @interface BindView {
-    public int id();
-}
-
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;p&gt;很简单，只有一个id，因为我们为view绑定控件时只需要一个int类型的id即可。&lt;/p&gt;
-
-&lt;p&gt;然后是我们的注解处理类：&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;public class Binder {
-    public static void bind(Object object, View view){
-        Field[] fields=object.getClass().getDeclaredFields();
-        for (Field field:fields){
-            if (field.isAnnotationPresent(BindView.class)){
-                BindView bindView=field.getAnnotation(BindView.class);
-                if (bindView!=null){
-                    field.setAccessible(true);
-                    try {
-                        field.set(object,view.findViewById(bindView.id()));
-                    } catch (IllegalAccessException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }
-    }
-}
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;p&gt;我们需要将注解所在的object以及需要绑定到的view作为参数传进去。&lt;/p&gt;
-
-&lt;p&gt;然后就可以使用啦！&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;public class MainActivity extends AppCompatActivity {
-
-    @BindView(id=R.id.text_view)
-    private TextView mTextView;
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        Binder.bind(this,this.findViewById(android.R.id.content));
-        mTextView.setText(&quot;This is not a hello world&quot;);
-    }
-}
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;p&gt;这里我们只需要@BindView(id=…)，然后在setContentView()后调用Binder.bind()即可使用我们的mTextView了。&lt;/p&gt;
-
-&lt;p&gt;当然利用反射是会对应用性能产生影响的，实际使用中我们还是应该使用ButterKnife。&lt;/p&gt;
-</description>
-        <pubDate>Sun, 11 Sep 2016 00:00:00 +0800</pubDate>
-        <link>http://mrrobot97.github.io/2016/09/11/%E5%88%A9%E7%94%A8%E6%B3%A8%E8%A7%A3+%E5%8F%8D%E5%B0%84%E5%AE%9E%E7%8E%B0view%E7%9A%84auto-bind.html</link>
-        <guid isPermaLink="true">http://mrrobot97.github.io/2016/09/11/%E5%88%A9%E7%94%A8%E6%B3%A8%E8%A7%A3+%E5%8F%8D%E5%B0%84%E5%AE%9E%E7%8E%B0view%E7%9A%84auto-bind.html</guid>
         
         
       </item>

@@ -13,6 +13,11 @@ layout: default
 
   </header>
 
+  <!--- 生成文章摘要 -->
+      <li>
+         <p>{{ post.excerpt }}</p>
+      </li>
+
 
  <p class="post-meta" style="text-align: right; color: rgb(152,152,152);"><time datetime="{{ post.date | date_to_xmlschema }}" itemprop="datePublished">{{ post.date | date: "%b %-d, %Y" }}</time>{% if page.author %} • <span itemprop="author" itemscope itemtype="http://schema.org/Person"><span itemprop="name">{{ post.author }}</span></span>{% endif %} </p>
 
