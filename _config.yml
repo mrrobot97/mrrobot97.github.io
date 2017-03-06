@@ -10,7 +10,7 @@ title: mrrobot97's blog
 author: mrrobot97
 description: 'Record my study in android.' # write a nice description for your blog
 baseurl: '' # the subpath of your site, e.g. /blog
-url: 'http://mrrobot97.github.io' # the base hostname & protocol for your site http://www.example.com
+url: 'https://mrrobot97.github.io' # the base hostname & protocol for your site http://www.example.com
 # google_analytics: 'UA-XXXXXX-X'
 github_username: 'mrrobot97'
 
