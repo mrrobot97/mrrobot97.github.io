@@ -5,8 +5,8 @@
     <description>Record my study.</description>
     <link>https://mrrobot97.me/</link>
     <atom:link href="https://mrrobot97.me/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Tue, 07 Mar 2017 12:42:55 +0800</pubDate>
-    <lastBuildDate>Tue, 07 Mar 2017 12:42:55 +0800</lastBuildDate>
+    <pubDate>Tue, 07 Mar 2017 15:59:13 +0800</pubDate>
+    <lastBuildDate>Tue, 07 Mar 2017 15:59:13 +0800</lastBuildDate>
     <generator>Jekyll v3.1.2</generator>
     
       <item>
@@ -647,6 +647,10 @@ Return number of packets received since device boot. Counts packets across all n
         <pubDate>Fri, 30 Dec 2016 00:00:00 +0800</pubDate>
         <link>https://mrrobot97.me/2016/12/30/%E5%88%B6%E4%BD%9C%E4%B8%80%E4%B8%AA%E7%BD%91%E9%80%9F%E6%98%BE%E7%A4%BA%E6%82%AC%E6%B5%AE%E7%AA%97/</link>
         <guid isPermaLink="true">https://mrrobot97.me/2016/12/30/%E5%88%B6%E4%BD%9C%E4%B8%80%E4%B8%AA%E7%BD%91%E9%80%9F%E6%98%BE%E7%A4%BA%E6%82%AC%E6%B5%AE%E7%AA%97/</guid>
+        
+        <category>Android</category>
+        
+        <category>悬浮窗</category>
         
         
       </item>
