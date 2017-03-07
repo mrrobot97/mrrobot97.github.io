@@ -5,8 +5,8 @@
     <description>Record my study.</description>
     <link>https://mrrobot97.me/</link>
     <atom:link href="https://mrrobot97.me/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Tue, 07 Mar 2017 15:59:13 +0800</pubDate>
-    <lastBuildDate>Tue, 07 Mar 2017 15:59:13 +0800</lastBuildDate>
+    <pubDate>Tue, 07 Mar 2017 16:15:10 +0800</pubDate>
+    <lastBuildDate>Tue, 07 Mar 2017 16:15:10 +0800</lastBuildDate>
     <generator>Jekyll v3.1.2</generator>
     
       <item>
@@ -41,6 +41,7 @@ public static EventBus getDefault(){
 &lt;p&gt;接下来是一个很重要的成员变量:&lt;/p&gt;
 
 &lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;private HashMap&amp;lt;Class&amp;lt;?&amp;gt;,ArrayList&amp;lt;Subscription&amp;gt;&amp;gt; subscriptionsByEventType=new HashMap&amp;lt;&amp;gt;();
+
 &lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 
@@ -304,7 +305,8 @@ public static EventBus getDefault(){
 &lt;p&gt;这里主要是在桌面上显示一个悬浮窗，利用了WindowManager以及Service,接下来看看如何实现这样一个效果：
 首先APP必须获得在桌面上显示悬浮窗的机会，很多第三方ROM都限制了这一权限，我们首先就是要申请改权限，代码如下：&lt;/p&gt;
 
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;public boolean checkDrawOverlayPermission() {
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;
+public boolean checkDrawOverlayPermission() {
         if (!Settings.canDrawOverlays(this)) {
             Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
                     Uri.parse(&quot;package:&quot; + getPackageName()));
@@ -313,6 +315,7 @@ public static EventBus getDefault(){
         }
         return true;
     }
+
 &lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 

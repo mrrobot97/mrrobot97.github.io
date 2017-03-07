@@ -28,7 +28,7 @@
     <!-- Custom CSS -->
     <link rel="stylesheet" href="/css/hux-blog.min.css">
 
-    <!-- Pygments Github CSS -->
+    <!-- Rouge Github CSS -->
     <link rel="stylesheet" href="/css/syntax.css">
 
     <!-- Custom Fonts -->
@@ -189,7 +189,8 @@
 <p>这里主要是在桌面上显示一个悬浮窗，利用了WindowManager以及Service,接下来看看如何实现这样一个效果：
 首先APP必须获得在桌面上显示悬浮窗的机会，很多第三方ROM都限制了这一权限，我们首先就是要申请改权限，代码如下：</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>public boolean checkDrawOverlayPermission() {
+<div class="highlighter-rouge"><pre class="highlight"><code>
+public boolean checkDrawOverlayPermission() {
         if (!Settings.canDrawOverlays(this)) {
             Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
                     Uri.parse("package:" + getPackageName()));
@@ -198,6 +199,7 @@
         }
         return true;
     }
+
 </code></pre>
 </div>
 
