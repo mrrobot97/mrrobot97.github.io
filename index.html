@@ -1,56 +1,42 @@
 ---
-layout: default
+layout: page
+description: "Record my study"
 ---
 
 {% for post in paginator.posts %}
-
-<article class="post" itemscope itemtype="http://schema.org/BlogPosting">
-
-    <div class="main-content" itemprop="articleBody">
-
-  <header class="post-header">
-      <a class="post-link" href="{{ post.url | prepend: site.baseurl }}"><h1 class="post-title" itemprop="name headline">  {{ post.title }}</h1> </a>
-
-  </header>
-
-  <!--- 生成文章摘要 -->
-      <li>
-         <p>{{ post.excerpt }}</p>
-      </li>
-
-
- <p class="post-meta" style="text-align: right; color: rgb(152,152,152);"><time datetime="{{ post.date | date_to_xmlschema }}" itemprop="datePublished">{{ post.date | date: "%b %-d, %Y" }}</time>{% if page.author %} • <span itemprop="author" itemscope itemtype="http://schema.org/Person"><span itemprop="name">{{ post.author }}</span></span>{% endif %} </p>
-
-  </div>
-
-</article>
-
+<div class="post-preview">
+    <a href="{{ post.url | prepend: site.baseurl }}">
+        <h2 class="post-title">
+            {{ post.title }}
+        </h2>
+        {% if post.subtitle %}
+        <h3 class="post-subtitle">
+            {{ post.subtitle }}
+        </h3>
+        {% endif %}
+        <div class="post-content-preview">
+            {{ post.content | strip_html | truncate:200 }}
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by {% if post.author %}{{ post.author }}{% else %}{{ site.title }}{% endif %} on {{ post.date | date: "%B %-d, %Y" }}
+    </p>
+</div>
+<hr>
 {% endfor %}
 
-
+<!-- Pager -->
 {% if paginator.total_pages > 1 %}
-<div class="pagination" style="text-align: center;">
-  {% if paginator.previous_page %}
-    <a href="{{ paginator.previous_page_path | prepend: site.baseurl | replace: '//', '/' }}">&laquo; Prev</a>
-  {% else %}
-    <span>&laquo; Prev</span>
-  {% endif %}
-
-  {% for page in (1..paginator.total_pages) %}
-    {% if page == paginator.page %}
-      <em>{{ page }}</em>
-    {% elsif page == 1 %}
-      <a href="{{ paginator.previous_page_path | prepend: site.baseurl | replace: '//', '/' }}">{{ page }}</a>
-    {% else %}
-      <a href="{{ site.paginate_path | prepend: site.baseurl | replace: '//', '/' | replace: ':num', page }}">{{ page }}</a>
+<ul class="pager">
+    {% if paginator.previous_page %}
+    <li class="previous">
+        <a href="{{ paginator.previous_page_path | prepend: site.baseurl | replace: '//', '/' }}">&larr; Newer Posts</a>
+    </li>
     {% endif %}
-  {% endfor %}
-
-  {% if paginator.next_page %}
-    <a href="{{ paginator.next_page_path | prepend: site.baseurl | replace: '//', '/' }}">Next &raquo;</a>
-  {% else %}
-    <span>Next &raquo;</span>
-  {% endif %}
-</div>
+    {% if paginator.next_page %}
+    <li class="next">
+        <a href="{{ paginator.next_page_path | prepend: site.baseurl | replace: '//', '/' }}">Older Posts &rarr;</a>
+    </li>
+    {% endif %}
+</ul>
 {% endif %}
-

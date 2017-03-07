@@ -1,411 +1,647 @@
 <!DOCTYPE html>
 <html lang="en">
 
-  <head>
-    <meta charset="UTF-8">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
-    <link rel="stylesheet" href="http://mrrobot97.github.io/stylesheets/stylesheet.css">
-  <link rel="canonical" href="http://mrrobot97.github.io/">
-  <link rel="alternate" type="application/rss+xml" title="mrrobot97's blog" href="http://mrrobot97.github.io/feed.xml">
-  <meta name="description" content="Record my study in android.">
+    <meta name="description" content="Record my study.">
+    <meta name="keywords"  content="mrrobot97, 博客, 个人网站, 互联网, Android, 移动, 编程">
+    <meta name="theme-color" content="#000000">
+    
+    <title>mrrobot97's blog</title>
 
-   <title>mrrobot97's blog</title>
+    <!-- Web App Manifest -->
+    <link rel="manifest" href="/pwa/manifest.json">
+
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://mrrobot97.me/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Github CSS -->
+    <link rel="stylesheet" href="/css/syntax.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css">
 
 
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
 
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
 </head>
 
 
-  <body>
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
 
-    <header class="page-header">
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">mrrobot97</a>
+        </div>
 
-	<link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?"
-     <h1 class="project-name"> <a class="header-link" href="/"> mrrobot97's blog</a></h1>
-     <h3><a class="header-link" href="https://github.com/mrrobot97" target="_blank">follow me on github@mrrobot97</a></h3>
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/tags/">Tags</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    var __HuxNav__ = {
+        close: function(){
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        },
+        open: function(){
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+
+    // Bind Event
+    $toggle.addEventListener('click', function(e){
+        if ($navbar.className.indexOf('in') > 0) {
+            __HuxNav__.close()
+        }else{
+            __HuxNav__.open()
+        }
+    })
+
+    /**
+     * Since Fastclick is used to delegate 'touchstart' globally
+     * to hack 300ms delay in iOS by performing a fake 'click',
+     * Using 'e.stopPropagation' to stop 'touchstart' event from 
+     * $toggle/$collapse will break global delegation.
+     * 
+     * Instead, we use a 'e.target' filter to prevent handler
+     * added to document close HuxNav.  
+     *
+     * Also, we use 'click' instead of 'touchstart' as compromise
+     */
+    document.addEventListener('click', function(e){
+        if(e.target == $toggle) return;
+        if(e.target.className == 'icon-bar') return;
+        __HuxNav__.close();
+    })
+</script>
+
+
+    <!-- Page Header -->
+<header class="intro-header" style="background-image: url('/img/home-bg.jpg')">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 ">
+                <div class="site-heading">
+                    <h1>mrrobot97</h1>
+                    <!--<hr class="small">-->
+                    <span class="subheading">Record my study</span>
+                </div>
+            </div>
+        </div>
+    </div>
 </header>
 
-
-    <section class="main-content">
-      <div class="wrapper">
+<!-- Main Content -->
+<div class="container">
+	<div class="row">
         
 
-<article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+<!-- USE SIDEBAR -->
+    <!-- PostList Container -->
+    		<div class="
+                col-lg-8 col-lg-offset-1
+                col-md-8 col-md-offset-1
+                col-sm-12
+                col-xs-12
+                postlist-container
+            ">
+    			
+<div class="post-preview">
+    <a href="/2017/02/26/%E8%87%AA%E5%B7%B1%E5%86%99%E4%B8%80%E4%B8%AA%E7%AE%80%E6%98%93%E7%89%88%E6%9C%AC%E7%9A%84EventBus/">
+        <h2 class="post-title">
+            自己写一个简易版本的EventBus
+        </h2>
+        
+        <div class="post-content-preview">
+            
+  大名鼎鼎的EventBus很多人一定都用过，这个框架通过利用注解+反射，很好的实现了事件订阅者与发布者的解耦。今天我们就手动实现一个简易版本的EventBus。
+
+
+先写我们的EventBus类，模仿真正的EventBus类，我们这个类里面包含的也是标准的几个方法:
+
+1.void register(Object subscriber)
+2.void unregister(Object...
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by mrrobot97 on February 26, 2017
+    </p>
+</div>
+<hr>
+
+<div class="post-preview">
+    <a href="/2016/12/30/%E5%88%B6%E4%BD%9C%E4%B8%80%E4%B8%AA%E7%BD%91%E9%80%9F%E6%98%BE%E7%A4%BA%E6%82%AC%E6%B5%AE%E7%AA%97/">
+        <h2 class="post-title">
+            制作一个网速显示悬浮窗
+        </h2>
+        
+        <div class="post-content-preview">
+            
+  2016转眼就要过去了，刚刚参加完学院举办的元旦晚会，看了看系里的大牛的各种事迹，内心感慨万分。回来继续安心做我的小码农，顺便更一下将近一个月没有更新的博客。
+
+
+这次带来的是一个悬浮窗网速显示计，先看下效果：
+
+
+
+这里主要是在桌面上显示一个悬浮窗，利用了WindowManager以及Service,接下来看看如何实现这样一个效果：
+首先APP必须获得在桌面上显示悬浮窗的机会，很多第...
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by mrrobot97 on December 30, 2016
+    </p>
+</div>
+<hr>
+
+<div class="post-preview">
+    <a href="/2016/11/05/Dribbble%E7%AC%AC%E4%B8%89%E6%96%B9%E5%BC%80%E6%BA%90%E5%AE%A2%E6%88%B7%E7%AB%AFDesigner/">
+        <h2 class="post-title">
+            Dribbble第三方开源客户端Designer
+        </h2>
+        
+        <div class="post-content-preview">
+            
+  Dribbble是一个优秀的设计师网站，这里有上万优秀设计师为移动开发人员提供了海量精美的UI资源。Dribbble很早就开放了API，也有许多优秀的第三方客户端，本着学习的目的，我在课余时间写了这个还很粗糙的客户端。目前的功能还很简陋，用户体验也不是很完善，主要是因为Dribbble的API服务器在国外，国内加载资源很慢。不过，我会慢慢更新的，一点一点把它变得更好。
+
+
+项目gith...
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by mrrobot97 on November 5, 2016
+    </p>
+</div>
+<hr>
+
+<div class="post-preview">
+    <a href="/2016/10/16/%E4%BD%BF%E7%94%A8MonkeyRunner%E8%BF%9B%E8%A1%8CAndroid%E5%BA%94%E7%94%A8%E8%87%AA%E5%8A%A8%E5%8C%96%E6%B5%8B%E8%AF%95/">
+        <h2 class="post-title">
+            使用MonkeyRunner进行Android应用自动化测试
+        </h2>
+        
+        <div class="post-content-preview">
+            
+  MonkeyRunner是谷歌官方SDK tools 中为我们提供的一个程序自动化测试工具，需要开发者编写相应的python自动测试脚本，开发者可以自定义测试流程，功能很全面，可以模拟各种事件。
+
+
+monkeyrunner位于SDK/tools/monkeyrunner,这是一个可执行脚本，我们编写自己的测试脚本然后用monkeyrunner运行即可。
+
+谷歌提供了一个python库...
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by mrrobot97 on October 16, 2016
+    </p>
+</div>
+<hr>
+
+<div class="post-preview">
+    <a href="/2016/10/15/%E5%8A%A8%E6%89%8B%E5%86%99%E4%B8%80%E4%B8%AA%E9%AB%98%E4%BB%BF%E5%BE%AE%E4%BF%A1%E7%9A%84%E6%BB%91%E5%8A%A8%E8%BF%94%E5%9B%9ESwipeBackActivity/">
+        <h2 class="post-title">
+            动手写一个高仿微信的滑动返回SwipeBackActivity
+        </h2>
+        
+        <div class="post-content-preview">
+            
+  本文来源于这个开源项目，由于作者只给出了用法和基本原理，因此才有了本文的产生。本文去除了原项目中较琐碎和不必要的一些内容，只实现了基本的Activity滑动返回功能。
 
-    <div class="main-content" itemprop="articleBody">
 
-  <header class="post-header">
-      <a class="post-link" href="/2017/02/26/%E8%87%AA%E5%B7%B1%E5%86%99%E4%B8%80%E4%B8%AA%E7%AE%80%E6%98%93%E7%89%88%E6%9C%AC%E7%9A%84EventBus.html"><h1 class="post-title" itemprop="name headline">  自己写一个简易版本的EventBus</h1> </a>
+先看效果图：
 
-  </header>
 
-  <!--- 生成文章摘要 -->
-      <li>
-         <p><blockquote>
-  <p>大名鼎鼎的<a href="https://github.com/greenrobot/EventBus">EventBus</a>很多人一定都用过，这个框架通过利用注解+反射，很好的实现了事件订阅者与发布者的解耦。今天我们就手动实现一个简易版本的EventBus。</p>
-</blockquote>
 
-</p>
-      </li>
+效果还是挺不错的。
 
+基本原理：利用Application类的registerActivityLifecycleCallbacks(ActivityLifecycleCallbacks)方法，可以...
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by mrrobot97 on October 15, 2016
+    </p>
+</div>
+<hr>
 
- <p class="post-meta" style="text-align: right; color: rgb(152,152,152);"><time datetime="2017-02-26T00:00:00+08:00" itemprop="datePublished">Feb 26, 2017</time> </p>
+<div class="post-preview">
+    <a href="/2016/10/10/%E4%BD%BF%E7%94%A8Android-Studio-%E8%BF%9B%E8%A1%8CNDK%E5%BC%80%E5%8F%91%E5%9F%BA%E7%A1%80/">
+        <h2 class="post-title">
+            使用Android Studio 进行NDK开发基础
+        </h2>
+        
+        <div class="post-content-preview">
+            配置NDK环境
+在SDKManager中下载NDK依赖包以及额外工具，只需要勾选NDK、LLDB、CMAKE：
 
-  </div>
 
-</article>
 
+安装完成后，重启AndroidStudio即可自动配置好NDK开发环境。
 
+JNI调用
 
-<article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+定义本地Native方法
 
-    <div class="main-content" itemprop="articleBody">
-
-  <header class="post-header">
-      <a class="post-link" href="/2016/12/30/%E5%88%B6%E4%BD%9C%E4%B8%80%E4%B8%AA%E7%BD%91%E9%80%9F%E6%98%BE%E7%A4%BA%E6%82%AC%E6%B5%AE%E7%AA%97.html"><h1 class="post-title" itemprop="name headline">  制作一个网速显示悬浮窗</h1> </a>
-
-  </header>
-
-  <!--- 生成文章摘要 -->
-      <li>
-         <p><blockquote>
-  <p>2016转眼就要过去了，刚刚参加完学院举办的元旦晚会，看了看系里的大牛的各种事迹，内心感慨万分。回来继续安心做我的小码农，顺便更一下将近一个月没有更新的博客。</p>
-</blockquote>
-
-</p>
-      </li>
-
-
- <p class="post-meta" style="text-align: right; color: rgb(152,152,152);"><time datetime="2016-12-30T00:00:00+08:00" itemprop="datePublished">Dec 30, 2016</time> </p>
-
-  </div>
-
-</article>
-
-
-
-<article class="post" itemscope itemtype="http://schema.org/BlogPosting">
-
-    <div class="main-content" itemprop="articleBody">
-
-  <header class="post-header">
-      <a class="post-link" href="/2016/11/05/Dribbble%E7%AC%AC%E4%B8%89%E6%96%B9%E5%BC%80%E6%BA%90%E5%AE%A2%E6%88%B7%E7%AB%AFDesigner.html"><h1 class="post-title" itemprop="name headline">  Dribbble第三方开源客户端Designer</h1> </a>
-
-  </header>
-
-  <!--- 生成文章摘要 -->
-      <li>
-         <p><blockquote>
-  <p>Dribbble是一个优秀的设计师网站，这里有上万优秀设计师为移动开发人员提供了海量精美的UI资源。Dribbble很早就开放了API，也有许多优秀的第三方客户端，本着学习的目的，我在课余时间写了这个还很粗糙的客户端。目前的功能还很简陋，用户体验也不是很完善，主要是因为Dribbble的API服务器在国外，国内加载资源很慢。不过，我会慢慢更新的，一点一点把它变得更好。</p>
-</blockquote>
-
-</p>
-      </li>
-
-
- <p class="post-meta" style="text-align: right; color: rgb(152,152,152);"><time datetime="2016-11-05T00:00:00+08:00" itemprop="datePublished">Nov 5, 2016</time> </p>
-
-  </div>
-
-</article>
-
-
-
-<article class="post" itemscope itemtype="http://schema.org/BlogPosting">
-
-    <div class="main-content" itemprop="articleBody">
-
-  <header class="post-header">
-      <a class="post-link" href="/2016/10/16/%E4%BD%BF%E7%94%A8MonkeyRunner%E8%BF%9B%E8%A1%8CAndroid%E5%BA%94%E7%94%A8%E8%87%AA%E5%8A%A8%E5%8C%96%E6%B5%8B%E8%AF%95.html"><h1 class="post-title" itemprop="name headline">  使用MonkeyRunner进行Android应用自动化测试</h1> </a>
-
-  </header>
-
-  <!--- 生成文章摘要 -->
-      <li>
-         <p><blockquote>
-  <p>MonkeyRunner是谷歌官方SDK tools 中为我们提供的一个程序自动化测试工具，需要开发者编写相应的python自动测试脚本，开发者可以自定义测试流程，功能很全面，可以模拟各种事件。</p>
-</blockquote>
-
-</p>
-      </li>
-
-
- <p class="post-meta" style="text-align: right; color: rgb(152,152,152);"><time datetime="2016-10-16T00:00:00+08:00" itemprop="datePublished">Oct 16, 2016</time> </p>
-
-  </div>
-
-</article>
-
-
-
-<article class="post" itemscope itemtype="http://schema.org/BlogPosting">
-
-    <div class="main-content" itemprop="articleBody">
-
-  <header class="post-header">
-      <a class="post-link" href="/2016/10/15/%E5%8A%A8%E6%89%8B%E5%86%99%E4%B8%80%E4%B8%AA%E9%AB%98%E4%BB%BF%E5%BE%AE%E4%BF%A1%E7%9A%84%E6%BB%91%E5%8A%A8%E8%BF%94%E5%9B%9ESwipeBackActivity.html"><h1 class="post-title" itemprop="name headline">  动手写一个高仿微信的滑动返回SwipeBackActivity</h1> </a>
-
-  </header>
-
-  <!--- 生成文章摘要 -->
-      <li>
-         <p><blockquote>
-  <p>本文来源于<a href="https://github.com/XBeats/and_swipeback">这个开源项目</a>，由于作者只给出了用法和基本原理，因此才有了本文的产生。本文去除了原项目中较琐碎和不必要的一些内容，只实现了基本的Activity滑动返回功能。</p>
-</blockquote>
-
-</p>
-      </li>
-
-
- <p class="post-meta" style="text-align: right; color: rgb(152,152,152);"><time datetime="2016-10-15T00:00:00+08:00" itemprop="datePublished">Oct 15, 2016</time> </p>
-
-  </div>
-
-</article>
-
-
-
-<article class="post" itemscope itemtype="http://schema.org/BlogPosting">
-
-    <div class="main-content" itemprop="articleBody">
-
-  <header class="post-header">
-      <a class="post-link" href="/2016/10/10/%E4%BD%BF%E7%94%A8Android-Studio-%E8%BF%9B%E8%A1%8CNDK%E5%BC%80%E5%8F%91%E5%9F%BA%E7%A1%80.html"><h1 class="post-title" itemprop="name headline">  使用Android Studio 进行NDK开发基础</h1> </a>
-
-  </header>
-
-  <!--- 生成文章摘要 -->
-      <li>
-         <p><h2 id="ndk">配置NDK环境</h2>
-<p>在SDKManager中下载NDK依赖包以及额外工具，只需要勾选NDK、LLDB、CMAKE：</p>
-
-</p>
-      </li>
-
-
- <p class="post-meta" style="text-align: right; color: rgb(152,152,152);"><time datetime="2016-10-10T00:00:00+08:00" itemprop="datePublished">Oct 10, 2016</time> </p>
-
-  </div>
-
-</article>
-
-
-
-<article class="post" itemscope itemtype="http://schema.org/BlogPosting">
-
-    <div class="main-content" itemprop="articleBody">
-
-  <header class="post-header">
-      <a class="post-link" href="/2016/09/27/%E4%BD%BF%E7%94%A8ItemTouchHelper%E5%AE%9E%E7%8E%B0RecyclerView%E7%9A%84%E6%8B%96%E5%8A%A8%E6%8E%92%E5%BA%8F-%E6%BB%91%E5%8A%A8%E5%88%A0%E9%99%A4.html"><h1 class="post-title" itemprop="name headline">  使用ItemTouchHelper实现RecyclerView的拖动排序、滑动删除</h1> </a>
-
-  </header>
-
-  <!--- 生成文章摘要 -->
-      <li>
-         <p><blockquote>
-  <p>Google为我们提供的RecyclerView真的是非常的好用，高度可定制化，这次我们利用ItemTouchHelper来实现对RecyclerView的拖动排序以及滑动删除。</p>
-</blockquote>
-
-</p>
-      </li>
-
-
- <p class="post-meta" style="text-align: right; color: rgb(152,152,152);"><time datetime="2016-09-27T00:00:00+08:00" itemprop="datePublished">Sep 27, 2016</time> </p>
-
-  </div>
-
-</article>
-
-
-
-<article class="post" itemscope itemtype="http://schema.org/BlogPosting">
-
-    <div class="main-content" itemprop="articleBody">
-
-  <header class="post-header">
-      <a class="post-link" href="/2016/09/17/%E5%88%A9%E7%94%A8%E4%BA%8C%E9%98%B6%E8%B4%9D%E5%A1%9E%E5%B0%94%E6%9B%B2%E7%BA%BF%E7%BB%98%E5%88%B6%E5%8A%A8%E6%80%81%E6%B3%A2%E6%B5%AA.html"><h1 class="post-title" itemprop="name headline">  利用二阶贝塞尔曲线绘制动态波浪</h1> </a>
-
-  </header>
-
-  <!--- 生成文章摘要 -->
-      <li>
-         <p><blockquote>
-  <p>利用贝塞尔曲线我们可以很好地拟合出各种曲线效果，其中二阶贝塞尔曲线可以用来模拟正弦曲线，及我们的“波浪”效果。</p>
-</blockquote>
-
-</p>
-      </li>
-
-
- <p class="post-meta" style="text-align: right; color: rgb(152,152,152);"><time datetime="2016-09-17T00:00:00+08:00" itemprop="datePublished">Sep 17, 2016</time> </p>
-
-  </div>
-
-</article>
-
-
-
-<article class="post" itemscope itemtype="http://schema.org/BlogPosting">
-
-    <div class="main-content" itemprop="articleBody">
-
-  <header class="post-header">
-      <a class="post-link" href="/2016/09/17/ViewPager%E5%AE%9E%E7%8E%B0%E6%97%A0%E9%99%90%E8%BD%AE%E6%92%AD.html"><h1 class="post-title" itemprop="name headline">  ViewPager实现无限轮播</h1> </a>
-
-  </header>
-
-  <!--- 生成文章摘要 -->
-      <li>
-         <p><blockquote>
-  <p>Android自带的ViewPager有翻页功能，支持用户手势滑动，但是不支持循环滚动，因此我们就在PagerAdapter的基础上为其增加循环滚动的功能就行了。</p>
-</blockquote>
-
-</p>
-      </li>
-
-
- <p class="post-meta" style="text-align: right; color: rgb(152,152,152);"><time datetime="2016-09-17T00:00:00+08:00" itemprop="datePublished">Sep 17, 2016</time> </p>
-
-  </div>
-
-</article>
-
-
-
-<article class="post" itemscope itemtype="http://schema.org/BlogPosting">
-
-    <div class="main-content" itemprop="articleBody">
-
-  <header class="post-header">
-      <a class="post-link" href="/2016/09/17/Android%E6%96%AD%E7%82%B9%E7%BB%AD%E4%BC%A0%E5%8E%9F%E7%90%86%E5%8F%8A%E5%AE%9E%E7%8E%B0.html"><h1 class="post-title" itemprop="name headline">  Android断点续传原理及实现</h1> </a>
-
-  </header>
-
-  <!--- 生成文章摘要 -->
-      <li>
-         <p><p>原理：利用HttpURLConnection进行从网站上下载文件时，我们可以利用HttpURLConnection的setRequestProperty()方法，对我们要读取的字节部分进行控制，比如:</p>
-
-</p>
-      </li>
-
-
- <p class="post-meta" style="text-align: right; color: rgb(152,152,152);"><time datetime="2016-09-17T00:00:00+08:00" itemprop="datePublished">Sep 17, 2016</time> </p>
-
-  </div>
-
-</article>
-
-
-
-
-
-<div class="pagination" style="text-align: center;">
-  
-    <span>&laquo; Prev</span>
-  
-
-  
+public class HelloJNI {
     
-      <em>1</em>
-    
-  
-    
-      <a href="/page2">2</a>
-    
-  
-    
-      <a href="/page3">3</a>
-    
-  
-    
-      <a href="/page4">4</a>
-    
-  
+    public native String getStringFromC();
+}
 
-  
-    <a href="/page2">Next &raquo;</a>
-  
+
+
+
+此...
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by mrrobot97 on October 10, 2016
+    </p>
+</div>
+<hr>
+
+<div class="post-preview">
+    <a href="/2016/09/27/%E4%BD%BF%E7%94%A8ItemTouchHelper%E5%AE%9E%E7%8E%B0RecyclerView%E7%9A%84%E6%8B%96%E5%8A%A8%E6%8E%92%E5%BA%8F-%E6%BB%91%E5%8A%A8%E5%88%A0%E9%99%A4/">
+        <h2 class="post-title">
+            使用ItemTouchHelper实现RecyclerView的拖动排序、滑动删除
+        </h2>
+        
+        <div class="post-content-preview">
+            
+  Google为我们提供的RecyclerView真的是非常的好用，高度可定制化，这次我们利用ItemTouchHelper来实现对RecyclerView的拖动排序以及滑动删除。
+
+
+先看看效果图:
+
+
+
+效果还是不错的，如果再结合自定义的ItemAnimator,可以实现很漂亮的花样。
+
+首先我们要定义一个类实现ItemTouchHelper.Callback接口，然后实现其中的几个...
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by mrrobot on September 27, 2016
+    </p>
+</div>
+<hr>
+
+<div class="post-preview">
+    <a href="/2016/09/17/%E5%88%A9%E7%94%A8%E4%BA%8C%E9%98%B6%E8%B4%9D%E5%A1%9E%E5%B0%94%E6%9B%B2%E7%BA%BF%E7%BB%98%E5%88%B6%E5%8A%A8%E6%80%81%E6%B3%A2%E6%B5%AA/">
+        <h2 class="post-title">
+            利用二阶贝塞尔曲线绘制动态波浪
+        </h2>
+        
+        <div class="post-content-preview">
+            
+  利用贝塞尔曲线我们可以很好地拟合出各种曲线效果，其中二阶贝塞尔曲线可以用来模拟正弦曲线，及我们的“波浪”效果。
+
+
+先上效果图:
+
+
+
+我们自定义一个WaveView，在onDraw中绘制我们的波浪，当然我们只能绘制静态的曲线，但是我们可以在onDraw中不断的调用invalidate()来实现模拟一帧帧的动画效果。
+
+Android中的贝塞尔曲线是利用Path.quadTo(x1,y...
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by mrrobot97 on September 17, 2016
+    </p>
+</div>
+<hr>
+
+<div class="post-preview">
+    <a href="/2016/09/17/ViewPager%E5%AE%9E%E7%8E%B0%E6%97%A0%E9%99%90%E8%BD%AE%E6%92%AD/">
+        <h2 class="post-title">
+            ViewPager实现无限轮播
+        </h2>
+        
+        <div class="post-content-preview">
+            
+  Android自带的ViewPager有翻页功能，支持用户手势滑动，但是不支持循环滚动，因此我们就在PagerAdapter的基础上为其增加循环滚动的功能就行了。
+
+
+自定义Adapter继承自PagerAdapter，我们需要重写四个方法:
+
+1.public int getCount()
+2.public Object instantiateItem(ViewGroup conta...
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by mrrobot97 on September 17, 2016
+    </p>
+</div>
+<hr>
+
+<div class="post-preview">
+    <a href="/2016/09/17/Android%E6%96%AD%E7%82%B9%E7%BB%AD%E4%BC%A0%E5%8E%9F%E7%90%86%E5%8F%8A%E5%AE%9E%E7%8E%B0/">
+        <h2 class="post-title">
+            Android断点续传原理及实现
+        </h2>
+        
+        <div class="post-content-preview">
+            原理：利用HttpURLConnection进行从网站上下载文件时，我们可以利用HttpURLConnection的setRequestProperty()方法，对我们要读取的字节部分进行控制，比如:
+
+1.Range=0-100代表只读取前100个字节。
+2.Range=100-500代表读取从第100个字节开始，读到第500个字节为止。
+3.Range=100-则代表从第100个字节开始...
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by mrrobot97 on September 17, 2016
+    </p>
+</div>
+<hr>
+
+
+<!-- Pager -->
+
+<ul class="pager">
+    
+    
+    <li class="next">
+        <a href="/page2">Older Posts &rarr;</a>
+    </li>
+    
+</ul>
+
+
+    		</div>
+    <!-- Sidebar Container -->
+            <div class="
+                col-lg-3 col-lg-offset-0
+                col-md-3 col-md-offset-0
+                col-sm-12
+                col-xs-12
+                sidebar-container
+            ">
+                <!-- Featured Tags -->
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                        
+                            
+                        
+                            
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Short About -->
+                <section class="visible-md visible-lg">
+                    <hr><h5><a href="/about/">ABOUT ME</a></h5>
+                    <div class="short-about">
+                        
+                            <img src="/img/avatar-mrrobot97.ico" />
+                        
+                        
+                            <p>Talk is cheap, show me the code.</p>
+                        
+                        <!-- SNS Link -->
+                        <ul class="list-inline">
+                            
+                            
+                            
+                            
+                            
+                            
+                            <li>
+                                <a target="_blank" href="https://github.com/mrrobot97">
+                                    <span class="fa-stack fa-lg">
+                                        <i class="fa fa-circle fa-stack-2x"></i>
+                                        <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                                    </span>
+                                </a>
+                            </li>
+                            
+                            
+                        </ul>
+                    </div>
+                </section>
+    		</div>
+        
+	</div>
 </div>
 
 
 
-      </div>
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                    
+                    
+
+                    <!-- add Weibo, Zhihu by Hux, add target = "_blank" to <a> by Hux -->
+                    
+                
+                    
+                    <li>
+                        <a target="_blank" href="https://github.com/mrrobot97">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; mrrobot97 2017
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> |
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="100px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=huxpro&repo=huxpro.github.io&type=star&count=true" >
+                    </iframe>
+                </p>
+            </div>
+        </div>
     </div>
+</footer>
 
-  </body>
+<!-- jQuery -->
+<script src="/js/jquery.min.js "></script>
 
-    <!-- 背景特效 -->
-    <script type="text/javascript">
-      !function() {
-    function o(w, v, i) {
-        return w.getAttribute(v) || i
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js "></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js "></script>
+
+<!-- Service Worker -->
+
+<script type="text/javascript">
+    if(navigator.serviceWorker){
+        // For security reasons, a service worker can only control the pages that are in the same directory level or below it. That's why we put sw.js at ROOT level.
+        navigator.serviceWorker
+            .register('/sw.js')
+            .then((registration) => {console.log('Service Worker Registered. ', registration)})
+            .catch((error) => {console.log('ServiceWorker registration failed: ', error)})
     }
-    function j(i) {
-        return document.getElementsByTagName(i)
+</script>
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
     }
-    function l() {
-        var i = j("script"), w = i.length, v = i[w - 1];
-        return {
-            l: w,
-            z: o(v, "zIndex", - 1),
-            o: o(v, "opacity", 0.5),
-            c: o(v, "color", "84,106,122"),
-            n: o(v, "count", 70)
-        }
-    }
-    function k() {
-        r = u.width = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth, n = u.height = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight
-    }
-    function b() {
-        e.clearRect(0, 0, r, n);
-        var w = [f].concat(t);
-        var x, v, A, B, z, y;
-        t.forEach(function(i) {
-            i.x += i.xa, i.y += i.ya, i.xa*=i.x > r || i.x < 0?-1 : 1, i.ya*=i.y > n || i.y < 0?-1 : 1, e.fillRect(i.x - 0.5, i.y - 0.5, 1, 1);
-            for (v = 0; v < w.length; v++) {
-                x = w[v];
-                if (i !== x && null !== x.x && null !== x.y) {
-                    B = i.x - x.x, z = i.y - x.y, y = B * B + z * z;
-                    y < x.max && (x === f && y >= x.max / 2 && (i.x -= 0.03 * B, i.y -= 0.03 * z), A = (x.max - y) / x.max, e.beginPath(), e.lineWidth = A / 2, e.strokeStyle = "rgba(" + s.c + "," + (A + 0.2) + ")", e.moveTo(i.x, i.y), e.lineTo(x.x, x.y), e.stroke())
-                }
-            }
-            w.splice(w.indexOf(i), 1)
-        }), m(b)
-    }
-    var u = document.createElement("canvas"), s = l(), c = "c_n" + s.l, e = u.getContext("2d"), r, n, m = window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame || function(i) {
-        window.setTimeout(i, 1000 / 45)
-    }, a = Math.random, f = {
-        x: null,
-        y: null,
-        max: 20000
-    };
-    u.id = c;
-    u.style.cssText = "position:fixed;top:0;left:0;z-index:" + s.z + ";opacity:" + s.o;
-    j("body")[0].appendChild(u);
-    k(), window.onresize = k;
-    window.onmousemove = function(i) {
-        i = i || window.event, f.x = i.clientX, f.y = i.clientY
-    }, window.onmouseout = function() {
-        f.x = null, f.y = null
-    };
-    for (var t = [], p = 0; s.n > p; p++) {
-        var h = a() * r, g = a() * n, q = 2 * a() - 1, d = 2 * a() - 1;
-        t.push({
-            x: h,
-            y: g,
-            xa: q,
-            ya: d,
-            max: 6000
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/ 
+     - https://github.com/jneen/rouge/wiki/list-of-supported-languages-and-lexers   
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async('/js/jquery.tagcloud.js',function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
         })
     }
-    setTimeout(function() {
-        b()
-    }, 100)
-}();
-    </script>
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("//cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
 
 
-    
+<!-- Google Analytics -->
+
+<script>
+    // dynamic User by Hux
+    var _gaId = 'UA-85750113-1';
+    var _gaDomain = 'mrrobot97.me';
+
+    // Originial
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', _gaId, _gaDomain);
+    ga('send', 'pageview');
+</script>
+
+
+
+<!-- Baidu Tongji -->
+
+
+
+
+<!-- Side Catalog -->
+
+
+
+
+</body>
 
 </html>

@@ -1,409 +1,628 @@
 <!DOCTYPE html>
 <html lang="en">
 
-  <head>
-    <meta charset="UTF-8">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
-    <link rel="stylesheet" href="http://mrrobot97.github.io/stylesheets/stylesheet.css">
-  <link rel="canonical" href="http://mrrobot97.github.io/page2/">
-  <link rel="alternate" type="application/rss+xml" title="mrrobot97's blog" href="http://mrrobot97.github.io/feed.xml">
-  <meta name="description" content="Record my study in android.">
+    <meta name="description" content="Record my study.">
+    <meta name="keywords"  content="mrrobot97, 博客, 个人网站, 互联网, Android, 移动, 编程">
+    <meta name="theme-color" content="#000000">
+    
+    <title>mrrobot97's blog</title>
 
-   <title>mrrobot97's blog</title>
+    <!-- Web App Manifest -->
+    <link rel="manifest" href="/pwa/manifest.json">
+
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://mrrobot97.me/page2/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Github CSS -->
+    <link rel="stylesheet" href="/css/syntax.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css">
 
 
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
 
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
 </head>
 
 
-  <body>
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
 
-    <header class="page-header">
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">mrrobot97</a>
+        </div>
 
-	<link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?"
-     <h1 class="project-name"> <a class="header-link" href="/"> mrrobot97's blog</a></h1>
-     <h3><a class="header-link" href="https://github.com/mrrobot97" target="_blank">follow me on github@mrrobot97</a></h3>
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/tags/">Tags</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    var __HuxNav__ = {
+        close: function(){
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        },
+        open: function(){
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+
+    // Bind Event
+    $toggle.addEventListener('click', function(e){
+        if ($navbar.className.indexOf('in') > 0) {
+            __HuxNav__.close()
+        }else{
+            __HuxNav__.open()
+        }
+    })
+
+    /**
+     * Since Fastclick is used to delegate 'touchstart' globally
+     * to hack 300ms delay in iOS by performing a fake 'click',
+     * Using 'e.stopPropagation' to stop 'touchstart' event from 
+     * $toggle/$collapse will break global delegation.
+     * 
+     * Instead, we use a 'e.target' filter to prevent handler
+     * added to document close HuxNav.  
+     *
+     * Also, we use 'click' instead of 'touchstart' as compromise
+     */
+    document.addEventListener('click', function(e){
+        if(e.target == $toggle) return;
+        if(e.target.className == 'icon-bar') return;
+        __HuxNav__.close();
+    })
+</script>
+
+
+    <!-- Page Header -->
+<header class="intro-header" style="background-image: url('/img/home-bg.jpg')">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 ">
+                <div class="site-heading">
+                    <h1>mrrobot97</h1>
+                    <!--<hr class="small">-->
+                    <span class="subheading">Record my study</span>
+                </div>
+            </div>
+        </div>
+    </div>
 </header>
 
-
-    <section class="main-content">
-      <div class="wrapper">
+<!-- Main Content -->
+<div class="container">
+	<div class="row">
         
 
-<article class="post" itemscope itemtype="http://schema.org/BlogPosting">
-
-    <div class="main-content" itemprop="articleBody">
-
-  <header class="post-header">
-      <a class="post-link" href="/2016/09/16/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E5%9B%BE%E7%89%87%E8%A3%81%E5%87%8F%E5%99%A8.html"><h1 class="post-title" itemprop="name headline">  从零开始制作图片裁减器</h1> </a>
-
-  </header>
-
-  <!--- 生成文章摘要 -->
-      <li>
-         <p><blockquote>
-  <p>这篇文章讲的是制作一个比较简单的自定义View—图片裁减器，为了降低难度，我只实现了矩形的裁减。</p>
-</blockquote>
-
-</p>
-      </li>
-
-
- <p class="post-meta" style="text-align: right; color: rgb(152,152,152);"><time datetime="2016-09-16T00:00:00+08:00" itemprop="datePublished">Sep 16, 2016</time> </p>
-
-  </div>
-
-</article>
-
-
-
-<article class="post" itemscope itemtype="http://schema.org/BlogPosting">
-
-    <div class="main-content" itemprop="articleBody">
-
-  <header class="post-header">
-      <a class="post-link" href="/2016/09/11/%E5%88%A9%E7%94%A8%E6%B3%A8%E8%A7%A3+%E5%8F%8D%E5%B0%84%E5%AE%9E%E7%8E%B0view%E7%9A%84auto-bind.html"><h1 class="post-title" itemprop="name headline">  利用注解+反射实现view的auto bind</h1> </a>
-
-  </header>
-
-  <!--- 生成文章摘要 -->
-      <li>
-         <p><blockquote>
-  <p>相信都用过JakeWharton大神的<a href="https://github.com/JakeWharton/butterknife">ButterKnife</a>框架，有了ButterKnife我们就可以不用再反复地写繁琐的findViewById()了，ButterKnife内部利用的是注解+编译时生成java字节码实现的，没有利用到反射，故在实际使用时不会对应用的性能产生影响。今天我们就简单的利用注解+反射实现一个简单的view的auto bind，当然只是为了了解一下注解和反射的简单用法。</p>
-</blockquote>
-
-</p>
-      </li>
-
-
- <p class="post-meta" style="text-align: right; color: rgb(152,152,152);"><time datetime="2016-09-11T00:00:00+08:00" itemprop="datePublished">Sep 11, 2016</time> </p>
-
-  </div>
-
-</article>
-
-
-
-<article class="post" itemscope itemtype="http://schema.org/BlogPosting">
-
-    <div class="main-content" itemprop="articleBody">
-
-  <header class="post-header">
-      <a class="post-link" href="/2016/09/10/%E4%B8%BARecyclerView%E6%B7%BB%E5%8A%A0Header-Footer-%E5%8A%A0%E8%BD%BD%E6%9B%B4%E5%A4%9A%E7%9A%84%E9%80%9A%E7%94%A8%E5%8E%9F%E7%90%86.html"><h1 class="post-title" itemprop="name headline">  为RecyclerView添加Header、Footer、加载更多的通用原理</h1> </a>
-
-  </header>
-
-  <!--- 生成文章摘要 -->
-      <li>
-         <p><blockquote>
-  <p>RecyclerView固然好用，但是官方并没有为其提供像ListView的addHeaderView()、addFooterView()等方法，固我们需要自己来实现。本文以一个简单例子介绍其通用原理，对题干中的三项都试用。</p>
-</blockquote>
-
-</p>
-      </li>
-
-
- <p class="post-meta" style="text-align: right; color: rgb(152,152,152);"><time datetime="2016-09-10T00:00:00+08:00" itemprop="datePublished">Sep 10, 2016</time> </p>
-
-  </div>
-
-</article>
-
-
-
-<article class="post" itemscope itemtype="http://schema.org/BlogPosting">
-
-    <div class="main-content" itemprop="articleBody">
-
-  <header class="post-header">
-      <a class="post-link" href="/2016/08/29/%E5%A4%9C%E9%97%B4%E6%A8%A1%E5%BC%8F%E8%BF%87%E6%B8%A1%E5%8A%A8%E7%94%BB%E7%AE%80%E5%8D%95%E5%AE%9E%E7%8E%B0.html"><h1 class="post-title" itemprop="name headline">  夜间模式过渡动画简单实现</h1> </a>
-
-  </header>
-
-  <!--- 生成文章摘要 -->
-      <li>
-         <p><blockquote>
-  <p>众所周知，知乎的夜间模式切换时有一个挺不错的过渡效果，本文就简单说明一下这个过渡是怎么实现的。</p>
-</blockquote>
-
-</p>
-      </li>
-
-
- <p class="post-meta" style="text-align: right; color: rgb(152,152,152);"><time datetime="2016-08-29T00:00:00+08:00" itemprop="datePublished">Aug 29, 2016</time> </p>
-
-  </div>
-
-</article>
-
-
-
-<article class="post" itemscope itemtype="http://schema.org/BlogPosting">
-
-    <div class="main-content" itemprop="articleBody">
-
-  <header class="post-header">
-      <a class="post-link" href="/2016/06/28/HttpURLConnection%E5%88%A9%E7%94%A8post%E4%BC%A0%E5%8F%82.html"><h1 class="post-title" itemprop="name headline">  HttpURLConnection利用post传参</h1> </a>
-
-  </header>
-
-  <!--- 生成文章摘要 -->
-      <li>
-         <p><p>直接上示例代码：</p>
-
-</p>
-      </li>
-
-
- <p class="post-meta" style="text-align: right; color: rgb(152,152,152);"><time datetime="2016-06-28T00:00:00+08:00" itemprop="datePublished">Jun 28, 2016</time> </p>
-
-  </div>
-
-</article>
-
-
-
-<article class="post" itemscope itemtype="http://schema.org/BlogPosting">
-
-    <div class="main-content" itemprop="articleBody">
-
-  <header class="post-header">
-      <a class="post-link" href="/2016/06/22/%E4%B8%BAViewPager%E8%AE%BE%E7%BD%AE%E7%82%B9%E5%87%BB%E4%BA%8B%E4%BB%B6.html"><h1 class="post-title" itemprop="name headline">  为ViewPager设置点击事件</h1> </a>
-
-  </header>
-
-  <!--- 生成文章摘要 -->
-      <li>
-         <p><p>由于ViewPager要监听用户的手势操作，故直接为ViewPager设置OnClickListener是不起作用的，因为点击事件被ViewPager内部消耗了。因此想要监听ViewPager的点击事件，我们应该利用ViewPager的setOnTouchListener()方法，在该方法中检测点击事件，然后做出响应。具体代码如下：</p>
-
-</p>
-      </li>
-
-
- <p class="post-meta" style="text-align: right; color: rgb(152,152,152);"><time datetime="2016-06-22T00:00:00+08:00" itemprop="datePublished">Jun 22, 2016</time> </p>
-
-  </div>
-
-</article>
-
-
-
-<article class="post" itemscope itemtype="http://schema.org/BlogPosting">
-
-    <div class="main-content" itemprop="articleBody">
-
-  <header class="post-header">
-      <a class="post-link" href="/2016/05/31/%E4%BD%BF%E7%94%A8python%E8%84%9A%E6%9C%AC%E7%88%AC%E5%8F%96%E8%87%AA%E5%B7%B1%E5%8D%9A%E5%AE%A2%E7%9A%84%E5%8D%9A%E6%96%87.html"><h1 class="post-title" itemprop="name headline">  使用python脚本爬取自己博客的博文</h1> </a>
-
-  </header>
-
-  <!--- 生成文章摘要 -->
-      <li>
-         <p><blockquote>
-  <p>最近在学习python和爬虫的知识，写了一个很简单的脚本来下载本博客所有的博文，文件存放问html文件。</p>
-</blockquote>
-
-</p>
-      </li>
-
-
- <p class="post-meta" style="text-align: right; color: rgb(152,152,152);"><time datetime="2016-05-31T00:00:00+08:00" itemprop="datePublished">May 31, 2016</time> </p>
-
-  </div>
-
-</article>
-
-
-
-<article class="post" itemscope itemtype="http://schema.org/BlogPosting">
-
-    <div class="main-content" itemprop="articleBody">
-
-  <header class="post-header">
-      <a class="post-link" href="/2016/05/29/%E4%BD%BF%E7%94%A8SwipeRefreshLayout%E8%BD%BB%E6%9D%BE%E5%AE%9E%E7%8E%B0%E4%B8%8B%E6%8B%89%E5%88%B7%E6%96%B0.html"><h1 class="post-title" itemprop="name headline">  使用SwipeRefreshLayout轻松实现下拉刷新</h1> </a>
-
-  </header>
-
-  <!--- 生成文章摘要 -->
-      <li>
-         <p><blockquote>
-  <p>是在看别的的源代码时才了解到的这个官方控件，都出了这么久了我居然不知道，真是醉了。再也不用第三方的了。
-使用方法：</p>
-</blockquote>
-
-</p>
-      </li>
-
-
- <p class="post-meta" style="text-align: right; color: rgb(152,152,152);"><time datetime="2016-05-29T00:00:00+08:00" itemprop="datePublished">May 29, 2016</time> </p>
-
-  </div>
-
-</article>
-
-
-
-<article class="post" itemscope itemtype="http://schema.org/BlogPosting">
-
-    <div class="main-content" itemprop="articleBody">
-
-  <header class="post-header">
-      <a class="post-link" href="/2016/05/19/%E5%8A%A8%E6%80%81%E6%B7%BB%E5%8A%A0Fragment.html"><h1 class="post-title" itemprop="name headline">  动态添加Fragment</h1> </a>
-
-  </header>
-
-  <!--- 生成文章摘要 -->
-      <li>
-         <p><p>利用代码动态生成的Fragment需要通过FragmentManager来动态地添加到应用中，这里利用的是FragmentTransaction.add()方法：
-<code class="highlighter-rouge">public abstract FragmentTransaction add (int containerViewId, Fragment fragment, String tag)</code>
-containerViewId是要添加到的布局父容器的id，tag可以随便写。</p>
-
-</p>
-      </li>
-
-
- <p class="post-meta" style="text-align: right; color: rgb(152,152,152);"><time datetime="2016-05-19T00:00:00+08:00" itemprop="datePublished">May 19, 2016</time> </p>
-
-  </div>
-
-</article>
-
-
-
-<article class="post" itemscope itemtype="http://schema.org/BlogPosting">
-
-    <div class="main-content" itemprop="articleBody">
-
-  <header class="post-header">
-      <a class="post-link" href="/2016/05/16/%E7%A1%AC%E7%9B%98%E7%BC%93%E5%AD%98DiskLruCache.html"><h1 class="post-title" itemprop="name headline">  硬盘缓存DiskLruCache</h1> </a>
-
-  </header>
-
-  <!--- 生成文章摘要 -->
-      <li>
-         <p><p>众所周知，Google官方提供一套内存缓存方案LruCache,但是并没有提供硬盘缓存方案。第三方提供了一个硬盘缓存方案DiskLruCache，不过没有被Google官方收录，故没有加入到SDK中。要使用DiskLruCache，先下载其源码：</p>
-
-</p>
-      </li>
-
-
- <p class="post-meta" style="text-align: right; color: rgb(152,152,152);"><time datetime="2016-05-16T00:00:00+08:00" itemprop="datePublished">May 16, 2016</time> </p>
-
-  </div>
-
-</article>
-
-
-
-
-
-<div class="pagination" style="text-align: center;">
-  
-    <a href="/">&laquo; Prev</a>
-  
-
-  
+<!-- USE SIDEBAR -->
+    <!-- PostList Container -->
+    		<div class="
+                col-lg-8 col-lg-offset-1
+                col-md-8 col-md-offset-1
+                col-sm-12
+                col-xs-12
+                postlist-container
+            ">
+    			
+<div class="post-preview">
+    <a href="/2016/09/16/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E5%88%B6%E4%BD%9C%E5%9B%BE%E7%89%87%E8%A3%81%E5%87%8F%E5%99%A8/">
+        <h2 class="post-title">
+            从零开始制作图片裁减器
+        </h2>
+        
+        <div class="post-content-preview">
+            
+  这篇文章讲的是制作一个比较简单的自定义View—图片裁减器，为了降低难度，我只实现了矩形的裁减。
+
+
+先看看效果图:
+
+
+
+在开始码代码之前先想一下我们的裁减器TailorView都需要实现哪些功能：
+
+1.打开系统相册，从中选中一张图片交给我们的Activity.
+2.将图片加载到一个ImageView上.
+3.显示一个矩形裁减框，并且可以放大、缩小、拖动.
+4.将图片中在裁减框范围...
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by mrrobot97 on September 16, 2016
+    </p>
+</div>
+<hr>
+
+<div class="post-preview">
+    <a href="/2016/09/11/%E5%88%A9%E7%94%A8%E6%B3%A8%E8%A7%A3+%E5%8F%8D%E5%B0%84%E5%AE%9E%E7%8E%B0view%E7%9A%84auto-bind/">
+        <h2 class="post-title">
+            利用注解+反射实现view的auto bind
+        </h2>
+        
+        <div class="post-content-preview">
+            
+  相信都用过JakeWharton大神的ButterKnife框架，有了ButterKnife我们就可以不用再反复地写繁琐的findViewById()了，ButterKnife内部利用的是注解+编译时生成java字节码实现的，没有利用到反射，故在实际使用时不会对应用的性能产生影响。今天我们就简单的利用注解+反射实现一个简单的view的auto bind，当然只是为了了解一下注解和反射的...
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by mrrobot on September 11, 2016
+    </p>
+</div>
+<hr>
+
+<div class="post-preview">
+    <a href="/2016/09/10/%E4%B8%BARecyclerView%E6%B7%BB%E5%8A%A0Header-Footer-%E5%8A%A0%E8%BD%BD%E6%9B%B4%E5%A4%9A%E7%9A%84%E9%80%9A%E7%94%A8%E5%8E%9F%E7%90%86/">
+        <h2 class="post-title">
+            为RecyclerView添加Header、Footer、加载更多的通用原理
+        </h2>
+        
+        <div class="post-content-preview">
+            
+  RecyclerView固然好用，但是官方并没有为其提供像ListView的addHeaderView()、addFooterView()等方法，固我们需要自己来实现。本文以一个简单例子介绍其通用原理，对题干中的三项都试用。
+
+
+方法就是：继承RecyclerView.Adapter，然后在其内部进行自己的逻辑实现。这里以在RecyclerView的尾部添加一个加载更多的FooterV...
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by mrrobot on September 10, 2016
+    </p>
+</div>
+<hr>
+
+<div class="post-preview">
+    <a href="/2016/08/29/%E5%A4%9C%E9%97%B4%E6%A8%A1%E5%BC%8F%E8%BF%87%E6%B8%A1%E5%8A%A8%E7%94%BB%E7%AE%80%E5%8D%95%E5%AE%9E%E7%8E%B0/">
+        <h2 class="post-title">
+            夜间模式过渡动画简单实现
+        </h2>
+        
+        <div class="post-content-preview">
+            
+  众所周知，知乎的夜间模式切换时有一个挺不错的过渡效果，本文就简单说明一下这个过渡是怎么实现的。
+
+
+原理就是：在切换至夜间模式，即给各个view更换底色之前，先给当前屏幕截一张图，然后将这张图显示在view的最上面，然后不断改变其透明度直至透明 ，然后再改变各个view的底色。至于屏幕截图，使用View的
+getDrawingCache()函数来实现的，不过要注意这个函数返回的是一张
+...
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by mrrobot97 on August 29, 2016
+    </p>
+</div>
+<hr>
+
+<div class="post-preview">
+    <a href="/2016/06/28/HttpURLConnection%E5%88%A9%E7%94%A8post%E4%BC%A0%E5%8F%82/">
+        <h2 class="post-title">
+            HttpURLConnection利用post传参
+        </h2>
+        
+        <div class="post-content-preview">
+            直接上示例代码：
+
+HttpURLConnection conn=null;
+            OutputStreamWriter osw=null;
+            BufferedReader br=null;
+            try {
+                URL url=new URL(address);
+                conn=...
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by mrrobot on June 28, 2016
+    </p>
+</div>
+<hr>
+
+<div class="post-preview">
+    <a href="/2016/06/22/%E4%B8%BAViewPager%E8%AE%BE%E7%BD%AE%E7%82%B9%E5%87%BB%E4%BA%8B%E4%BB%B6/">
+        <h2 class="post-title">
+            为ViewPager设置点击事件
+        </h2>
+        
+        <div class="post-content-preview">
+            由于ViewPager要监听用户的手势操作，故直接为ViewPager设置OnClickListener是不起作用的，因为点击事件被ViewPager内部消耗了。因此想要监听ViewPager的点击事件，我们应该利用ViewPager的setOnTouchListener()方法，在该方法中检测点击事件，然后做出响应。具体代码如下：
+
+mViewPager.setOnTouchListene...
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by mrrobot on June 22, 2016
+    </p>
+</div>
+<hr>
+
+<div class="post-preview">
+    <a href="/2016/05/31/%E4%BD%BF%E7%94%A8python%E8%84%9A%E6%9C%AC%E7%88%AC%E5%8F%96%E8%87%AA%E5%B7%B1%E5%8D%9A%E5%AE%A2%E7%9A%84%E5%8D%9A%E6%96%87/">
+        <h2 class="post-title">
+            使用python脚本爬取自己博客的博文
+        </h2>
+        
+        <div class="post-content-preview">
+            
+  最近在学习python和爬虫的知识，写了一个很简单的脚本来下载本博客所有的博文，文件存放问html文件。
+
+
+直接上代码：
+
+#-*- coding:utf-8 -*-
+import requests
+import re
+from bs4 import BeautifulSoup 
+import os
+import sys
+reload(sys)
+sys.setdefaultencod...
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by mrrobot on May 31, 2016
+    </p>
+</div>
+<hr>
+
+<div class="post-preview">
+    <a href="/2016/05/29/%E4%BD%BF%E7%94%A8SwipeRefreshLayout%E8%BD%BB%E6%9D%BE%E5%AE%9E%E7%8E%B0%E4%B8%8B%E6%8B%89%E5%88%B7%E6%96%B0/">
+        <h2 class="post-title">
+            使用SwipeRefreshLayout轻松实现下拉刷新
+        </h2>
+        
+        <div class="post-content-preview">
+            
+  是在看别的的源代码时才了解到的这个官方控件，都出了这么久了我居然不知道，真是醉了。再也不用第三方的了。
+使用方法：
+
+
+
+  在布局文件中添加SwipeRefreshLayout.
+  将ListView或者GridView或者RecyclerView放到SwipeRefreshLayout布局中。
+  在代码中为SwipeRefreshLayout设置onRefresh监听事件：se...
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by mrrobot on May 29, 2016
+    </p>
+</div>
+<hr>
+
+<div class="post-preview">
+    <a href="/2016/05/19/%E5%8A%A8%E6%80%81%E6%B7%BB%E5%8A%A0Fragment/">
+        <h2 class="post-title">
+            动态添加Fragment
+        </h2>
+        
+        <div class="post-content-preview">
+            利用代码动态生成的Fragment需要通过FragmentManager来动态地添加到应用中，这里利用的是FragmentTransaction.add()方法：
+public abstract FragmentTransaction add (int containerViewId, Fragment fragment, String tag)
+containerViewId是要添加到的布...
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by mrrobot97 on May 19, 2016
+    </p>
+</div>
+<hr>
+
+<div class="post-preview">
+    <a href="/2016/05/16/%E7%A1%AC%E7%9B%98%E7%BC%93%E5%AD%98DiskLruCache/">
+        <h2 class="post-title">
+            硬盘缓存DiskLruCache
+        </h2>
+        
+        <div class="post-content-preview">
+            众所周知，Google官方提供一套内存缓存方案LruCache,但是并没有提供硬盘缓存方案。第三方提供了一个硬盘缓存方案DiskLruCache，不过没有被Google官方收录，故没有加入到SDK中。要使用DiskLruCache，先下载其源码：
+
+DiskLruCache源码
+
+下载后将源码放在自己的项目中即可使用。关于DiskLruCache的使用：
+
+1.创建实例：
+DiskLruCa...
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by mrrobot97 on May 16, 2016
+    </p>
+</div>
+<hr>
+
+
+<!-- Pager -->
+
+<ul class="pager">
     
-      <a href="/">1</a>
+    <li class="previous">
+        <a href="/">&larr; Newer Posts</a>
+    </li>
     
-  
     
-      <em>2</em>
+    <li class="next">
+        <a href="/page3">Older Posts &rarr;</a>
+    </li>
     
-  
-    
-      <a href="/page3">3</a>
-    
-  
-    
-      <a href="/page4">4</a>
-    
-  
+</ul>
 
-  
-    <a href="/page3">Next &raquo;</a>
-  
+
+    		</div>
+    <!-- Sidebar Container -->
+            <div class="
+                col-lg-3 col-lg-offset-0
+                col-md-3 col-md-offset-0
+                col-sm-12
+                col-xs-12
+                sidebar-container
+            ">
+                <!-- Featured Tags -->
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                        
+                            
+                        
+                            
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Short About -->
+                <section class="visible-md visible-lg">
+                    <hr><h5><a href="/about/">ABOUT ME</a></h5>
+                    <div class="short-about">
+                        
+                            <img src="/img/avatar-mrrobot97.ico" />
+                        
+                        
+                            <p>Talk is cheap, show me the code.</p>
+                        
+                        <!-- SNS Link -->
+                        <ul class="list-inline">
+                            
+                            
+                            
+                            
+                            
+                            
+                            <li>
+                                <a target="_blank" href="https://github.com/mrrobot97">
+                                    <span class="fa-stack fa-lg">
+                                        <i class="fa fa-circle fa-stack-2x"></i>
+                                        <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                                    </span>
+                                </a>
+                            </li>
+                            
+                            
+                        </ul>
+                    </div>
+                </section>
+    		</div>
+        
+	</div>
 </div>
 
 
 
-      </div>
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                    
+                    
+
+                    <!-- add Weibo, Zhihu by Hux, add target = "_blank" to <a> by Hux -->
+                    
+                
+                    
+                    <li>
+                        <a target="_blank" href="https://github.com/mrrobot97">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; mrrobot97 2017
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> |
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="100px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=huxpro&repo=huxpro.github.io&type=star&count=true" >
+                    </iframe>
+                </p>
+            </div>
+        </div>
     </div>
+</footer>
 
-  </body>
+<!-- jQuery -->
+<script src="/js/jquery.min.js "></script>
 
-    <!-- 背景特效 -->
-    <script type="text/javascript">
-      !function() {
-    function o(w, v, i) {
-        return w.getAttribute(v) || i
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js "></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js "></script>
+
+<!-- Service Worker -->
+
+<script type="text/javascript">
+    if(navigator.serviceWorker){
+        // For security reasons, a service worker can only control the pages that are in the same directory level or below it. That's why we put sw.js at ROOT level.
+        navigator.serviceWorker
+            .register('/sw.js')
+            .then((registration) => {console.log('Service Worker Registered. ', registration)})
+            .catch((error) => {console.log('ServiceWorker registration failed: ', error)})
     }
-    function j(i) {
-        return document.getElementsByTagName(i)
+</script>
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
     }
-    function l() {
-        var i = j("script"), w = i.length, v = i[w - 1];
-        return {
-            l: w,
-            z: o(v, "zIndex", - 1),
-            o: o(v, "opacity", 0.5),
-            c: o(v, "color", "84,106,122"),
-            n: o(v, "count", 70)
-        }
-    }
-    function k() {
-        r = u.width = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth, n = u.height = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight
-    }
-    function b() {
-        e.clearRect(0, 0, r, n);
-        var w = [f].concat(t);
-        var x, v, A, B, z, y;
-        t.forEach(function(i) {
-            i.x += i.xa, i.y += i.ya, i.xa*=i.x > r || i.x < 0?-1 : 1, i.ya*=i.y > n || i.y < 0?-1 : 1, e.fillRect(i.x - 0.5, i.y - 0.5, 1, 1);
-            for (v = 0; v < w.length; v++) {
-                x = w[v];
-                if (i !== x && null !== x.x && null !== x.y) {
-                    B = i.x - x.x, z = i.y - x.y, y = B * B + z * z;
-                    y < x.max && (x === f && y >= x.max / 2 && (i.x -= 0.03 * B, i.y -= 0.03 * z), A = (x.max - y) / x.max, e.beginPath(), e.lineWidth = A / 2, e.strokeStyle = "rgba(" + s.c + "," + (A + 0.2) + ")", e.moveTo(i.x, i.y), e.lineTo(x.x, x.y), e.stroke())
-                }
-            }
-            w.splice(w.indexOf(i), 1)
-        }), m(b)
-    }
-    var u = document.createElement("canvas"), s = l(), c = "c_n" + s.l, e = u.getContext("2d"), r, n, m = window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame || function(i) {
-        window.setTimeout(i, 1000 / 45)
-    }, a = Math.random, f = {
-        x: null,
-        y: null,
-        max: 20000
-    };
-    u.id = c;
-    u.style.cssText = "position:fixed;top:0;left:0;z-index:" + s.z + ";opacity:" + s.o;
-    j("body")[0].appendChild(u);
-    k(), window.onresize = k;
-    window.onmousemove = function(i) {
-        i = i || window.event, f.x = i.clientX, f.y = i.clientY
-    }, window.onmouseout = function() {
-        f.x = null, f.y = null
-    };
-    for (var t = [], p = 0; s.n > p; p++) {
-        var h = a() * r, g = a() * n, q = 2 * a() - 1, d = 2 * a() - 1;
-        t.push({
-            x: h,
-            y: g,
-            xa: q,
-            ya: d,
-            max: 6000
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/ 
+     - https://github.com/jneen/rouge/wiki/list-of-supported-languages-and-lexers   
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async('/js/jquery.tagcloud.js',function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
         })
     }
-    setTimeout(function() {
-        b()
-    }, 100)
-}();
-    </script>
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("//cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
 
 
-    
+<!-- Google Analytics -->
+
+<script>
+    // dynamic User by Hux
+    var _gaId = 'UA-85750113-1';
+    var _gaDomain = 'mrrobot97.me';
+
+    // Originial
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', _gaId, _gaDomain);
+    ga('send', 'pageview');
+</script>
+
+
+
+<!-- Baidu Tongji -->
+
+
+
+
+<!-- Side Catalog -->
+
+
+
+
+</body>
 
 </html>

@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>mrrobot97&#39;s blog</title>
-    <description>Record my study in android.</description>
-    <link>http://mrrobot97.github.io/</link>
-    <atom:link href="http://mrrobot97.github.io/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Mon, 06 Mar 2017 20:37:10 +0800</pubDate>
-    <lastBuildDate>Mon, 06 Mar 2017 20:37:10 +0800</lastBuildDate>
+    <title>mrrobot97</title>
+    <description>Record my study.</description>
+    <link>https://mrrobot97.me/</link>
+    <atom:link href="https://mrrobot97.me/feed.xml" rel="self" type="application/rss+xml" />
+    <pubDate>Tue, 07 Mar 2017 12:42:55 +0800</pubDate>
+    <lastBuildDate>Tue, 07 Mar 2017 12:42:55 +0800</lastBuildDate>
     <generator>Jekyll v3.1.2</generator>
     
       <item>
@@ -281,8 +281,12 @@ public static EventBus getDefault(){
 &lt;p&gt;#&lt;a href=&quot;https://github.com/mrrobot97/EventBus&quot;&gt;全部源代码点此&lt;/a&gt;&lt;/p&gt;
 </description>
         <pubDate>Sun, 26 Feb 2017 00:00:00 +0800</pubDate>
-        <link>http://mrrobot97.github.io/2017/02/26/%E8%87%AA%E5%B7%B1%E5%86%99%E4%B8%80%E4%B8%AA%E7%AE%80%E6%98%93%E7%89%88%E6%9C%AC%E7%9A%84EventBus.html</link>
-        <guid isPermaLink="true">http://mrrobot97.github.io/2017/02/26/%E8%87%AA%E5%B7%B1%E5%86%99%E4%B8%80%E4%B8%AA%E7%AE%80%E6%98%93%E7%89%88%E6%9C%AC%E7%9A%84EventBus.html</guid>
+        <link>https://mrrobot97.me/2017/02/26/%E8%87%AA%E5%B7%B1%E5%86%99%E4%B8%80%E4%B8%AA%E7%AE%80%E6%98%93%E7%89%88%E6%9C%AC%E7%9A%84EventBus/</link>
+        <guid isPermaLink="true">https://mrrobot97.me/2017/02/26/%E8%87%AA%E5%B7%B1%E5%86%99%E4%B8%80%E4%B8%AA%E7%AE%80%E6%98%93%E7%89%88%E6%9C%AC%E7%9A%84EventBus/</guid>
+        
+        <category>Android</category>
+        
+        <category>事件总线</category>
         
         
       </item>
@@ -641,8 +645,8 @@ Return number of packets received since device boot. Counts packets across all n
 
 </description>
         <pubDate>Fri, 30 Dec 2016 00:00:00 +0800</pubDate>
-        <link>http://mrrobot97.github.io/2016/12/30/%E5%88%B6%E4%BD%9C%E4%B8%80%E4%B8%AA%E7%BD%91%E9%80%9F%E6%98%BE%E7%A4%BA%E6%82%AC%E6%B5%AE%E7%AA%97.html</link>
-        <guid isPermaLink="true">http://mrrobot97.github.io/2016/12/30/%E5%88%B6%E4%BD%9C%E4%B8%80%E4%B8%AA%E7%BD%91%E9%80%9F%E6%98%BE%E7%A4%BA%E6%82%AC%E6%B5%AE%E7%AA%97.html</guid>
+        <link>https://mrrobot97.me/2016/12/30/%E5%88%B6%E4%BD%9C%E4%B8%80%E4%B8%AA%E7%BD%91%E9%80%9F%E6%98%BE%E7%A4%BA%E6%82%AC%E6%B5%AE%E7%AA%97/</link>
+        <guid isPermaLink="true">https://mrrobot97.me/2016/12/30/%E5%88%B6%E4%BD%9C%E4%B8%80%E4%B8%AA%E7%BD%91%E9%80%9F%E6%98%BE%E7%A4%BA%E6%82%AC%E6%B5%AE%E7%AA%97/</guid>
         
         
       </item>
@@ -717,8 +721,8 @@ Return number of packets received since device boot. Counts packets across all n
 &lt;h2 id=&quot;version-010-apk-downloadhttpockr1qfi1bktclouddncomdesignerapk&quot;&gt;&lt;a href=&quot;http://ockr1qfi1.bkt.clouddn.com/Designer.apk&quot;&gt;version 0.1.0 apk download&lt;/a&gt;&lt;/h2&gt;
 </description>
         <pubDate>Sat, 05 Nov 2016 00:00:00 +0800</pubDate>
-        <link>http://mrrobot97.github.io/2016/11/05/Dribbble%E7%AC%AC%E4%B8%89%E6%96%B9%E5%BC%80%E6%BA%90%E5%AE%A2%E6%88%B7%E7%AB%AFDesigner.html</link>
-        <guid isPermaLink="true">http://mrrobot97.github.io/2016/11/05/Dribbble%E7%AC%AC%E4%B8%89%E6%96%B9%E5%BC%80%E6%BA%90%E5%AE%A2%E6%88%B7%E7%AB%AFDesigner.html</guid>
+        <link>https://mrrobot97.me/2016/11/05/Dribbble%E7%AC%AC%E4%B8%89%E6%96%B9%E5%BC%80%E6%BA%90%E5%AE%A2%E6%88%B7%E7%AB%AFDesigner/</link>
+        <guid isPermaLink="true">https://mrrobot97.me/2016/11/05/Dribbble%E7%AC%AC%E4%B8%89%E6%96%B9%E5%BC%80%E6%BA%90%E5%AE%A2%E6%88%B7%E7%AB%AFDesigner/</guid>
         
         
       </item>
@@ -782,8 +786,8 @@ print &#39;finished&#39;
 &lt;p&gt;关于MonkeyRunner具体的用法请上网查API文档。&lt;/p&gt;
 </description>
         <pubDate>Sun, 16 Oct 2016 00:00:00 +0800</pubDate>
-        <link>http://mrrobot97.github.io/2016/10/16/%E4%BD%BF%E7%94%A8MonkeyRunner%E8%BF%9B%E8%A1%8CAndroid%E5%BA%94%E7%94%A8%E8%87%AA%E5%8A%A8%E5%8C%96%E6%B5%8B%E8%AF%95.html</link>
-        <guid isPermaLink="true">http://mrrobot97.github.io/2016/10/16/%E4%BD%BF%E7%94%A8MonkeyRunner%E8%BF%9B%E8%A1%8CAndroid%E5%BA%94%E7%94%A8%E8%87%AA%E5%8A%A8%E5%8C%96%E6%B5%8B%E8%AF%95.html</guid>
+        <link>https://mrrobot97.me/2016/10/16/%E4%BD%BF%E7%94%A8MonkeyRunner%E8%BF%9B%E8%A1%8CAndroid%E5%BA%94%E7%94%A8%E8%87%AA%E5%8A%A8%E5%8C%96%E6%B5%8B%E8%AF%95/</link>
+        <guid isPermaLink="true">https://mrrobot97.me/2016/10/16/%E4%BD%BF%E7%94%A8MonkeyRunner%E8%BF%9B%E8%A1%8CAndroid%E5%BA%94%E7%94%A8%E8%87%AA%E5%8A%A8%E5%8C%96%E6%B5%8B%E8%AF%95/</guid>
         
         
       </item>
@@ -1145,8 +1149,8 @@ class BackView extends View{
 &lt;p&gt;喜欢的话，去给&lt;a href=&quot;https://github.com/XBeats/and_swipeback&quot;&gt;原项目&lt;/a&gt;start吧，当然如果你能给我的文章一个喜欢话我会更开心的~&lt;/p&gt;
 </description>
         <pubDate>Sat, 15 Oct 2016 00:00:00 +0800</pubDate>
-        <link>http://mrrobot97.github.io/2016/10/15/%E5%8A%A8%E6%89%8B%E5%86%99%E4%B8%80%E4%B8%AA%E9%AB%98%E4%BB%BF%E5%BE%AE%E4%BF%A1%E7%9A%84%E6%BB%91%E5%8A%A8%E8%BF%94%E5%9B%9ESwipeBackActivity.html</link>
-        <guid isPermaLink="true">http://mrrobot97.github.io/2016/10/15/%E5%8A%A8%E6%89%8B%E5%86%99%E4%B8%80%E4%B8%AA%E9%AB%98%E4%BB%BF%E5%BE%AE%E4%BF%A1%E7%9A%84%E6%BB%91%E5%8A%A8%E8%BF%94%E5%9B%9ESwipeBackActivity.html</guid>
+        <link>https://mrrobot97.me/2016/10/15/%E5%8A%A8%E6%89%8B%E5%86%99%E4%B8%80%E4%B8%AA%E9%AB%98%E4%BB%BF%E5%BE%AE%E4%BF%A1%E7%9A%84%E6%BB%91%E5%8A%A8%E8%BF%94%E5%9B%9ESwipeBackActivity/</link>
+        <guid isPermaLink="true">https://mrrobot97.me/2016/10/15/%E5%8A%A8%E6%89%8B%E5%86%99%E4%B8%80%E4%B8%AA%E9%AB%98%E4%BB%BF%E5%BE%AE%E4%BF%A1%E7%9A%84%E6%BB%91%E5%8A%A8%E8%BF%94%E5%9B%9ESwipeBackActivity/</guid>
         
         
       </item>
@@ -1240,8 +1244,8 @@ JNIEXPORT jstring JNICALL Java_me_mrrobot97_hellojni_HelloJNI_getStringFromC
 &lt;p&gt;上面的方法是针对只有源C文件而无.so文件的使用步骤，如果我们有现成的.so文件，直接调用System.loadLibrary即可。&lt;/p&gt;
 </description>
         <pubDate>Mon, 10 Oct 2016 00:00:00 +0800</pubDate>
-        <link>http://mrrobot97.github.io/2016/10/10/%E4%BD%BF%E7%94%A8Android-Studio-%E8%BF%9B%E8%A1%8CNDK%E5%BC%80%E5%8F%91%E5%9F%BA%E7%A1%80.html</link>
-        <guid isPermaLink="true">http://mrrobot97.github.io/2016/10/10/%E4%BD%BF%E7%94%A8Android-Studio-%E8%BF%9B%E8%A1%8CNDK%E5%BC%80%E5%8F%91%E5%9F%BA%E7%A1%80.html</guid>
+        <link>https://mrrobot97.me/2016/10/10/%E4%BD%BF%E7%94%A8Android-Studio-%E8%BF%9B%E8%A1%8CNDK%E5%BC%80%E5%8F%91%E5%9F%BA%E7%A1%80/</link>
+        <guid isPermaLink="true">https://mrrobot97.me/2016/10/10/%E4%BD%BF%E7%94%A8Android-Studio-%E8%BF%9B%E8%A1%8CNDK%E5%BC%80%E5%8F%91%E5%9F%BA%E7%A1%80/</guid>
         
         
       </item>
@@ -1341,8 +1345,8 @@ JNIEXPORT jstring JNICALL Java_me_mrrobot97_hellojni_HelloJNI_getStringFromC
 完整的项目源码地址&lt;a href=&quot;https://github.com/mrrobot97/DragableRecyclerView&quot;&gt;在此&lt;/a&gt;&lt;/p&gt;
 </description>
         <pubDate>Tue, 27 Sep 2016 00:00:00 +0800</pubDate>
-        <link>http://mrrobot97.github.io/2016/09/27/%E4%BD%BF%E7%94%A8ItemTouchHelper%E5%AE%9E%E7%8E%B0RecyclerView%E7%9A%84%E6%8B%96%E5%8A%A8%E6%8E%92%E5%BA%8F-%E6%BB%91%E5%8A%A8%E5%88%A0%E9%99%A4.html</link>
-        <guid isPermaLink="true">http://mrrobot97.github.io/2016/09/27/%E4%BD%BF%E7%94%A8ItemTouchHelper%E5%AE%9E%E7%8E%B0RecyclerView%E7%9A%84%E6%8B%96%E5%8A%A8%E6%8E%92%E5%BA%8F-%E6%BB%91%E5%8A%A8%E5%88%A0%E9%99%A4.html</guid>
+        <link>https://mrrobot97.me/2016/09/27/%E4%BD%BF%E7%94%A8ItemTouchHelper%E5%AE%9E%E7%8E%B0RecyclerView%E7%9A%84%E6%8B%96%E5%8A%A8%E6%8E%92%E5%BA%8F-%E6%BB%91%E5%8A%A8%E5%88%A0%E9%99%A4/</link>
+        <guid isPermaLink="true">https://mrrobot97.me/2016/09/27/%E4%BD%BF%E7%94%A8ItemTouchHelper%E5%AE%9E%E7%8E%B0RecyclerView%E7%9A%84%E6%8B%96%E5%8A%A8%E6%8E%92%E5%BA%8F-%E6%BB%91%E5%8A%A8%E5%88%A0%E9%99%A4/</guid>
         
         
       </item>
@@ -1443,8 +1447,8 @@ JNIEXPORT jstring JNICALL Java_me_mrrobot97_hellojni_HelloJNI_getStringFromC
 &lt;/div&gt;
 </description>
         <pubDate>Sat, 17 Sep 2016 00:00:00 +0800</pubDate>
-        <link>http://mrrobot97.github.io/2016/09/17/%E5%88%A9%E7%94%A8%E4%BA%8C%E9%98%B6%E8%B4%9D%E5%A1%9E%E5%B0%94%E6%9B%B2%E7%BA%BF%E7%BB%98%E5%88%B6%E5%8A%A8%E6%80%81%E6%B3%A2%E6%B5%AA.html</link>
-        <guid isPermaLink="true">http://mrrobot97.github.io/2016/09/17/%E5%88%A9%E7%94%A8%E4%BA%8C%E9%98%B6%E8%B4%9D%E5%A1%9E%E5%B0%94%E6%9B%B2%E7%BA%BF%E7%BB%98%E5%88%B6%E5%8A%A8%E6%80%81%E6%B3%A2%E6%B5%AA.html</guid>
+        <link>https://mrrobot97.me/2016/09/17/%E5%88%A9%E7%94%A8%E4%BA%8C%E9%98%B6%E8%B4%9D%E5%A1%9E%E5%B0%94%E6%9B%B2%E7%BA%BF%E7%BB%98%E5%88%B6%E5%8A%A8%E6%80%81%E6%B3%A2%E6%B5%AA/</link>
+        <guid isPermaLink="true">https://mrrobot97.me/2016/09/17/%E5%88%A9%E7%94%A8%E4%BA%8C%E9%98%B6%E8%B4%9D%E5%A1%9E%E5%B0%94%E6%9B%B2%E7%BA%BF%E7%BB%98%E5%88%B6%E5%8A%A8%E6%80%81%E6%B3%A2%E6%B5%AA/</guid>
         
         
       </item>
@@ -1517,8 +1521,8 @@ JNIEXPORT jstring JNICALL Java_me_mrrobot97_hellojni_HelloJNI_getStringFromC
 &lt;p&gt;&lt;img src=&quot;http://ockr1qfi1.bkt.clouddn.com/Screen%2520Capture%2520on%25202016-09-17%2520at%252015-51-54.gif&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
 </description>
         <pubDate>Sat, 17 Sep 2016 00:00:00 +0800</pubDate>
-        <link>http://mrrobot97.github.io/2016/09/17/ViewPager%E5%AE%9E%E7%8E%B0%E6%97%A0%E9%99%90%E8%BD%AE%E6%92%AD.html</link>
-        <guid isPermaLink="true">http://mrrobot97.github.io/2016/09/17/ViewPager%E5%AE%9E%E7%8E%B0%E6%97%A0%E9%99%90%E8%BD%AE%E6%92%AD.html</guid>
+        <link>https://mrrobot97.me/2016/09/17/ViewPager%E5%AE%9E%E7%8E%B0%E6%97%A0%E9%99%90%E8%BD%AE%E6%92%AD/</link>
+        <guid isPermaLink="true">https://mrrobot97.me/2016/09/17/ViewPager%E5%AE%9E%E7%8E%B0%E6%97%A0%E9%99%90%E8%BD%AE%E6%92%AD/</guid>
         
         
       </item>
@@ -1658,8 +1662,8 @@ JNIEXPORT jstring JNICALL Java_me_mrrobot97_hellojni_HelloJNI_getStringFromC
 &lt;p&gt;&lt;img src=&quot;http://ockr1qfi1.bkt.clouddn.com/2016-09-17_12_09_42.gif&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
 </description>
         <pubDate>Sat, 17 Sep 2016 00:00:00 +0800</pubDate>
-        <link>http://mrrobot97.github.io/2016/09/17/Android%E6%96%AD%E7%82%B9%E7%BB%AD%E4%BC%A0%E5%8E%9F%E7%90%86%E5%8F%8A%E5%AE%9E%E7%8E%B0.html</link>
-        <guid isPermaLink="true">http://mrrobot97.github.io/2016/09/17/Android%E6%96%AD%E7%82%B9%E7%BB%AD%E4%BC%A0%E5%8E%9F%E7%90%86%E5%8F%8A%E5%AE%9E%E7%8E%B0.html</guid>
+        <link>https://mrrobot97.me/2016/09/17/Android%E6%96%AD%E7%82%B9%E7%BB%AD%E4%BC%A0%E5%8E%9F%E7%90%86%E5%8F%8A%E5%AE%9E%E7%8E%B0/</link>
+        <guid isPermaLink="true">https://mrrobot97.me/2016/09/17/Android%E6%96%AD%E7%82%B9%E7%BB%AD%E4%BC%A0%E5%8E%9F%E7%90%86%E5%8F%8A%E5%AE%9E%E7%8E%B0/</guid>
         
         
       </item>

@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Record my study.">
+    <meta name="keywords"  content="mrrobot97, 博客, 个人网站, 互联网, Android, 移动, 编程">
+    <meta name="theme-color" content="#000000">
+    
+    <title>使用ItemTouchHelper实现RecyclerView的拖动排序、滑动删除 - mrrobot97's blog</title>
+
+    <!-- Web App Manifest -->
+    <link rel="manifest" href="/pwa/manifest.json">
+
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://mrrobot97.me/2016/09/27/%E4%BD%BF%E7%94%A8ItemTouchHelper%E5%AE%9E%E7%8E%B0RecyclerView%E7%9A%84%E6%8B%96%E5%8A%A8%E6%8E%92%E5%BA%8F-%E6%BB%91%E5%8A%A8%E5%88%A0%E9%99%A4/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Github CSS -->
+    <link rel="stylesheet" href="/css/syntax.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">mrrobot97</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/tags/">Tags</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    var __HuxNav__ = {
+        close: function(){
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        },
+        open: function(){
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+
+    // Bind Event
+    $toggle.addEventListener('click', function(e){
+        if ($navbar.className.indexOf('in') > 0) {
+            __HuxNav__.close()
+        }else{
+            __HuxNav__.open()
+        }
+    })
+
+    /**
+     * Since Fastclick is used to delegate 'touchstart' globally
+     * to hack 300ms delay in iOS by performing a fake 'click',
+     * Using 'e.stopPropagation' to stop 'touchstart' event from 
+     * $toggle/$collapse will break global delegation.
+     * 
+     * Instead, we use a 'e.target' filter to prevent handler
+     * added to document close HuxNav.  
+     *
+     * Also, we use 'click' instead of 'touchstart' as compromise
+     */
+    document.addEventListener('click', function(e){
+        if(e.target == $toggle) return;
+        if(e.target.className == 'icon-bar') return;
+        __HuxNav__.close();
+    })
+</script>
+
+
+    <!-- Image to hack wechat -->
+<!-- <img src="/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="/img/home-bg.jpg" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        position: relative;
+        background-image: url('/img/home-bg.jpg')
+    }
+
+    
+</style>
+<header class="intro-header" >
+    <div class="header-mask"></div>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                    </div>
+                    <h1>使用ItemTouchHelper实现RecyclerView的拖动排序、滑动删除</h1>
+                    
+                    
+                    <h2 class="subheading"></h2>
+                    
+                    <span class="meta">Posted by mrrobot on September 27, 2016</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+				<blockquote>
+  <p>Google为我们提供的RecyclerView真的是非常的好用，高度可定制化，这次我们利用ItemTouchHelper来实现对RecyclerView的拖动排序以及滑动删除。</p>
+</blockquote>
+
+<p>先看看效果图:</p>
+
+<p><img src="http://ockr1qfi1.bkt.clouddn.com/demo.gif" alt="效果图" /></p>
+
+<p>效果还是不错的，如果再结合自定义的ItemAnimator,可以实现很漂亮的花样。</p>
+
+<p>首先我们要定义一个类实现<code class="highlighter-rouge">ItemTouchHelper.Callback</code>接口，然后实现其中的几个方法:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>1.public boolean isLongPressDragEnabled()
+2.public boolean isItemViewSwipeEnabled()
+3.public int getMovementFlags(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder)
+4.public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target)
+5.public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction)
+</code></pre>
+</div>
+
+<p>其中isLongPressDragEnable是决定是否可以通过长按Item来对其排序，isItemViewSwipeEnable决定是否可以滑动Item，只需要在需要实现的功能里面返回true即可，这里我们两个都返回true</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>@Override
+    public boolean isLongPressDragEnabled() {
+        return true;
+    }
+
+    @Override
+    public boolean isItemViewSwipeEnabled() {
+        return true;
+    }
+</code></pre>
+</div>
+
+<p>然后就是重写onMove和onSwiped方法了，在这两个方法里面我们可以获取需要改变的item的位置，然后我们需要将这些位置通知给我们的Adapter，做法是定义一个接口：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>public interface OnDragListener {
+
+    void onDrag(int from,int to);
+
+    void onDismiss(int pos);
+}
+</code></pre>
+</div>
+
+<p>让MainActivity实现这个接口，然后重写这两个方法，并通知Adapter数据更新:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>@Override
+    public void onDrag(int from, int to) {
+        Collections.swap(mList,from,to);
+        mAdapter.notifyItemMoved(from,to);
+    }
+
+    @Override
+    public void onDismiss(int pos) {
+        mList.remove(pos);
+        mAdapter.notifyItemRemoved(pos);
+    }
+</code></pre>
+</div>
+
+<p>onMove以及onSwiped方法如下:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>@Override
+    public int getMovementFlags(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
+        int dragFlags=ItemTouchHelper.DOWN|ItemTouchHelper.UP|ItemTouchHelper.LEFT|ItemTouchHelper.RIGHT;
+        int swipeFlags=ItemTouchHelper.LEFT|ItemTouchHelper.RIGHT;
+
+        return makeMovementFlags(dragFlags,swipeFlags);
+    }
+
+    @Override
+    public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
+        mListener.onDrag(viewHolder.getAdapterPosition(),target.getAdapterPosition());
+        return true;
+    }
+</code></pre>
+</div>
+
+<p>makeMovementFlags()是用来控制滑动以及拖动的方向的，用法如上所示。</p>
+
+<p>最后就是在MainActivity中将我们的ItemTouchHelper.Callback与RecyclerView绑定:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>ItemTouchHelper.Callback callback=new MyItemTouchHelper(this);
+        ItemTouchHelper helper=new ItemTouchHelper(callback);
+        helper.attachToRecyclerView(mRecyclerView);
+</code></pre>
+</div>
+
+<p>这样所有的工作就做完了。
+完整的项目源码地址<a href="https://github.com/mrrobot97/DragableRecyclerView">在此</a></p>
+
+
+                <hr style="visibility: hidden;">
+
+
+
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/2016/09/17/%E5%88%A9%E7%94%A8%E4%BA%8C%E9%98%B6%E8%B4%9D%E5%A1%9E%E5%B0%94%E6%9B%B2%E7%BA%BF%E7%BB%98%E5%88%B6%E5%8A%A8%E6%80%81%E6%B3%A2%E6%B5%AA/" data-toggle="tooltip" data-placement="top" title="利用二阶贝塞尔曲线绘制动态波浪">
+                        Previous<br>
+                        <span>利用二阶贝塞尔曲线绘制动态波浪</span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/2016/10/10/%E4%BD%BF%E7%94%A8Android-Studio-%E8%BF%9B%E8%A1%8CNDK%E5%BC%80%E5%8F%91%E5%9F%BA%E7%A1%80/" data-toggle="tooltip" data-placement="top" title="使用Android Studio 进行NDK开发基础">
+                        Next<br>
+                        <span>使用Android Studio 进行NDK开发基础</span>
+                        </a>
+                    </li>
+                    
+                </ul>
+            
+            </div>  
+
+    <!-- Side Catalog Container -->
+        
+
+    <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+        				
+                            
+        				
+                            
+        				
+        			</div>
+                </section>
+                
+              <!-- disqus评论 -->
+                <div id="disqus_thread"></div>
+                <script>
+                (function() { // DON'T EDIT BELOW THIS LINE
+                var d = document, s = d.createElement('script');
+                s.src = '//http-mrrobot97-me.disqus.com/embed.js';
+                s.setAttribute('data-timestamp', +new Date());
+                (d.head || d.body).appendChild(s);
+                })();
+                </script>
+                <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript> 
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("//cdnjs.cloudflare.com/ajax/libs/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                    
+                    
+
+                    <!-- add Weibo, Zhihu by Hux, add target = "_blank" to <a> by Hux -->
+                    
+                
+                    
+                    <li>
+                        <a target="_blank" href="https://github.com/mrrobot97">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; mrrobot97 2017
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> |
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="100px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=huxpro&repo=huxpro.github.io&type=star&count=true" >
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js "></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js "></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js "></script>
+
+<!-- Service Worker -->
+
+<script type="text/javascript">
+    if(navigator.serviceWorker){
+        // For security reasons, a service worker can only control the pages that are in the same directory level or below it. That's why we put sw.js at ROOT level.
+        navigator.serviceWorker
+            .register('/sw.js')
+            .then((registration) => {console.log('Service Worker Registered. ', registration)})
+            .catch((error) => {console.log('ServiceWorker registration failed: ', error)})
+    }
+</script>
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/ 
+     - https://github.com/jneen/rouge/wiki/list-of-supported-languages-and-lexers   
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async('/js/jquery.tagcloud.js',function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("//cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+<script>
+    // dynamic User by Hux
+    var _gaId = 'UA-85750113-1';
+    var _gaDomain = 'mrrobot97.me';
+
+    // Originial
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', _gaId, _gaDomain);
+    ga('send', 'pageview');
+</script>
+
+
+
+<!-- Baidu Tongji -->
+
+
+
+
+<!-- Side Catalog -->
+
+
+
+
+</body>
+
+</html>
