@@ -192,22 +192,24 @@
 
 <p>EventBus里的方法只有这几个（因为我们是简易版本的嘛）。当然我们的EventBus是一个单例模式类，我用的是双重检测null的那种：</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>private static EventBus defaultInstance;
+<div class="highlighter-rouge"><pre class="highlight"><code>
+<span class="kd">private</span> <span class="kd">static</span> <span class="n">EventBus</span> <span class="n">defaultInstance</span><span class="o">;</span>
 
-public static EventBus getDefault(){
-        if(defaultInstance==null){
-            synchronized (EventBus.class){
-                if(defaultInstance==null) defaultInstance=new EventBus();
-            }
-        }
-        return defaultInstance;
-    }
+<span class="kd">public</span> <span class="kd">static</span> <span class="n">EventBus</span> <span class="nf">getDefault</span><span class="p">(</span><span class="o">){</span>
+        <span class="k">if</span><span class="o">(</span><span class="n">defaultInstance</span><span class="o">==</span><span class="kc">null</span><span class="o">){</span>
+            <span class="kd">synchronized</span> <span class="o">(</span><span class="n">EventBus</span><span class="o">.</span><span class="na">class</span><span class="o">){</span>
+                <span class="k">if</span><span class="o">(</span><span class="n">defaultInstance</span><span class="o">==</span><span class="kc">null</span><span class="o">)</span> <span class="n">defaultInstance</span><span class="o">=</span><span class="k">new</span> <span class="n">EventBus</span><span class="o">();</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+        <span class="k">return</span> <span class="n">defaultInstance</span><span class="o">;</span>
+    <span class="o">}</span>
 </code></pre>
 </div>
 
 <p>接下来是一个很重要的成员变量:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>private HashMap&lt;Class&lt;?&gt;,ArrayList&lt;Subscription&gt;&gt; subscriptionsByEventType=new HashMap&lt;&gt;();
+<div class="highlighter-rouge"><pre class="highlight"><code>
+<span class="kd">private</span> <span class="n">HashMap</span><span class="o">&lt;</span><span class="n">Class</span><span class="o">&lt;?&gt;,</span><span class="n">ArrayList</span><span class="o">&lt;</span><span class="n">Subscription</span><span class="o">&gt;&gt;</span> <span class="n">subscriptionsByEventType</span><span class="o">=</span><span class="k">new</span> <span class="n">HashMap</span><span class="o">&lt;&gt;();</span>
 
 </code></pre>
 </div>
@@ -224,55 +226,58 @@ public static EventBus getDefault(){
 
 <p>综上，我们的类Subscription如下：</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>public class Subscription {
-    public Method method;
-    public Object subscriber;
-    public ThreadMode mode;
+<div class="highlighter-rouge"><pre class="highlight"><code>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Subscription</span> <span class="o">{</span>
+    <span class="kd">public</span> <span class="n">Method</span> <span class="n">method</span><span class="o">;</span>
+    <span class="kd">public</span> <span class="n">Object</span> <span class="n">subscriber</span><span class="o">;</span>
+    <span class="kd">public</span> <span class="n">ThreadMode</span> <span class="n">mode</span><span class="o">;</span>
 
-    public Subscription(Method method, Object subscriber, ThreadMode mode) {
-        this.method = method;
-        this.subscriber = subscriber;
-        this.mode = mode;
-    }
-}
+    <span class="kd">public</span> <span class="n">Subscription</span><span class="o">(</span><span class="n">Method</span> <span class="n">method</span><span class="o">,</span> <span class="n">Object</span> <span class="n">subscriber</span><span class="o">,</span> <span class="n">ThreadMode</span> <span class="n">mode</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">method</span> <span class="o">=</span> <span class="n">method</span><span class="o">;</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">subscriber</span> <span class="o">=</span> <span class="n">subscriber</span><span class="o">;</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">mode</span> <span class="o">=</span> <span class="n">mode</span><span class="o">;</span>
+    <span class="o">}</span>
+<span class="o">}</span>
 </code></pre>
 </div>
 
 <p>其中ThreadMode就是一个简单的枚举，作为演示我只设置了两个值:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>public enum ThreadMode {
-    MainThread,PostThread
-}
+<div class="highlighter-rouge"><pre class="highlight"><code>
+<span class="kd">public</span> <span class="kd">enum</span> <span class="n">ThreadMode</span> <span class="o">{</span>
+    <span class="n">MainThread</span><span class="o">,</span><span class="n">PostThread</span>
+<span class="o">}</span>
 </code></pre>
 </div>
 <p>即post事件所在的线程以及主线程main。</p>
 
 <p>EventBus的成员变量暂时就这些，还有一个稍后再讲，接下来就是成员方法的实现，我们一个一个来，首先是register方法。先看一下register的全部代码:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>public void register(Object subscriber){
-        //根据反射机制，查找subscriber中所有已onEvent开头的method
-        Class&lt;?&gt; clazz=subscriber.getClass();
-        Method[] methods=clazz.getMethods();
-        for(Method method:methods){
-            String name=method.getName();
-            if(name.startsWith("onEvent")){
-                Class&lt;?&gt; param=method.getParameterTypes()[0];
-                ArrayList&lt;Subscription&gt; subscriptions=subscriptionsByEventType.get(param);
-                if(subscriptions==null){
-                    subscriptions=new ArrayList&lt;&gt;();
-                    subscriptionsByEventType.put(param,subscriptions);
-                }
-                //根据函数名字决定线程
-                if(name.substring("onEvent".length()).length()==0){
-                    //onEvent 默认为postThread
-                    subscriptions.add(new Subscription(method,subscriber, ThreadMode.PostThread));
-                }else{
-                    //onEventMainThread
-                    subscriptions.add(new Subscription(method,subscriber, ThreadMode.MainThread));
-                }
-            }
-        }
-    }
+<div class="highlighter-rouge"><pre class="highlight"><code>
+<span class="kd">public</span> <span class="kt">void</span> <span class="nf">register</span><span class="p">(</span><span class="n">Object</span> <span class="n">subscriber</span><span class="o">){</span>
+        <span class="c1">//根据反射机制，查找subscriber中所有已onEvent开头的method</span>
+        <span class="n">Class</span><span class="o">&lt;?&gt;</span> <span class="n">clazz</span><span class="o">=</span><span class="n">subscriber</span><span class="o">.</span><span class="na">getClass</span><span class="o">();</span>
+        <span class="n">Method</span><span class="o">[]</span> <span class="n">methods</span><span class="o">=</span><span class="n">clazz</span><span class="o">.</span><span class="na">getMethods</span><span class="o">();</span>
+        <span class="k">for</span><span class="o">(</span><span class="n">Method</span> <span class="nl">method:</span><span class="n">methods</span><span class="o">){</span>
+            <span class="n">String</span> <span class="n">name</span><span class="o">=</span><span class="n">method</span><span class="o">.</span><span class="na">getName</span><span class="o">();</span>
+            <span class="k">if</span><span class="o">(</span><span class="n">name</span><span class="o">.</span><span class="na">startsWith</span><span class="o">(</span><span class="s">"onEvent"</span><span class="o">)){</span>
+                <span class="n">Class</span><span class="o">&lt;?&gt;</span> <span class="n">param</span><span class="o">=</span><span class="n">method</span><span class="o">.</span><span class="na">getParameterTypes</span><span class="o">()[</span><span class="mi">0</span><span class="o">];</span>
+                <span class="n">ArrayList</span><span class="o">&lt;</span><span class="n">Subscription</span><span class="o">&gt;</span> <span class="n">subscriptions</span><span class="o">=</span><span class="n">subscriptionsByEventType</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">param</span><span class="o">);</span>
+                <span class="k">if</span><span class="o">(</span><span class="n">subscriptions</span><span class="o">==</span><span class="kc">null</span><span class="o">){</span>
+                    <span class="n">subscriptions</span><span class="o">=</span><span class="k">new</span> <span class="n">ArrayList</span><span class="o">&lt;&gt;();</span>
+                    <span class="n">subscriptionsByEventType</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="n">param</span><span class="o">,</span><span class="n">subscriptions</span><span class="o">);</span>
+                <span class="o">}</span>
+                <span class="c1">//根据函数名字决定线程</span>
+                <span class="k">if</span><span class="o">(</span><span class="n">name</span><span class="o">.</span><span class="na">substring</span><span class="o">(</span><span class="s">"onEvent"</span><span class="o">.</span><span class="na">length</span><span class="o">()).</span><span class="na">length</span><span class="o">()==</span><span class="mi">0</span><span class="o">){</span>
+                    <span class="c1">//onEvent 默认为postThread</span>
+                    <span class="n">subscriptions</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="k">new</span> <span class="n">Subscription</span><span class="o">(</span><span class="n">method</span><span class="o">,</span><span class="n">subscriber</span><span class="o">,</span> <span class="n">ThreadMode</span><span class="o">.</span><span class="na">PostThread</span><span class="o">));</span>
+                <span class="o">}</span><span class="k">else</span><span class="o">{</span>
+                    <span class="c1">//onEventMainThread</span>
+                    <span class="n">subscriptions</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="k">new</span> <span class="n">Subscription</span><span class="o">(</span><span class="n">method</span><span class="o">,</span><span class="n">subscriber</span><span class="o">,</span> <span class="n">ThreadMode</span><span class="o">.</span><span class="na">MainThread</span><span class="o">));</span>
+                <span class="o">}</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
 </code></pre>
 </div>
 
@@ -282,58 +287,61 @@ public static EventBus getDefault(){
 
 <p>unregister:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>public void unregister(Object subscriber){
-        Class&lt;?&gt; clazz=subscriber.getClass();
-        Method[] methods=clazz.getMethods();
-        for(Method method:methods){
-            String name=method.getName();
-            if(name.startsWith("onEvent")){
-                Class&lt;?&gt; param=method.getParameterTypes()[0];
-                ArrayList&lt;Subscription&gt; subscriptions=subscriptionsByEventType.get(param);
-                if(subscriptions!=null){
-                    for(Subscription subscription:subscriptions){
-                        if(subscription.subscriber==subscriber) subscriptions.remove(subscription);
-                    }
-                }
-            }
-        }
-    }
+<div class="highlighter-rouge"><pre class="highlight"><code>
+<span class="kd">public</span> <span class="kt">void</span> <span class="nf">unregister</span><span class="p">(</span><span class="n">Object</span> <span class="n">subscriber</span><span class="o">){</span>
+        <span class="n">Class</span><span class="o">&lt;?&gt;</span> <span class="n">clazz</span><span class="o">=</span><span class="n">subscriber</span><span class="o">.</span><span class="na">getClass</span><span class="o">();</span>
+        <span class="n">Method</span><span class="o">[]</span> <span class="n">methods</span><span class="o">=</span><span class="n">clazz</span><span class="o">.</span><span class="na">getMethods</span><span class="o">();</span>
+        <span class="k">for</span><span class="o">(</span><span class="n">Method</span> <span class="nl">method:</span><span class="n">methods</span><span class="o">){</span>
+            <span class="n">String</span> <span class="n">name</span><span class="o">=</span><span class="n">method</span><span class="o">.</span><span class="na">getName</span><span class="o">();</span>
+            <span class="k">if</span><span class="o">(</span><span class="n">name</span><span class="o">.</span><span class="na">startsWith</span><span class="o">(</span><span class="s">"onEvent"</span><span class="o">)){</span>
+                <span class="n">Class</span><span class="o">&lt;?&gt;</span> <span class="n">param</span><span class="o">=</span><span class="n">method</span><span class="o">.</span><span class="na">getParameterTypes</span><span class="o">()[</span><span class="mi">0</span><span class="o">];</span>
+                <span class="n">ArrayList</span><span class="o">&lt;</span><span class="n">Subscription</span><span class="o">&gt;</span> <span class="n">subscriptions</span><span class="o">=</span><span class="n">subscriptionsByEventType</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">param</span><span class="o">);</span>
+                <span class="k">if</span><span class="o">(</span><span class="n">subscriptions</span><span class="o">!=</span><span class="kc">null</span><span class="o">){</span>
+                    <span class="k">for</span><span class="o">(</span><span class="n">Subscription</span> <span class="nl">subscription:</span><span class="n">subscriptions</span><span class="o">){</span>
+                        <span class="k">if</span><span class="o">(</span><span class="n">subscription</span><span class="o">.</span><span class="na">subscriber</span><span class="o">==</span><span class="n">subscriber</span><span class="o">)</span> <span class="n">subscriptions</span><span class="o">.</span><span class="na">remove</span><span class="o">(</span><span class="n">subscription</span><span class="o">);</span>
+                    <span class="o">}</span>
+                <span class="o">}</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
 </code></pre>
 </div>
 <p>懂了register怎么写的写unregister就简单多了，同样利用反射找到onEvent*方法，获取参数类型，然后将该订阅者的所有订阅事件Sunscription从HashMap中去除即可。</p>
 
 <p>最后是post方法：</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>public void post(Object eventType){
-        Class&lt;?&gt; clazz=eventType.getClass();
-        ArrayList&lt;Subscription&gt; subscriptions=subscriptionsByEventType.get(clazz);
-        if(subscriptions==null) Log.d(TAG,"EventBus: no subscriber has subscribed to this event");
-        else{
-            for(Subscription subscription:subscriptions){
-                switch (subscription.mode){
-                    case MainThread:
-                        mainThreadHandler.post(subscription,eventType);
-                        break;
-                    case PostThread:
-                        try {
-                            subscription.method.invoke(subscription.subscriber,eventType);
-                        } catch (IllegalAccessException e) {
-                            e.printStackTrace();
-                        } catch (InvocationTargetException e) {
-                            e.printStackTrace();
-                        }
-                        break;
-                    default:
-                        break;
-                }
-            }
-        }
-    }
+<div class="highlighter-rouge"><pre class="highlight"><code>
+<span class="kd">public</span> <span class="kt">void</span> <span class="nf">post</span><span class="p">(</span><span class="n">Object</span> <span class="n">eventType</span><span class="o">){</span>
+        <span class="n">Class</span><span class="o">&lt;?&gt;</span> <span class="n">clazz</span><span class="o">=</span><span class="n">eventType</span><span class="o">.</span><span class="na">getClass</span><span class="o">();</span>
+        <span class="n">ArrayList</span><span class="o">&lt;</span><span class="n">Subscription</span><span class="o">&gt;</span> <span class="n">subscriptions</span><span class="o">=</span><span class="n">subscriptionsByEventType</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">clazz</span><span class="o">);</span>
+        <span class="k">if</span><span class="o">(</span><span class="n">subscriptions</span><span class="o">==</span><span class="kc">null</span><span class="o">)</span> <span class="n">Log</span><span class="o">.</span><span class="na">d</span><span class="o">(</span><span class="n">TAG</span><span class="o">,</span><span class="s">"EventBus: no subscriber has subscribed to this event"</span><span class="o">);</span>
+        <span class="k">else</span><span class="o">{</span>
+            <span class="k">for</span><span class="o">(</span><span class="n">Subscription</span> <span class="nl">subscription:</span><span class="n">subscriptions</span><span class="o">){</span>
+                <span class="k">switch</span> <span class="o">(</span><span class="n">subscription</span><span class="o">.</span><span class="na">mode</span><span class="o">){</span>
+                    <span class="k">case</span> <span class="nl">MainThread:</span>
+                        <span class="n">mainThreadHandler</span><span class="o">.</span><span class="na">post</span><span class="o">(</span><span class="n">subscription</span><span class="o">,</span><span class="n">eventType</span><span class="o">);</span>
+                        <span class="k">break</span><span class="o">;</span>
+                    <span class="k">case</span> <span class="nl">PostThread:</span>
+                        <span class="k">try</span> <span class="o">{</span>
+                            <span class="n">subscription</span><span class="o">.</span><span class="na">method</span><span class="o">.</span><span class="na">invoke</span><span class="o">(</span><span class="n">subscription</span><span class="o">.</span><span class="na">subscriber</span><span class="o">,</span><span class="n">eventType</span><span class="o">);</span>
+                        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">IllegalAccessException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+                            <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+                        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">InvocationTargetException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+                            <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+                        <span class="o">}</span>
+                        <span class="k">break</span><span class="o">;</span>
+                    <span class="k">default</span><span class="o">:</span>
+                        <span class="k">break</span><span class="o">;</span>
+                <span class="o">}</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
 </code></pre>
 </div>
 <p>post中要做的事情是根据参数类型，从HashMap中取出所有订阅该事件的Subscription,然后依次执行每一个订阅。根据订阅事件发生的线程，这里分为两种情况。PostThread很简单，直接在post函数里执行即可，具体方法为利用Method.Invoke(Object obj,Object…args);</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>subscription.method.invoke(subscription.subscriber,eventType);
+<div class="highlighter-rouge"><pre class="highlight"><code>
+<span class="n">subscription</span><span class="o">.</span><span class="na">method</span><span class="o">.</span><span class="na">invoke</span><span class="o">(</span><span class="n">subscription</span><span class="o">.</span><span class="na">subscriber</span><span class="o">,</span><span class="n">eventType</span><span class="o">);</span>
 </code></pre>
 </div>
 
@@ -341,31 +349,32 @@ public static EventBus getDefault(){
 
 <p>MainThreadHandler:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>public class MainThreadHandler extends Handler {
-    private Subscription subscription;
-    private Object eventType;
+<div class="highlighter-rouge"><pre class="highlight"><code>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">MainThreadHandler</span> <span class="kd">extends</span> <span class="n">Handler</span> <span class="o">{</span>
+    <span class="kd">private</span> <span class="n">Subscription</span> <span class="n">subscription</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="n">Object</span> <span class="n">eventType</span><span class="o">;</span>
 
-    public MainThreadHandler(Looper looper) {
-        super(looper);
-    }
+    <span class="kd">public</span> <span class="n">MainThreadHandler</span><span class="o">(</span><span class="n">Looper</span> <span class="n">looper</span><span class="o">)</span> <span class="o">{</span>
+        <span class="kd">super</span><span class="o">(</span><span class="n">looper</span><span class="o">);</span>
+    <span class="o">}</span>
 
-    @Override
-    public void handleMessage(Message msg) {
-        try {
-            subscription.method.invoke(subscription.subscriber,eventType);
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
-        }
-    }
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="n">handleMessage</span><span class="o">(</span><span class="n">Message</span> <span class="n">msg</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="n">subscription</span><span class="o">.</span><span class="na">method</span><span class="o">.</span><span class="na">invoke</span><span class="o">(</span><span class="n">subscription</span><span class="o">.</span><span class="na">subscriber</span><span class="o">,</span><span class="n">eventType</span><span class="o">);</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">IllegalAccessException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">InvocationTargetException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
 
-    public void post(Subscription subscription,Object eventType){
-        this.subscription=subscription;
-        this.eventType=eventType;
-        sendMessage(Message.obtain());
-    }
-}
+    <span class="kd">public</span> <span class="kt">void</span> <span class="n">post</span><span class="o">(</span><span class="n">Subscription</span> <span class="n">subscription</span><span class="o">,</span><span class="n">Object</span> <span class="n">eventType</span><span class="o">){</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">subscription</span><span class="o">=</span><span class="n">subscription</span><span class="o">;</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">eventType</span><span class="o">=</span><span class="n">eventType</span><span class="o">;</span>
+        <span class="n">sendMessage</span><span class="o">(</span><span class="n">Message</span><span class="o">.</span><span class="na">obtain</span><span class="o">());</span>
+    <span class="o">}</span>
+<span class="o">}</span>
 </code></pre>
 </div>
 
@@ -383,58 +392,60 @@ public static EventBus getDefault(){
 
 <p>写了两个订阅函数，订阅事件类型都是ToastEvent：</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>public class ToastEvent {
-}
+<div class="highlighter-rouge"><pre class="highlight"><code>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">ToastEvent</span> <span class="o">{</span>
+<span class="o">}</span>
 </code></pre>
 </div>
 
 <p>MainActivity.java:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>public class MainActivity extends AppCompatActivity {
-    Button bt;
-    Button btAsync;
+<div class="highlighter-rouge"><pre class="highlight"><code>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">MainActivity</span> <span class="kd">extends</span> <span class="n">AppCompatActivity</span> <span class="o">{</span>
+    <span class="n">Button</span> <span class="n">bt</span><span class="o">;</span>
+    <span class="n">Button</span> <span class="n">btAsync</span><span class="o">;</span>
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        EventBus.getDefault().register(this);
-        bt= (Button) findViewById(R.id.bt);
-        btAsync= (Button) findViewById(R.id.btAsync);
-        bt.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                EventBus.getDefault().post(new ToastEvent());
-            }
-        });
-        btAsync.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        EventBus.getDefault().post(new ToastEvent());
-                    }
-                }).start();
-            }
-        });
-    }
+    <span class="nd">@Override</span>
+    <span class="kd">protected</span> <span class="kt">void</span> <span class="n">onCreate</span><span class="o">(</span><span class="n">Bundle</span> <span class="n">savedInstanceState</span><span class="o">)</span> <span class="o">{</span>
+        <span class="kd">super</span><span class="o">.</span><span class="na">onCreate</span><span class="o">(</span><span class="n">savedInstanceState</span><span class="o">);</span>
+        <span class="n">setContentView</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">layout</span><span class="o">.</span><span class="na">activity_main</span><span class="o">);</span>
+        <span class="n">EventBus</span><span class="o">.</span><span class="na">getDefault</span><span class="o">().</span><span class="na">register</span><span class="o">(</span><span class="k">this</span><span class="o">);</span>
+        <span class="n">bt</span><span class="o">=</span> <span class="o">(</span><span class="n">Button</span><span class="o">)</span> <span class="n">findViewById</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">id</span><span class="o">.</span><span class="na">bt</span><span class="o">);</span>
+        <span class="n">btAsync</span><span class="o">=</span> <span class="o">(</span><span class="n">Button</span><span class="o">)</span> <span class="n">findViewById</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">id</span><span class="o">.</span><span class="na">btAsync</span><span class="o">);</span>
+        <span class="n">bt</span><span class="o">.</span><span class="na">setOnClickListener</span><span class="o">(</span><span class="k">new</span> <span class="n">View</span><span class="o">.</span><span class="na">OnClickListener</span><span class="o">()</span> <span class="o">{</span>
+            <span class="nd">@Override</span>
+            <span class="kd">public</span> <span class="kt">void</span> <span class="n">onClick</span><span class="o">(</span><span class="n">View</span> <span class="n">view</span><span class="o">)</span> <span class="o">{</span>
+                <span class="n">EventBus</span><span class="o">.</span><span class="na">getDefault</span><span class="o">().</span><span class="na">post</span><span class="o">(</span><span class="k">new</span> <span class="n">ToastEvent</span><span class="o">());</span>
+            <span class="o">}</span>
+        <span class="o">});</span>
+        <span class="n">btAsync</span><span class="o">.</span><span class="na">setOnClickListener</span><span class="o">(</span><span class="k">new</span> <span class="n">View</span><span class="o">.</span><span class="na">OnClickListener</span><span class="o">()</span> <span class="o">{</span>
+            <span class="nd">@Override</span>
+            <span class="kd">public</span> <span class="kt">void</span> <span class="n">onClick</span><span class="o">(</span><span class="n">View</span> <span class="n">view</span><span class="o">)</span> <span class="o">{</span>
+                <span class="k">new</span> <span class="n">Thread</span><span class="o">(</span><span class="k">new</span> <span class="n">Runnable</span><span class="o">()</span> <span class="o">{</span>
+                    <span class="nd">@Override</span>
+                    <span class="kd">public</span> <span class="kt">void</span> <span class="n">run</span><span class="o">()</span> <span class="o">{</span>
+                        <span class="n">EventBus</span><span class="o">.</span><span class="na">getDefault</span><span class="o">().</span><span class="na">post</span><span class="o">(</span><span class="k">new</span> <span class="n">ToastEvent</span><span class="o">());</span>
+                    <span class="o">}</span>
+                <span class="o">}).</span><span class="na">start</span><span class="o">();</span>
+            <span class="o">}</span>
+        <span class="o">});</span>
+    <span class="o">}</span>
 
-    public void onEvent(ToastEvent event){
-        Log.d("YJW","onEvent: "+ Thread.currentThread().getName());
-    }
+    <span class="kd">public</span> <span class="kt">void</span> <span class="n">onEvent</span><span class="o">(</span><span class="n">ToastEvent</span> <span class="n">event</span><span class="o">){</span>
+        <span class="n">Log</span><span class="o">.</span><span class="na">d</span><span class="o">(</span><span class="s">"YJW"</span><span class="o">,</span><span class="s">"onEvent: "</span><span class="o">+</span> <span class="n">Thread</span><span class="o">.</span><span class="na">currentThread</span><span class="o">().</span><span class="na">getName</span><span class="o">());</span>
+    <span class="o">}</span>
 
-    public void onEventMainThread(ToastEvent event){
-        Toast.makeText(this, "Haha on MainThread", Toast.LENGTH_SHORT).show();
-        Log.d("YJW","onEventMainThread: "+ Thread.currentThread().getName());
-    }
+    <span class="kd">public</span> <span class="kt">void</span> <span class="n">onEventMainThread</span><span class="o">(</span><span class="n">ToastEvent</span> <span class="n">event</span><span class="o">){</span>
+        <span class="n">Toast</span><span class="o">.</span><span class="na">makeText</span><span class="o">(</span><span class="k">this</span><span class="o">,</span> <span class="s">"Haha on MainThread"</span><span class="o">,</span> <span class="n">Toast</span><span class="o">.</span><span class="na">LENGTH_SHORT</span><span class="o">).</span><span class="na">show</span><span class="o">();</span>
+        <span class="n">Log</span><span class="o">.</span><span class="na">d</span><span class="o">(</span><span class="s">"YJW"</span><span class="o">,</span><span class="s">"onEventMainThread: "</span><span class="o">+</span> <span class="n">Thread</span><span class="o">.</span><span class="na">currentThread</span><span class="o">().</span><span class="na">getName</span><span class="o">());</span>
+    <span class="o">}</span>
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        EventBus.getDefault().unregister(this);
-    }
-}
+    <span class="nd">@Override</span>
+    <span class="kd">protected</span> <span class="kt">void</span> <span class="n">onDestroy</span><span class="o">()</span> <span class="o">{</span>
+        <span class="kd">super</span><span class="o">.</span><span class="na">onDestroy</span><span class="o">();</span>
+        <span class="n">EventBus</span><span class="o">.</span><span class="na">getDefault</span><span class="o">().</span><span class="na">unregister</span><span class="o">(</span><span class="k">this</span><span class="o">);</span>
+    <span class="o">}</span>
+<span class="o">}</span>
 </code></pre>
 </div>
 
