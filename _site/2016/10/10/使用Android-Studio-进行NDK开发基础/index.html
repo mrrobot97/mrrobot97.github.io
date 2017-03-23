@@ -20,7 +20,7 @@
     <link rel="shortcut icon" href="/img/favicon.ico">
     
     <!-- Canonical URL -->
-    <link rel="canonical" href="https://mrrobot97.me/2016/10/10/%E4%BD%BF%E7%94%A8Android-Studio-%E8%BF%9B%E8%A1%8CNDK%E5%BC%80%E5%8F%91%E5%9F%BA%E7%A1%80/">
+    <link rel="canonical" href="http://localhost:4000/2016/10/10/%E4%BD%BF%E7%94%A8Android-Studio-%E8%BF%9B%E8%A1%8CNDK%E5%BC%80%E5%8F%91%E5%9F%BA%E7%A1%80/">
 
     <!-- Bootstrap Core CSS -->
     <link rel="stylesheet" href="/css/bootstrap.min.css">
@@ -174,16 +174,16 @@
                 col-md-10 col-md-offset-1
                 post-container">
 
-				<h2 id="ndk">配置NDK环境</h2>
+				<h2 id="配置ndk环境">配置NDK环境</h2>
 <p>在SDKManager中下载NDK依赖包以及额外工具，只需要勾选NDK、LLDB、CMAKE：</p>
 
 <p><img src="https://developer.android.com/studio/images/projects/ndk-install_2-2_2x.png" alt="" /></p>
 
 <p>安装完成后，重启AndroidStudio即可自动配置好NDK开发环境。</p>
 
-<h2 id="jni">JNI调用</h2>
+<h2 id="jni调用">JNI调用</h2>
 
-<h3 id="native">定义本地Native方法</h3>
+<h3 id="定义本地native方法">定义本地Native方法</h3>
 
 <div class="highlighter-rouge"><pre class="highlight"><code>public class HelloJNI {
     
@@ -195,7 +195,7 @@
 
 <p>此时getStringFromC()方法会报错，这是由于找不到这个方法，无视之，直接build project。</p>
 
-<h3 id="section">生成头文件</h3>
+<h3 id="生成头文件">生成头文件</h3>
 
 <p>build成功后进入app/build/intermediates/classes/debug目录下，使用命令行javah生成HelloJNI中的native方法对应的头文件：</p>
 
@@ -214,7 +214,7 @@ JNIEXPORT jstring JNICALL Java_me_mrrobot97_hellojni_HelloJNI_getStringFromC
 </code></pre>
 </div>
 
-<h3 id="gradle">修改gradle</h3>
+<h3 id="修改gradle">修改gradle</h3>
 <p>然后修改module级别的build.gradle文件，在defaultConfig中加入如下配置：</p>
 
 <div class="highlighter-rouge"><pre class="highlight"><code>ndk{

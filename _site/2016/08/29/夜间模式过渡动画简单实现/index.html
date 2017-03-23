@@ -20,7 +20,7 @@
     <link rel="shortcut icon" href="/img/favicon.ico">
     
     <!-- Canonical URL -->
-    <link rel="canonical" href="https://mrrobot97.me/2016/08/29/%E5%A4%9C%E9%97%B4%E6%A8%A1%E5%BC%8F%E8%BF%87%E6%B8%A1%E5%8A%A8%E7%94%BB%E7%AE%80%E5%8D%95%E5%AE%9E%E7%8E%B0/">
+    <link rel="canonical" href="http://localhost:4000/2016/08/29/%E5%A4%9C%E9%97%B4%E6%A8%A1%E5%BC%8F%E8%BF%87%E6%B8%A1%E5%8A%A8%E7%94%BB%E7%AE%80%E5%8D%95%E5%AE%9E%E7%8E%B0/">
 
     <!-- Bootstrap Core CSS -->
     <link rel="stylesheet" href="/css/bootstrap.min.css">
@@ -179,8 +179,10 @@
 </blockquote>
 
 <p>原理就是：在切换至夜间模式，即给各个view更换底色之前，先给当前屏幕截一张图，然后将这张图显示在view的最上面，然后不断改变其透明度直至透明 ，然后再改变各个view的底色。至于屏幕截图，使用View的
-getDrawingCache()函数来实现的，不过要注意这个函数返回的是一张
-&gt;A non-scaled bitmap representing this view</p>
+getDrawingCache()函数来实现的，不过要注意这个函数返回的是一张</p>
+<blockquote>
+  <p>A non-scaled bitmap representing this view</p>
+</blockquote>
 
 <p>的图片，所以我们需要一这个Bitmap为src在创建一个Bitmap.</p>
 
