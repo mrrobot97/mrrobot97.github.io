@@ -41,7 +41,7 @@ public @interface BindView {
 
 ​	这两个注解的Retention都是CLASS级别，表示注解会被编译保留到.class文件但是运行时（RUNTIME）不保留，因此不影响代码运行时的性能。有一个小技巧就是将注解的变量取名为value(只有一个变量时)可以在声明注解变量时省略变量名，即可以这样使用:
 
-```jav
+```java
 @BindView(R.id.my_tv)
 TextView mTV;
 ```
@@ -222,7 +222,7 @@ ParameterSpec activityParam=ParameterSpec.builder(activityClassName,"activity")
 
 构造函数:
 
-```
+```java
         //构造函数，内部调用bindView方法
         MethodSpec constructorMethod=MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PUBLIC)
