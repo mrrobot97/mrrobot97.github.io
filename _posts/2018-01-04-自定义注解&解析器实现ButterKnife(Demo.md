@@ -1,7 +1,7 @@
 ---
-Layout:post
-Title:自定义注解&解析器实现ButterKnife(Demo
-Tags:自定义注解 BUtterKnife annotation android
+layout:post
+title:自定义注解&解析器实现ButterKnife(Demo
+tags:自定义注解 BUtterKnife annotation android
 author:mrrobot97
 ---
 
