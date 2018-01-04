@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Record my study.">
+    <meta name="keywords"  content="mrrobot97, 博客, 个人网站, 互联网, Android, 移动, 编程">
+    <meta name="theme-color" content="#000000">
+    
+    <title>自定义注解和解析器实现ButterKnife(Demo - mrrobot97's blog</title>
+
+    <!-- Web App Manifest -->
+    <link rel="manifest" href="/pwa/manifest.json">
+
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="http://localhost:4000/2018/01/04/%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B3%A8%E8%A7%A3%E5%92%8C%E8%A7%A3%E6%9E%90%E5%99%A8%E5%AE%9E%E7%8E%B0ButterKnife(Demo/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Rouge Github CSS -->
+    <link rel="stylesheet" href="/css/syntax.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">mrrobot97</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/tags/">Tags</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    var __HuxNav__ = {
+        close: function(){
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        },
+        open: function(){
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+
+    // Bind Event
+    $toggle.addEventListener('click', function(e){
+        if ($navbar.className.indexOf('in') > 0) {
+            __HuxNav__.close()
+        }else{
+            __HuxNav__.open()
+        }
+    })
+
+    /**
+     * Since Fastclick is used to delegate 'touchstart' globally
+     * to hack 300ms delay in iOS by performing a fake 'click',
+     * Using 'e.stopPropagation' to stop 'touchstart' event from 
+     * $toggle/$collapse will break global delegation.
+     * 
+     * Instead, we use a 'e.target' filter to prevent handler
+     * added to document close HuxNav.  
+     *
+     * Also, we use 'click' instead of 'touchstart' as compromise
+     */
+    document.addEventListener('click', function(e){
+        if(e.target == $toggle) return;
+        if(e.target.className == 'icon-bar') return;
+        __HuxNav__.close();
+    })
+</script>
+
+
+    <!-- Image to hack wechat -->
+<!-- <img src="/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="/img/home-bg.jpg" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        position: relative;
+        background-image: url('/img/home-bg.jpg')
+    }
+
+    
+</style>
+<header class="intro-header" >
+    <div class="header-mask"></div>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/#自定义注解" title="自定义注解">自定义注解</a>
+                        
+                        <a class="tag" href="/tags/#ButterKnife" title="ButterKnife">ButterKnife</a>
+                        
+                        <a class="tag" href="/tags/#annotation" title="annotation">annotation</a>
+                        
+                        <a class="tag" href="/tags/#android" title="android">android</a>
+                        
+                    </div>
+                    <h1>自定义注解和解析器实现ButterKnife(Demo</h1>
+                    
+                    
+                    <h2 class="subheading"></h2>
+                    
+                    <span class="meta">Posted by mrrobot97 on January 4, 2018</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+				<blockquote>
+  <p>​	相信绝大部分的Android开发者都曾使用过<a href="https://github.com/JakeWharton/butterknife">ButterKnife</a>, 利用ButterKnife开发者可以快速的实现实体view与xml的绑定，此外还能绑定各种资源、动画、字符串甚至是点击事件等。ButterKnife内部的原理就是通过自定义注解+自定义注解解析器来动态生成代码并为我们的view绑定id的。本文通过实现一个demo性质的ButterKnife项目来展示如何自定义注解+注解解析器。</p>
+</blockquote>
+
+<p>​	关于注解本身本文不多做介绍，这里给出一篇讲解注解的文章<a href="http://blog.csdn.net/u013045971/article/details/53433874">一小时搞明白自定义注解（Annotation）</a>，对注解还比较陌生的读者可以先看一下注解的知识。</p>
+
+<p>​	新建一个Android Studio Project，名字就叫MyButterKnife好了。MainActivity、layout都直接使用自动生成的，在activity_main.xml中给TextView添加一个id。</p>
+
+<p>​	接下来新建一个module用于实现我们的自定义注解以及自定义注解解析器，注意这个module必须是<strong>java library</strong>,因为在java library中我们才可以继承解析器<em>AbstractProcessor</em>，android library是无法访问的。</p>
+
+<p><img src="http://ockr1qfi1.bkt.clouddn.com/CF59B5F3-A17A-4C01-817D-1465066D7705.png" alt="选择java library" /></p>
+
+<p>​	新建一个java library取名为<em>processor</em>.</p>
+
+<p>​	然后自定义注解(Annotation)，我们只是做一个demo性质的实验，因此只实现View与id的绑定功能。这里我定义了两个注解<strong>NeedBind</strong>与<strong>BindView</strong>:</p>
+
+<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="nd">@Target</span><span class="o">(</span><span class="n">ElementType</span><span class="o">.</span><span class="na">TYPE</span><span class="o">)</span>
+<span class="nd">@Retention</span><span class="o">(</span><span class="n">RetentionPolicy</span><span class="o">.</span><span class="na">CLASS</span><span class="o">)</span>
+<span class="kd">public</span> <span class="nd">@interface</span> <span class="n">NeedBind</span> <span class="o">{</span>
+  
+<span class="o">}</span>
+</code></pre>
+</div>
+
+<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="nd">@Target</span><span class="o">(</span><span class="n">ElementType</span><span class="o">.</span><span class="na">FIELD</span><span class="o">)</span>
+<span class="nd">@Retention</span><span class="o">(</span><span class="n">RetentionPolicy</span><span class="o">.</span><span class="na">CLASS</span><span class="o">)</span>
+<span class="kd">public</span> <span class="nd">@interface</span> <span class="n">BindView</span> <span class="o">{</span>
+    <span class="kt">int</span> <span class="nf">value</span><span class="o">()</span> <span class="k">default</span> <span class="o">-</span><span class="mi">1</span><span class="o">;</span>
+<span class="o">}</span>
+</code></pre>
+</div>
+
+<p>​	<em>NeedBind</em>的Target是<em>TYPE</em>说明这是一个用于修饰类和接口的注解，这里NeedBind的作用是帮助我们快速筛选出需要处理自定义注解的类。<em>BindView</em>的Target是FIELD也就是成员变量，即需要绑定资源id的view成员。</p>
+
+<p>​	这两个注解的Retention都是CLASS级别，表示注解会被编译保留到.class文件但是运行时（RUNTIME）不保留，因此不影响代码运行时的性能。有一个小技巧就是将注解的变量取名为value(只有一个变量时)可以在声明注解变量时省略变量名，即可以这样使用:</p>
+
+<pre><code class="language-jav">@BindView(R.id.my_tv)
+TextView mTV;
+</code></pre>
+
+<p>​	如果我们取名为别的比如id，那么注解必须向下面这样使用:</p>
+
+<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="nd">@BindView</span><span class="o">(</span><span class="n">id</span> <span class="o">=</span> <span class="n">R</span><span class="o">.</span><span class="na">id</span><span class="o">.</span><span class="na">my_tv</span><span class="o">)</span>
+<span class="n">TextView</span> <span class="n">mTv</span><span class="o">;</span>
+</code></pre>
+</div>
+
+<p>​	注解定义好后就可以在项目里使用了：</p>
+
+<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="nd">@NeedBind</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">MainActivity</span> <span class="kd">extends</span> <span class="n">AppCompatActivity</span> <span class="o">{</span>
+
+    <span class="nd">@BindView</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">id</span><span class="o">.</span><span class="na">my_tv</span><span class="o">)</span>
+    <span class="n">TextView</span> <span class="n">mTv</span><span class="o">;</span>	<span class="c1">//不能为private</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">onCreate</span><span class="o">(</span><span class="n">Bundle</span> <span class="n">savedInstanceState</span><span class="o">)</span> <span class="o">{</span>
+        <span class="kd">super</span><span class="o">.</span><span class="na">onCreate</span><span class="o">(</span><span class="n">savedInstanceState</span><span class="o">);</span>
+        <span class="n">setContentView</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">layout</span><span class="o">.</span><span class="na">activity_main</span><span class="o">);</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre>
+</div>
+
+<p>​	注意这里我加了两个注解：用于修饰MainActivity的NeedBind和用于修饰mTv的BindView。另外很重要的一点就是mTv变量<strong>不能</strong>用private修饰，因为我们是通过在生成的代理类中调用MainActivity.view=(View)MainActivity.findViewById()来实现为view绑定id的，所以mTv至少需要是package可见级别的。现在还没有解析我们自定义的注解，因此现在加的注解是没有任何作用的，那么接下来就开始实现我们的注解解析器吧。</p>
+
+<p>​	还是在processor module下，新建类<strong>MyButterKnifeProcessor</strong>,继承自<strong>AbstractProcessor</strong>.这个就是用于解析自定义注解的解析器了。不过要想让它生效还必须在processor下新建如下的目录结构：</p>
+
+<p><img src="http://ockr1qfi1.bkt.clouddn.com/46E63139-25BC-4D9A-AAC4-F73148611296.png" alt="" /></p>
+
+<p>并新建名为<strong>javax.annotation.processing.Processor</strong>的文本文件，内容就一行:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>me.mrrobot97.lib.MyButterKnifeProcessor
+</code></pre>
+</div>
+
+<p>​	还需要修改app module的build.gradle文件，加入:</p>
+
+<div class="language-groovy highlighter-rouge"><pre class="highlight"><code><span class="n">compile</span> <span class="nf">project</span><span class="o">(</span><span class="nl">path:</span> <span class="s1">':processor'</span><span class="o">)</span>
+<span class="n">annotationProcessor</span> <span class="nf">project</span><span class="o">(</span><span class="nl">path:</span> <span class="s1">':processor'</span><span class="o">)</span>
+</code></pre>
+</div>
+
+<p>​	这么做是为了让编译器使用我们的解析器用于解析注解。</p>
+
+<p>​	后面的工作都是在<em>MyButterKnifeProcessor</em>类里实现了。我们的目的是通过读取类中的自定义注解，生成相应的绑定视图的代码，这就需要一个生成java代码的库<a href="https://github.com/square/javapoet">javapoet</a>, squre出品，质量绝对上乘。在processor的build.gradle里加入如下一行:</p>
+
+<div class="language-groovy highlighter-rouge"><pre class="highlight"><code><span class="n">compile</span> <span class="s1">'com.squareup:javapoet:1.9.0'</span>
+</code></pre>
+</div>
+
+<p>ps:这么实用的开源项目在github上居然才4500start,还没有最近火的微信跳一跳小游戏辅助脚本的star多，我也是醉了。可见github的star还是很水的，看看就好，千万别用star数目判断一个项目是否牛逼……</p>
+
+<p>​	MyButterKnifeProcessor里需要重写方法<strong>process()</strong>和方法<strong>getSupportedAnnotationTypes()</strong>:</p>
+
+<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">MyButterKnifeProcessor</span> <span class="kd">extends</span> <span class="n">AbstractProcessor</span><span class="o">{</span>
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">process</span><span class="o">(</span><span class="n">Set</span><span class="o">&lt;?</span> <span class="kd">extends</span> <span class="n">TypeElement</span><span class="o">&gt;</span> <span class="n">set</span><span class="o">,</span> <span class="n">RoundEnvironment</span> <span class="n">roundEnvironment</span><span class="o">)</span> <span class="o">{</span>
+      	<span class="c1">//为所有标注了NeedBind标注的类生成相应代理class</span>
+		<span class="k">for</span><span class="o">(</span><span class="n">Element</span> <span class="nl">element:</span><span class="n">roundEnvironment</span><span class="o">.</span><span class="na">getElementsAnnotatedWith</span><span class="o">(</span><span class="n">NeedBind</span><span class="o">.</span><span class="na">class</span><span class="o">)){</span>
+            <span class="n">generateBinderClass</span><span class="o">((</span><span class="n">TypeElement</span><span class="o">)</span> <span class="n">element</span><span class="o">);</span>	<span class="c1">//后面实现</span>
+        <span class="o">}</span>
+        <span class="c1">//return true 表示该processor处理的注解是否只由该processor处理</span>
+        <span class="k">return</span> <span class="kc">true</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="n">Set</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span> <span class="nf">getSupportedAnnotationTypes</span><span class="o">()</span> <span class="o">{</span>
+      <span class="c1">//表示该注解处理器需要处理带有这些注解的类、接口</span>
+        <span class="k">return</span> <span class="n">Collections</span><span class="o">.</span><span class="na">singleton</span><span class="o">(</span><span class="n">NeedBind</span><span class="o">.</span><span class="na">class</span><span class="o">.</span><span class="na">getCanonicalName</span><span class="o">());</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre>
+</div>
+
+<p>​	然后就到了本文的关键：处理注解并生成辅助类。<strong>强烈建议</strong>读者先阅读<strong><a href="https://github.com/square/javapoet">javapoet的简单使用</a></strong>, 不然可能难以读懂接下来的代码。</p>
+
+<p>​	先展示一下最终生成代码的效果，这是准备本文时练习的一个demo：</p>
+
+<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="c1">// This file is generated by Binder, do not edit!</span>
+<span class="kn">package</span> <span class="n">guru</span><span class="o">.</span><span class="na">mrrobot97</span><span class="o">.</span><span class="na">customannotationprocessor</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">android.view.View</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">android.widget.TextView</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">MainActivityDeleagteBinder</span> <span class="o">{</span>
+  <span class="kd">public</span> <span class="nf">MainActivityDeleagteBinder</span><span class="o">(</span><span class="kd">final</span> <span class="n">MainActivity</span> <span class="n">activity</span><span class="o">)</span> <span class="o">{</span>
+    <span class="n">bindView</span><span class="o">(</span><span class="n">activity</span><span class="o">);</span>
+    <span class="n">bindClick</span><span class="o">(</span><span class="n">activity</span><span class="o">);</span>
+  <span class="o">}</span>
+
+  <span class="kd">private</span> <span class="kt">void</span> <span class="nf">bindView</span><span class="o">(</span><span class="kd">final</span> <span class="n">MainActivity</span> <span class="n">activity</span><span class="o">)</span> <span class="o">{</span>
+    <span class="n">activity</span><span class="o">.</span><span class="na">mTv</span><span class="o">=(</span><span class="n">TextView</span><span class="o">)</span><span class="n">activity</span><span class="o">.</span><span class="na">findViewById</span><span class="o">(</span><span class="mi">2131165301</span><span class="o">);</span>
+    <span class="n">activity</span><span class="o">.</span><span class="na">mTv2</span><span class="o">=(</span><span class="n">TextView</span><span class="o">)</span><span class="n">activity</span><span class="o">.</span><span class="na">findViewById</span><span class="o">(</span><span class="mi">2131165302</span><span class="o">);</span>
+  <span class="o">}</span>
+
+  <span class="kd">private</span> <span class="kt">void</span> <span class="nf">bindClick</span><span class="o">(</span><span class="kd">final</span> <span class="n">MainActivity</span> <span class="n">activity</span><span class="o">)</span> <span class="o">{</span>
+    <span class="n">activity</span><span class="o">.</span><span class="na">findViewById</span><span class="o">(</span><span class="mi">2131165301</span><span class="o">).</span><span class="na">setOnClickListener</span><span class="o">(</span><span class="k">new</span> <span class="n">View</span><span class="o">.</span><span class="na">OnClickListener</span><span class="o">()</span> <span class="o">{</span>
+                    <span class="nd">@Override</span>
+                    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onClick</span><span class="o">(</span><span class="n">View</span> <span class="n">v</span><span class="o">)</span> <span class="o">{</span>
+                          <span class="n">activity</span><span class="o">.</span><span class="na">sayHello</span><span class="o">();</span>                
+                    <span class="o">}</span>
+                <span class="o">});</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre>
+</div>
+
+<p>​	上面所有的内容都是javapoet生成的，下面就按照上面这个最终效果来一步一步分析要怎么生成我们的代理类。简单起见，就不生成bindClick相关代码了，毕竟我们也没定义相关注解。</p>
+
+<p>​	我们要为所有标注了NeedBind注解的类生成名为*DeleagteBinder的类，同样为了简单起见我们只做了Activity中view的绑定。DeleagteBinder类要包含一个构造函数、一个bindView方法, bingView方法里要为Activity中绑定了BindView注解的view绑定id，此外构造函数和bindVIew方法还都有一个&lt;? extends Activity&gt;类型的参数。</p>
+
+<p>​	我们从小到大一个一个生成，首先来构造我们的&lt;? extends Activity&gt;类型的方法参数:</p>
+
+<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="c1">//拿到Activity的类</span>
+<span class="n">ClassName</span> <span class="n">activityClassName</span><span class="o">=</span><span class="n">ClassName</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">element</span><span class="o">);</span>     
+<span class="c1">//构造activity类型的参数</span>
+<span class="n">ParameterSpec</span> <span class="n">activityParam</span><span class="o">=</span><span class="n">ParameterSpec</span><span class="o">.</span><span class="na">builder</span><span class="o">(</span><span class="n">activityClassName</span><span class="o">,</span><span class="s">"activity"</span><span class="o">)</span>
+                <span class="o">.</span><span class="na">addModifiers</span><span class="o">(</span><span class="n">Modifier</span><span class="o">.</span><span class="na">FINAL</span><span class="o">)</span>
+                <span class="o">.</span><span class="na">build</span><span class="o">();</span>
+</code></pre>
+</div>
+
+<p>然后加入一个如下的方法，用于查找类中所有标注了某种注解的成员变量(VariableElement):</p>
+
+<div class="language-java highlighter-rouge"><pre class="highlight"><code>    <span class="cm">/**
+     * 返回所有标注了clazz类型注解的成员变量
+     * @param typeElement
+     * @param clazz
+     * @return
+     */</span>
+    <span class="kd">private</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">VariableElement</span><span class="o">&gt;</span> <span class="nf">getFieldElementsWithAnnotation</span><span class="o">(</span><span class="n">TypeElement</span> <span class="n">typeElement</span><span class="o">,</span><span class="n">Class</span> <span class="n">clazz</span><span class="o">){</span>
+        <span class="n">List</span><span class="o">&lt;</span><span class="n">VariableElement</span><span class="o">&gt;</span> <span class="n">elements</span><span class="o">=</span><span class="k">new</span> <span class="n">ArrayList</span><span class="o">&lt;&gt;();</span>
+        <span class="k">for</span><span class="o">(</span><span class="n">Element</span> <span class="nl">element:</span><span class="n">typeElement</span><span class="o">.</span><span class="na">getEnclosedElements</span><span class="o">()){</span>
+            <span class="k">if</span><span class="o">(</span><span class="n">element</span><span class="o">.</span><span class="na">getAnnotation</span><span class="o">(</span><span class="n">clazz</span><span class="o">)!=</span><span class="kc">null</span><span class="o">){</span>
+                <span class="c1">//并没有进行类型、访问权限检查，真实生产环境肯定是要检查的</span>
+                <span class="n">elements</span><span class="o">.</span><span class="na">add</span><span class="o">((</span><span class="n">VariableElement</span><span class="o">)</span> <span class="n">element</span><span class="o">);</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+        <span class="k">return</span> <span class="n">elements</span><span class="o">;</span>
+    <span class="o">}</span>
+</code></pre>
+</div>
+
+<p>然后是生成bindView方法内的方法体，就是真正实现view=activity.findViewById的java语句：</p>
+
+<div class="language-java highlighter-rouge"><pre class="highlight"><code>        <span class="n">List</span><span class="o">&lt;</span><span class="n">VariableElement</span><span class="o">&gt;</span> <span class="n">bindViewFieldList</span><span class="o">=</span><span class="n">getFieldElementsWithAnnotation</span><span class="o">(</span><span class="n">element</span><span class="o">,</span><span class="n">BindView</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+        <span class="n">CodeBlock</span><span class="o">.</span><span class="na">Builder</span> <span class="n">bindViewCodeBlockBuilder</span><span class="o">=</span><span class="n">CodeBlock</span><span class="o">.</span><span class="na">builder</span><span class="o">();</span>
+        <span class="k">for</span><span class="o">(</span><span class="n">VariableElement</span> <span class="nl">variableElement:</span><span class="n">bindViewFieldList</span><span class="o">){</span>
+            <span class="c1">//拿到变量名</span>
+            <span class="n">String</span> <span class="n">variableName</span><span class="o">=</span><span class="n">variableElement</span><span class="o">.</span><span class="na">getSimpleName</span><span class="o">().</span><span class="na">toString</span><span class="o">();</span>
+            <span class="c1">//变量的类型</span>
+            <span class="n">TypeName</span> <span class="n">viewType</span><span class="o">=</span><span class="n">ClassName</span><span class="o">.</span><span class="na">bestGuess</span><span class="o">(</span><span class="n">variableElement</span><span class="o">.</span><span class="na">asType</span><span class="o">().</span><span class="na">toString</span><span class="o">());</span>
+            <span class="c1">//注解的值，也就是view要绑定的id</span>
+            <span class="kt">int</span> <span class="n">viewId</span><span class="o">=</span><span class="n">variableElement</span><span class="o">.</span><span class="na">getAnnotation</span><span class="o">(</span><span class="n">BindView</span><span class="o">.</span><span class="na">class</span><span class="o">).</span><span class="na">value</span><span class="o">();</span>
+            <span class="n">bindViewCodeBlockBuilder</span><span class="o">.</span><span class="na">addStatement</span><span class="o">(</span><span class="s">"activity.$L=($T)activity.findViewById($L)"</span><span class="o">,</span><span class="n">variableName</span><span class="o">,</span><span class="n">viewType</span><span class="o">,</span><span class="n">viewId</span><span class="o">);</span>
+        <span class="o">}</span>
+</code></pre>
+</div>
+
+<p>有了bindView()的方法体，参数，该构造bindView()方法了:</p>
+
+<div class="language-java highlighter-rouge"><pre class="highlight"><code>        <span class="c1">//生成bindView()方法</span>
+        <span class="n">MethodSpec</span> <span class="n">bindViewMethod</span><span class="o">=</span><span class="n">MethodSpec</span><span class="o">.</span><span class="na">methodBuilder</span><span class="o">(</span><span class="s">"bindView"</span><span class="o">)</span>
+                <span class="o">.</span><span class="na">addModifiers</span><span class="o">(</span><span class="n">Modifier</span><span class="o">.</span><span class="na">PUBLIC</span><span class="o">)</span>
+                <span class="o">.</span><span class="na">addParameter</span><span class="o">(</span><span class="n">activityParam</span><span class="o">)</span>
+                <span class="o">.</span><span class="na">addCode</span><span class="o">(</span><span class="n">bindViewCodeBlockBuilder</span><span class="o">.</span><span class="na">build</span><span class="o">())</span>
+                <span class="o">.</span><span class="na">returns</span><span class="o">(</span><span class="kt">void</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
+                <span class="o">.</span><span class="na">build</span><span class="o">();</span>
+</code></pre>
+</div>
+
+<p>构造函数:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>        //构造函数，内部调用bindView方法
+        MethodSpec constructorMethod=MethodSpec.constructorBuilder()
+                .addModifiers(Modifier.PUBLIC)
+                .addParameter(activityParam)
+                .addStatement("$N($L)",bindViewMethod,activityParam.name)
+                .build();
+</code></pre>
+</div>
+
+<p>然后是生成*DelegateBinder这个类文件:</p>
+
+<div class="language-java highlighter-rouge"><pre class="highlight"><code>        <span class="c1">//生成BinderDelegate类</span>
+        <span class="n">String</span> <span class="n">binderClassName</span><span class="o">=</span><span class="n">element</span><span class="o">.</span><span class="na">getSimpleName</span><span class="o">().</span><span class="na">toString</span><span class="o">();</span>
+        <span class="n">TypeSpec</span> <span class="n">delegateType</span><span class="o">=</span><span class="n">TypeSpec</span><span class="o">.</span><span class="na">classBuilder</span><span class="o">(</span><span class="n">binderClassName</span><span class="o">+</span><span class="s">"DelegateBinder"</span><span class="o">)</span>
+                <span class="o">.</span><span class="na">addModifiers</span><span class="o">(</span><span class="n">Modifier</span><span class="o">.</span><span class="na">PUBLIC</span><span class="o">)</span>
+                <span class="o">.</span><span class="na">addMethod</span><span class="o">(</span><span class="n">bindViewMethod</span><span class="o">)</span>
+                <span class="o">.</span><span class="na">addMethod</span><span class="o">(</span><span class="n">constructorMethod</span><span class="o">)</span>
+                <span class="o">.</span><span class="na">build</span><span class="o">();</span>
+
+        <span class="n">JavaFile</span> <span class="n">javaFile</span><span class="o">=</span><span class="n">JavaFile</span><span class="o">.</span><span class="na">builder</span><span class="o">(</span><span class="n">getPackage</span><span class="o">(</span><span class="n">element</span><span class="o">).</span><span class="na">getQualifiedName</span><span class="o">().</span><span class="na">toString</span><span class="o">(),</span><span class="n">delegateType</span><span class="o">)</span>
+                <span class="o">.</span><span class="na">addFileComment</span><span class="o">(</span><span class="s">"This file is generated by Binder, do not edit!"</span><span class="o">)</span>
+                <span class="o">.</span><span class="na">build</span><span class="o">();</span>
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="n">javaFile</span><span class="o">.</span><span class="na">writeTo</span><span class="o">(</span><span class="n">processingEnv</span><span class="o">.</span><span class="na">getFiler</span><span class="o">());</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">IOException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+        <span class="o">}</span>
+</code></pre>
+</div>
+
+<p>注意这里的包名，生成的类的包名尽量与需要绑定的Activity所在的包名一致，这样BindView修饰的成员变量只需是包内可见就行，否则的话就必须是public的了。获取包名用如下方法:</p>
+
+<div class="language-java highlighter-rouge"><pre class="highlight"><code>    <span class="cm">/**
+     * 查找包名
+     * @param element
+     * @return
+     */</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="n">PackageElement</span> <span class="nf">getPackage</span><span class="o">(</span><span class="n">Element</span> <span class="n">element</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">while</span> <span class="o">(</span><span class="n">element</span><span class="o">.</span><span class="na">getKind</span><span class="o">()</span> <span class="o">!=</span> <span class="n">PACKAGE</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">element</span> <span class="o">=</span> <span class="n">element</span><span class="o">.</span><span class="na">getEnclosingElement</span><span class="o">();</span>
+        <span class="o">}</span>
+        <span class="k">return</span> <span class="o">(</span><span class="n">PackageElement</span><span class="o">)</span> <span class="n">element</span><span class="o">;</span>
+    <span class="o">}</span>
+</code></pre>
+</div>
+
+<p>写完上面所有这些，Make Project，你会发现app下的build/generated/source/apt/debug目录下生成了MainActivityDelegateBinder类:</p>
+
+<p><img src="http://ockr1qfi1.bkt.clouddn.com/2E060012-4BE3-4F9B-99D5-F15D0BC249A5.png" alt="" /></p>
+
+<p>到这里，已经距离成功很接近了，我们还需要做的就是在MainActivity的setContentView()调用之后，new出我们的MainActivityDelegateBinder类，即完成了MainActivity中带BindView标注的成员变量的id绑定。为了new一个MainActivityDelegateBinder，我们在app module中新建一个帮助类MyButterKnife:</p>
+
+<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">MyButterKnife</span> <span class="o">{</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kd">final</span> <span class="n">String</span> <span class="n">ACTIVITY_DELEGATE_SUFFIX</span> <span class="o">=</span> <span class="s">"DelegateBinder"</span><span class="o">;</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">bind</span><span class="o">(</span><span class="n">Activity</span> <span class="n">activity</span><span class="o">){</span>
+        <span class="n">String</span> <span class="n">activityName</span><span class="o">=</span><span class="n">activity</span><span class="o">.</span><span class="na">getClass</span><span class="o">().</span><span class="na">getName</span><span class="o">();</span>
+        <span class="n">String</span> <span class="n">delegateName</span><span class="o">=</span><span class="n">activityName</span><span class="o">+</span> <span class="n">ACTIVITY_DELEGATE_SUFFIX</span><span class="o">;</span>
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="n">Class</span> <span class="n">delegateClass</span><span class="o">=</span><span class="n">activity</span><span class="o">.</span><span class="na">getClass</span><span class="o">().</span><span class="na">getClassLoader</span><span class="o">().</span><span class="na">loadClass</span><span class="o">(</span><span class="n">delegateName</span><span class="o">);</span>
+            <span class="n">Constructor</span> <span class="n">constructor</span><span class="o">=</span><span class="n">delegateClass</span><span class="o">.</span><span class="na">getConstructor</span><span class="o">(</span><span class="n">activity</span><span class="o">.</span><span class="na">getClass</span><span class="o">());</span>
+            <span class="n">constructor</span><span class="o">.</span><span class="na">newInstance</span><span class="o">(</span><span class="n">activity</span><span class="o">);</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">InstantiationException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">InvocationTargetException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">NoSuchMethodException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">IllegalAccessException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">ClassNotFoundException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre>
+</div>
+
+<p>​	在MyButterKnife里稍微利用了一点反射new了MainActivityDelegateBinder实体，然后MainActivityDelegateBinder的构造函数调用了bindView()最终实现了MainActivity中view的绑定。</p>
+
+<p>​	最后在MainActivity中调用MyButterKnife.bind(this)即可:</p>
+
+<div class="language-java highlighter-rouge"><pre class="highlight"><code><span class="nd">@NeedBind</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">MainActivity</span> <span class="kd">extends</span> <span class="n">AppCompatActivity</span> <span class="o">{</span>
+
+    <span class="nd">@BindView</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">id</span><span class="o">.</span><span class="na">my_tv</span><span class="o">)</span>
+    <span class="n">TextView</span> <span class="n">mTv</span><span class="o">;</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">onCreate</span><span class="o">(</span><span class="n">Bundle</span> <span class="n">savedInstanceState</span><span class="o">)</span> <span class="o">{</span>
+        <span class="kd">super</span><span class="o">.</span><span class="na">onCreate</span><span class="o">(</span><span class="n">savedInstanceState</span><span class="o">);</span>
+        <span class="n">setContentView</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">layout</span><span class="o">.</span><span class="na">activity_main</span><span class="o">);</span>
+
+        <span class="n">MyButterKnife</span><span class="o">.</span><span class="na">bind</span><span class="o">(</span><span class="k">this</span><span class="o">);</span>
+
+        <span class="n">mTv</span><span class="o">.</span><span class="na">setText</span><span class="o">(</span><span class="s">"This is not hello world"</span><span class="o">);</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre>
+</div>
+
+<p>​	编译运行，没有NullPointerException,而且mTv的内容也是我们设置的内容:</p>
+
+<p><img src="http://ockr1qfi1.bkt.clouddn.com/6F5CF689-4895-4629-9B19-2846FADD0E14.png" alt="" /></p>
+
+<p>​	至此，我们实现Demo版本ButterKnife的目的已经基本实现了！</p>
+
+<p>​	ps:如果你在你的自定义Processor中用到Modifier的地方Android Studio报红时，请无视，这是Android Studio自身的bug，不影响编译.</p>
+
+<p>​	再次强调，本文的目的是给读者对AnnotationProcessor一个入门的使用概念，最终实现的Demo也是一个十分拙劣的版本，只能说可以跑通，代码里没有做任何合法性、类型匹配、访问权限等相关的安全性检查，这在生产环境中是完全不可用的。真正的ButterKnife在这些可能发生异常的方面做了大量安全性检查。</p>
+
+<p>​	另附<a href="https://github.com/mrrobot97/MyButterKnife">demo源码地址</a></p>
+
+<p>​	以上。</p>
+
+
+
+                <hr style="visibility: hidden;">
+
+
+
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/2017/02/26/%E8%87%AA%E5%B7%B1%E5%86%99%E4%B8%80%E4%B8%AA%E7%AE%80%E6%98%93%E7%89%88%E6%9C%AC%E7%9A%84EventBus/" data-toggle="tooltip" data-placement="top" title="自己写一个简易版本的EventBus">
+                        Previous<br>
+                        <span>自己写一个简易版本的EventBus</span>
+                        </a>
+                    </li>
+                    
+                    
+                </ul>
+            
+            </div>  
+
+    <!-- Side Catalog Container -->
+        
+
+    <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+        				
+                            
+                				<a href="/tags/#Android" title="Android" rel="2">
+                                    Android
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+        			</div>
+                </section>
+                
+              <!-- disqus评论 -->
+                <div id="disqus_thread"></div>
+                <script>
+                (function() { // DON'T EDIT BELOW THIS LINE
+                var d = document, s = d.createElement('script');
+                s.src = '//http-mrrobot97-me.disqus.com/embed.js';
+                s.setAttribute('data-timestamp', +new Date());
+                (d.head || d.body).appendChild(s);
+                })();
+                </script>
+                <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript> 
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("//cdnjs.cloudflare.com/ajax/libs/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                    
+                    
+
+                    <!-- add Weibo, Zhihu by Hux, add target = "_blank" to <a> by Hux -->
+                    
+                
+                    
+                    <li>
+                        <a target="_blank" href="https://github.com/mrrobot97">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; mrrobot97 2018
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> |
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="100px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=huxpro&repo=huxpro.github.io&type=star&count=true" >
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js "></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js "></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js "></script>
+
+<!-- Service Worker -->
+
+<script type="text/javascript">
+    if(navigator.serviceWorker){
+        // For security reasons, a service worker can only control the pages that are in the same directory level or below it. That's why we put sw.js at ROOT level.
+        navigator.serviceWorker
+            .register('/sw.js')
+            .then((registration) => {console.log('Service Worker Registered. ', registration)})
+            .catch((error) => {console.log('ServiceWorker registration failed: ', error)})
+    }
+</script>
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/ 
+     - https://github.com/jneen/rouge/wiki/list-of-supported-languages-and-lexers   
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async('/js/jquery.tagcloud.js',function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("//cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+<script>
+    // dynamic User by Hux
+    var _gaId = 'UA-85750113-1';
+    var _gaDomain = 'mrrobot97.me';
+
+    // Originial
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', _gaId, _gaDomain);
+    ga('send', 'pageview');
+</script>
+
+
+
+<!-- Baidu Tongji -->
+
+
+
+
+<!-- Side Catalog -->
+
+
+
+
+</body>
+
+</html>

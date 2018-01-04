@@ -160,6 +160,35 @@
             ">
     			
 <div class="post-preview">
+    <a href="/2016/04/25/Apache%E7%A6%81%E6%AD%A2%E5%A4%96%E9%83%A8%E7%94%A8%E6%88%B7%E9%80%9A%E8%BF%87URL%E7%9B%B4%E6%8E%A5%E8%AE%BF%E9%97%AE%E6%9C%8D%E5%8A%A1%E5%99%A8%E4%B8%8A%E7%9A%84%E6%96%87%E4%BB%B6/">
+        <h2 class="post-title">
+            Apache禁止外部用户通过URL直接访问服务器上的文件
+        </h2>
+        
+        <div class="post-content-preview">
+            编辑Apache的http.conf文件，在其中任意一处加入如下代码
+
+&lt;Directory “绝对路径”&gt;
+
+Order allow,deny
+
+Deny from all
+
+&lt;/Directory&gt;
+
+然后 service httpd restart 重启Apache服务即可，此后若有外部用户试图 通过URL直接访问文件，就会得到权限不足的提示：
+
+
+
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by mrrobot on April 25, 2016
+    </p>
+</div>
+<hr>
+
+<div class="post-preview">
     <a href="/2016/04/24/git%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E7%9A%84%E4%BD%BF%E7%94%A8/">
         <h2 class="post-title">
             git基本命令的使用
@@ -335,6 +364,14 @@ Start from today.
                         
                             
                         
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
                     </div>
                 </section>
                 
@@ -401,7 +438,7 @@ Start from today.
                     
                 </ul>
                 <p class="copyright text-muted">
-                    Copyright &copy; mrrobot97 2017
+                    Copyright &copy; mrrobot97 2018
                     <br>
                     Theme by <a href="http://huangxuan.me">Hux</a> |
                     <iframe

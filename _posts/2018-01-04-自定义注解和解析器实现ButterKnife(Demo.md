@@ -1,8 +1,8 @@
 ---
-layout:post
-title:自定义注解和解析器实现ButterKnife(Demo
-tags:自定义注解 ButterKnife annotation android
-author:mrrobot97
+layout: post
+title: 自定义注解和解析器实现ButterKnife(Demo
+tags: 自定义注解 ButterKnife annotation android
+author: mrrobot97
 ---
 
 > ​	相信绝大部分的Android开发者都曾使用过[ButterKnife](https://github.com/JakeWharton/butterknife), 利用ButterKnife开发者可以快速的实现实体view与xml的绑定，此外还能绑定各种资源、动画、字符串甚至是点击事件等。ButterKnife内部的原理就是通过自定义注解+自定义注解解析器来动态生成代码并为我们的view绑定id的。本文通过实现一个demo性质的ButterKnife项目来展示如何自定义注解+注解解析器。

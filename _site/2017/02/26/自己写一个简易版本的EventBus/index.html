@@ -184,11 +184,10 @@
 
 <p>先写我们的EventBus类，模仿真正的EventBus类，我们这个类里面包含的也是标准的几个方法:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>1.void register(Object subscriber)
+<pre><code class="language-Java">1.void register(Object subscriber)
 2.void unregister(Object subscriber)
 3.void post(Object eventType)
 </code></pre>
-</div>
 
 <p>EventBus里的方法只有这几个（因为我们是简易版本的嘛）。当然我们的EventBus是一个单例模式类，我用的是双重检测null的那种：</p>
 
@@ -210,7 +209,6 @@
 
 <div class="language-java highlighter-rouge"><pre class="highlight"><code>
 <span class="kd">private</span> <span class="n">HashMap</span><span class="o">&lt;</span><span class="n">Class</span><span class="o">&lt;?&gt;,</span><span class="n">ArrayList</span><span class="o">&lt;</span><span class="n">Subscription</span><span class="o">&gt;&gt;</span> <span class="n">subscriptionsByEventType</span><span class="o">=</span><span class="k">new</span> <span class="n">HashMap</span><span class="o">&lt;&gt;();</span>
-
 </code></pre>
 </div>
 
@@ -474,6 +472,13 @@
                     </li>
                     
                     
+                    <li class="next">
+                        <a href="/2018/01/04/%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B3%A8%E8%A7%A3%E5%92%8C%E8%A7%A3%E6%9E%90%E5%99%A8%E5%AE%9E%E7%8E%B0ButterKnife(Demo/" data-toggle="tooltip" data-placement="top" title="自定义注解和解析器实现ButterKnife(Demo">
+                        Next<br>
+                        <span>自定义注解和解析器实现ButterKnife(Demo</span>
+                        </a>
+                    </li>
+                    
                 </ul>
             
             </div>  
@@ -498,6 +503,14 @@
                 				<a href="/tags/#Android" title="Android" rel="2">
                                     Android
                                 </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
                             
         				
                             
@@ -586,7 +599,7 @@
                     
                 </ul>
                 <p class="copyright text-muted">
-                    Copyright &copy; mrrobot97 2017
+                    Copyright &copy; mrrobot97 2018
                     <br>
                     Theme by <a href="http://huangxuan.me">Hux</a> |
                     <iframe
