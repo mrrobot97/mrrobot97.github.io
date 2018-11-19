@@ -8,7 +8,7 @@ author: mrrobot
 
 先看看效果图:
 
-![效果图](http://ockr1qfi1.bkt.clouddn.com/demo.gif)
+![效果图](https://blog-1256554550.cos.ap-beijing.myqcloud.com/demo.gif)
 
 效果还是不错的，如果再结合自定义的ItemAnimator,可以实现很漂亮的花样。
 

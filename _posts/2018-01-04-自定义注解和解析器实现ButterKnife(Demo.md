@@ -3,29 +3,28 @@ layout: post
 title: 自定义注解和解析器实现ButterKnife(Demo
 tags: 自定义注解 ButterKnife annotation android
 author: mrrobot97
+
 ---
 
-> ​	相信绝大部分的Android开发者都曾使用过[ButterKnife](https://github.com/JakeWharton/butterknife), 利用ButterKnife开发者可以快速的实现实体view与xml的绑定，此外还能绑定各种资源、动画、字符串甚至是点击事件等。ButterKnife内部的原理就是通过自定义注解+自定义注解解析器来动态生成代码并为我们的view绑定id的。本文通过实现一个demo性质的ButterKnife项目来展示如何自定义注解+注解解析器。
+> ​    相信绝大部分的Android开发者都曾使用过[ButterKnife](https://github.com/JakeWharton/butterknife), 利用ButterKnife开发者可以快速的实现实体view与xml的绑定，此外还能绑定各种资源、动画、字符串甚至是点击事件等。ButterKnife内部的原理就是通过自定义注解+自定义注解解析器来动态生成代码并为我们的view绑定id的。本文通过实现一个demo性质的ButterKnife项目来展示如何自定义注解+注解解析器。
 
-​	关于注解本身本文不多做介绍，这里给出一篇讲解注解的文章[一小时搞明白自定义注解（Annotation）](http://blog.csdn.net/u013045971/article/details/53433874)，对注解还比较陌生的读者可以先看一下注解的知识。
+​    关于注解本身本文不多做介绍，这里给出一篇讲解注解的文章[一小时搞明白自定义注解（Annotation）](http://blog.csdn.net/u013045971/article/details/53433874)，对注解还比较陌生的读者可以先看一下注解的知识。
 
-​	新建一个Android Studio Project，名字就叫MyButterKnife好了。MainActivity、layout都直接使用自动生成的，在activity_main.xml中给TextView添加一个id。
+​    新建一个Android Studio Project，名字就叫MyButterKnife好了。MainActivity、layout都直接使用自动生成的，在activity_main.xml中给TextView添加一个id。
 
-​	接下来新建一个module用于实现我们的自定义注解以及自定义注解解析器，注意这个module必须是**java library**,因为在java library中我们才可以继承解析器*AbstractProcessor*，android library是无法访问的。
+​    接下来新建一个module用于实现我们的自定义注解以及自定义注解解析器，注意这个module必须是**java library**,因为在java library中我们才可以继承解析器*AbstractProcessor*，android library是无法访问的。
 
-![选择java library](http://ockr1qfi1.bkt.clouddn.com/CF59B5F3-A17A-4C01-817D-1465066D7705.png)
+![选择java library](https://blog-1256554550.cos.ap-beijing.myqcloud.com/CF59B5F3-A17A-4C01-817D-1465066D7705.png)
 
+​    新建一个java library取名为*processor*.
 
-
-​	新建一个java library取名为*processor*.
-
-​	然后自定义注解(Annotation)，我们只是做一个demo性质的实验，因此只实现View与id的绑定功能。这里我定义了两个注解**NeedBind**与**BindView**:
+​    然后自定义注解(Annotation)，我们只是做一个demo性质的实验，因此只实现View与id的绑定功能。这里我定义了两个注解**NeedBind**与**BindView**:
 
 ```java
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.CLASS)
 public @interface NeedBind {
-  
+
 }
 ```
 
@@ -37,30 +36,30 @@ public @interface BindView {
 }
 ```
 
-​	*NeedBind*的Target是*TYPE*说明这是一个用于修饰类和接口的注解，这里NeedBind的作用是帮助我们快速筛选出需要处理自定义注解的类。*BindView*的Target是FIELD也就是成员变量，即需要绑定资源id的view成员。
+​    *NeedBind*的Target是*TYPE*说明这是一个用于修饰类和接口的注解，这里NeedBind的作用是帮助我们快速筛选出需要处理自定义注解的类。*BindView*的Target是FIELD也就是成员变量，即需要绑定资源id的view成员。
 
-​	这两个注解的Retention都是CLASS级别，表示注解会被编译保留到.class文件但是运行时（RUNTIME）不保留，因此不影响代码运行时的性能。有一个小技巧就是将注解的变量取名为value(只有一个变量时)可以在声明注解变量时省略变量名，即可以这样使用:
+​    这两个注解的Retention都是CLASS级别，表示注解会被编译保留到.class文件但是运行时（RUNTIME）不保留，因此不影响代码运行时的性能。有一个小技巧就是将注解的变量取名为value(只有一个变量时)可以在声明注解变量时省略变量名，即可以这样使用:
 
 ```java
 @BindView(R.id.my_tv)
 TextView mTV;
 ```
 
-​	如果我们取名为别的比如id，那么注解必须向下面这样使用:
+​    如果我们取名为别的比如id，那么注解必须向下面这样使用:
 
 ```java
 @BindView(id = R.id.my_tv)
 TextView mTv;
 ```
 
-​	注解定义好后就可以在项目里使用了：
+​    注解定义好后就可以在项目里使用了：
 
 ```java
 @NeedBind
 public class MainActivity extends AppCompatActivity {
 
     @BindView(R.id.my_tv)
-    TextView mTv;	//不能为private
+    TextView mTv;    //不能为private
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,11 +69,11 @@ public class MainActivity extends AppCompatActivity {
 }
 ```
 
-​	注意这里我加了两个注解：用于修饰MainActivity的NeedBind和用于修饰mTv的BindView。另外很重要的一点就是mTv变量**不能**用private修饰，因为我们是通过在生成的代理类中调用MainActivity.view=(View)MainActivity.findViewById()来实现为view绑定id的，所以mTv至少需要是package可见级别的。现在还没有解析我们自定义的注解，因此现在加的注解是没有任何作用的，那么接下来就开始实现我们的注解解析器吧。
+​    注意这里我加了两个注解：用于修饰MainActivity的NeedBind和用于修饰mTv的BindView。另外很重要的一点就是mTv变量**不能**用private修饰，因为我们是通过在生成的代理类中调用MainActivity.view=(View)MainActivity.findViewById()来实现为view绑定id的，所以mTv至少需要是package可见级别的。现在还没有解析我们自定义的注解，因此现在加的注解是没有任何作用的，那么接下来就开始实现我们的注解解析器吧。
 
-​	还是在processor module下，新建类**MyButterKnifeProcessor**,继承自**AbstractProcessor**.这个就是用于解析自定义注解的解析器了。不过要想让它生效还必须在processor下新建如下的目录结构：
+​    还是在processor module下，新建类**MyButterKnifeProcessor**,继承自**AbstractProcessor**.这个就是用于解析自定义注解的解析器了。不过要想让它生效还必须在processor下新建如下的目录结构：
 
-![](http://ockr1qfi1.bkt.clouddn.com/46E63139-25BC-4D9A-AAC4-F73148611296.png)
+![](https://blog-1256554550.cos.ap-beijing.myqcloud.com/46E63139-25BC-4D9A-AAC4-F73148611296.png)
 
 并新建名为**javax.annotation.processing.Processor**的文本文件，内容就一行:
 
@@ -82,16 +81,16 @@ public class MainActivity extends AppCompatActivity {
 me.mrrobot97.lib.MyButterKnifeProcessor
 ```
 
-​	还需要修改app module的build.gradle文件，加入:
+​    还需要修改app module的build.gradle文件，加入:
 
 ```groovy
 compile project(path: ':processor')
 annotationProcessor project(path: ':processor')
 ```
 
-​	这么做是为了让编译器使用我们的解析器用于解析注解。
+​    这么做是为了让编译器使用我们的解析器用于解析注解。
 
-​	后面的工作都是在*MyButterKnifeProcessor*类里实现了。我们的目的是通过读取类中的自定义注解，生成相应的绑定视图的代码，这就需要一个生成java代码的库[javapoet](https://github.com/square/javapoet), squre出品，质量绝对上乘。在processor的build.gradle里加入如下一行:
+​    后面的工作都是在*MyButterKnifeProcessor*类里实现了。我们的目的是通过读取类中的自定义注解，生成相应的绑定视图的代码，这就需要一个生成java代码的库[javapoet](https://github.com/square/javapoet), squre出品，质量绝对上乘。在processor的build.gradle里加入如下一行:
 
 ```groovy
 compile 'com.squareup:javapoet:1.9.0'
@@ -99,15 +98,15 @@ compile 'com.squareup:javapoet:1.9.0'
 
 ps:这么实用的开源项目在github上居然才4500start,还没有最近火的微信跳一跳小游戏辅助脚本的star多，我也是醉了。可见github的star还是很水的，看看就好，千万别用star数目判断一个项目是否牛逼……
 
-​	MyButterKnifeProcessor里需要重写方法**process()**和方法**getSupportedAnnotationTypes()**:
+​    MyButterKnifeProcessor里需要重写方法**process()**和方法**getSupportedAnnotationTypes()**:
 
 ```java
 public class MyButterKnifeProcessor extends AbstractProcessor{
     @Override
     public boolean process(Set<? extends TypeElement> set, RoundEnvironment roundEnvironment) {
-      	//为所有标注了NeedBind标注的类生成相应代理class
-		for(Element element:roundEnvironment.getElementsAnnotatedWith(NeedBind.class)){
-            generateBinderClass((TypeElement) element);	//后面实现
+          //为所有标注了NeedBind标注的类生成相应代理class
+        for(Element element:roundEnvironment.getElementsAnnotatedWith(NeedBind.class)){
+            generateBinderClass((TypeElement) element);    //后面实现
         }
         //return true 表示该processor处理的注解是否只由该processor处理
         return true;
@@ -121,11 +120,9 @@ public class MyButterKnifeProcessor extends AbstractProcessor{
 }
 ```
 
+​    然后就到了本文的关键：处理注解并生成辅助类。**强烈建议**读者先阅读**[javapoet的简单使用](https://github.com/square/javapoet)**, 不然可能难以读懂接下来的代码。
 
-
-​	然后就到了本文的关键：处理注解并生成辅助类。**强烈建议**读者先阅读**[javapoet的简单使用](https://github.com/square/javapoet)**, 不然可能难以读懂接下来的代码。
-
-​	先展示一下最终生成代码的效果，这是准备本文时练习的一个demo：
+​    先展示一下最终生成代码的效果，这是准备本文时练习的一个demo：
 
 ```java
 // This file is generated by Binder, do not edit!
@@ -156,11 +153,11 @@ public class MainActivityDeleagteBinder {
 }
 ```
 
-​	上面所有的内容都是javapoet生成的，下面就按照上面这个最终效果来一步一步分析要怎么生成我们的代理类。简单起见，就不生成bindClick相关代码了，毕竟我们也没定义相关注解。
+​    上面所有的内容都是javapoet生成的，下面就按照上面这个最终效果来一步一步分析要怎么生成我们的代理类。简单起见，就不生成bindClick相关代码了，毕竟我们也没定义相关注解。
 
-​	我们要为所有标注了NeedBind注解的类生成名为*DeleagteBinder的类，同样为了简单起见我们只做了Activity中view的绑定。DeleagteBinder类要包含一个构造函数、一个bindView方法, bingView方法里要为Activity中绑定了BindView注解的view绑定id，此外构造函数和bindVIew方法还都有一个<? extends Activity>类型的参数。
+​    我们要为所有标注了NeedBind注解的类生成名为*DeleagteBinder的类，同样为了简单起见我们只做了Activity中view的绑定。DeleagteBinder类要包含一个构造函数、一个bindView方法, bingView方法里要为Activity中绑定了BindView注解的view绑定id，此外构造函数和bindVIew方法还都有一个<? extends Activity>类型的参数。
 
-​	我们从小到大一个一个生成，首先来构造我们的<? extends Activity>类型的方法参数:
+​    我们从小到大一个一个生成，首先来构造我们的<? extends Activity>类型的方法参数:
 
 ```java
 //拿到Activity的类
@@ -231,8 +228,6 @@ ParameterSpec activityParam=ParameterSpec.builder(activityClassName,"activity")
                 .build();
 ```
 
-
-
 然后是生成*DelegateBinder这个类文件:
 
 ```java
@@ -254,8 +249,6 @@ ParameterSpec activityParam=ParameterSpec.builder(activityClassName,"activity")
         }
 ```
 
-
-
 注意这里的包名，生成的类的包名尽量与需要绑定的Activity所在的包名一致，这样BindView修饰的成员变量只需是包内可见就行，否则的话就必须是public的了。获取包名用如下方法:
 
 ```java
@@ -272,11 +265,9 @@ ParameterSpec activityParam=ParameterSpec.builder(activityClassName,"activity")
     }
 ```
 
-
-
 写完上面所有这些，Make Project，你会发现app下的build/generated/source/apt/debug目录下生成了MainActivityDelegateBinder类:
 
-![](http://ockr1qfi1.bkt.clouddn.com/2E060012-4BE3-4F9B-99D5-F15D0BC249A5.png)
+![](https://blog-1256554550.cos.ap-beijing.myqcloud.com/2E060012-4BE3-4F9B-99D5-F15D0BC249A5.png)
 
 到这里，已经距离成功很接近了，我们还需要做的就是在MainActivity的setContentView()调用之后，new出我们的MainActivityDelegateBinder类，即完成了MainActivity中带BindView标注的成员变量的id绑定。为了new一个MainActivityDelegateBinder，我们在app module中新建一个帮助类MyButterKnife:
 
@@ -306,9 +297,9 @@ public class MyButterKnife {
 }
 ```
 
-​	在MyButterKnife里稍微利用了一点反射new了MainActivityDelegateBinder实体，然后MainActivityDelegateBinder的构造函数调用了bindView()最终实现了MainActivity中view的绑定。
+​    在MyButterKnife里稍微利用了一点反射new了MainActivityDelegateBinder实体，然后MainActivityDelegateBinder的构造函数调用了bindView()最终实现了MainActivity中view的绑定。
 
-​	最后在MainActivity中调用MyButterKnife.bind(this)即可:
+​    最后在MainActivity中调用MyButterKnife.bind(this)即可:
 
 ```java
 @NeedBind
@@ -329,17 +320,16 @@ public class MainActivity extends AppCompatActivity {
 }
 ```
 
-​	编译运行，没有NullPointerException,而且mTv的内容也是我们设置的内容:
+​    编译运行，没有NullPointerException,而且mTv的内容也是我们设置的内容:
 
-![](http://ockr1qfi1.bkt.clouddn.com/6F5CF689-4895-4629-9B19-2846FADD0E14.png)
+![](https://blog-1256554550.cos.ap-beijing.myqcloud.com/6F5CF689-4895-4629-9B19-2846FADD0E14.png)
 
-​	至此，我们实现Demo版本ButterKnife的目的已经基本实现了！
+​    至此，我们实现Demo版本ButterKnife的目的已经基本实现了！
 
-​	ps:如果你在你的自定义Processor中用到Modifier的地方Android Studio报红时，请无视，这是Android Studio自身的bug，不影响编译.
+​    ps:如果你在你的自定义Processor中用到Modifier的地方Android Studio报红时，请无视，这是Android Studio自身的bug，不影响编译.
 
-​	再次强调，本文的目的是给读者对AnnotationProcessor一个入门的使用概念，最终实现的Demo也是一个十分拙劣的版本，只能说可以跑通，代码里没有做任何合法性、类型匹配、访问权限等相关的安全性检查，这在生产环境中是完全不可用的。真正的ButterKnife在这些可能发生异常的方面做了大量安全性检查。
+​    再次强调，本文的目的是给读者对AnnotationProcessor一个入门的使用概念，最终实现的Demo也是一个十分拙劣的版本，只能说可以跑通，代码里没有做任何合法性、类型匹配、访问权限等相关的安全性检查，这在生产环境中是完全不可用的。真正的ButterKnife在这些可能发生异常的方面做了大量安全性检查。
 
-​	另附[demo源码地址](https://github.com/mrrobot97/MyButterKnife)
+​    另附[demo源码地址](https://github.com/mrrobot97/MyButterKnife)
 
-​	以上。
-
+​    以上。

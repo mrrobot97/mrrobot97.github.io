@@ -54,6 +54,6 @@ print 'finished'
 
 即可在虚拟机或真机中观察到效果:
 
-![Demo](http://ockr1qfi1.bkt.clouddn.com/auto-test.gif)
+![Demo](https://blog-1256554550.cos.ap-beijing.myqcloud.com/auto-test.gif)
 
 关于MonkeyRunner具体的用法请上网查API文档。

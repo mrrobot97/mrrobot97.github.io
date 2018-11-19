@@ -8,7 +8,7 @@ title: 动手写一个高仿微信的滑动返回SwipeBackActivity
 
 先看效果图：
 
-![demo](http://ockr1qfi1.bkt.clouddn.com/swipebackdemo.gif)
+![demo](https://blog-1256554550.cos.ap-beijing.myqcloud.com/swipebackdemo.gif)
 
 效果还是挺不错的。
 
@@ -325,7 +325,7 @@ class BackView extends View{
 
 这样实现的效果就是如下:
 
-![demo](http://ockr1qfi1.bkt.clouddn.com/withouwshadowview.gif)
+![demo](https://blog-1256554550.cos.ap-beijing.myqcloud.com/withouwshadowview.gif)
 
 你应该注意要这个和第一个demo显示的不太一样，因为这里没有阴影效果，体现不出层次感，不够美观，那么接下来我们只需要在添加一点点代码就可以添加这样的一个阴影效果.
 

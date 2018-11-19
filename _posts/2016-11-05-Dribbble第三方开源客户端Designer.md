@@ -9,17 +9,17 @@ author: mrrobot97
 
 先看一下预览图：
 
-![](http://ockr1qfi1.bkt.clouddn.com/screener_20161029%2800_13_49%29.jpg)
+![](https://blog-1256554550.cos.ap-beijing.myqcloud.com/screener_20161029%2800_13_49%29.jpg)
 
-![](http://ockr1qfi1.bkt.clouddn.com/screener_20161028%2823_54_36%29.jpg)
+![](https://blog-1256554550.cos.ap-beijing.myqcloud.com/screener_20161028%2823_54_36%29.jpg)
 
-![](http://ockr1qfi1.bkt.clouddn.com/screener_20161029%2800_14_23%29.png)
+![](https://blog-1256554550.cos.ap-beijing.myqcloud.com/screener_20161029%2800_14_23%29.png)
 
-![](http://ockr1qfi1.bkt.clouddn.com/screener_20161029%2800_15_02%29.png)
+![](https://blog-1256554550.cos.ap-beijing.myqcloud.com/screener_20161029%2800_15_02%29.png)
 
-![](http://ockr1qfi1.bkt.clouddn.com/screener_20161029%2800_15_24%29.png)
+![](https://blog-1256554550.cos.ap-beijing.myqcloud.com/screener_20161029%2800_15_24%29.png)
 
-![](http://ockr1qfi1.bkt.clouddn.com/screener_20161029%2800_15_39%29.png)
+![](https://blog-1256554550.cos.ap-beijing.myqcloud.com/screener_20161029%2800_15_39%29.png)
 
 主要使用的技术和开源项目:
 
@@ -56,7 +56,7 @@ todo list：
 	1.加入Oauth2.0登录入口，用户可以登录并查看自己的个人信息。
 	2.利用OKHttp加入离线缓存，没有网也可以愉快的玩耍了。
 	
-## [version 0.1.1 apk download](http://ockr1qfi1.bkt.clouddn.com/release0.1.1.apk)
+## [version 0.1.1 apk download](https://blog-1256554550.cos.ap-beijing.myqcloud.com/release0.1.1.apk)
 
 	
-## [version 0.1.0 apk download](http://ockr1qfi1.bkt.clouddn.com/Designer.apk)
+## [version 0.1.0 apk download](https://blog-1256554550.cos.ap-beijing.myqcloud.com/Designer.apk)

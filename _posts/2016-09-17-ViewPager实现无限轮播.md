@@ -63,4 +63,4 @@ isViewFromObject的写法是固定的:
 
 Demo:
 
-![](http://ockr1qfi1.bkt.clouddn.com/Screen%2520Capture%2520on%25202016-09-17%2520at%252015-51-54.gif)
+![](https://blog-1256554550.cos.ap-beijing.myqcloud.com/Screen%2520Capture%2520on%25202016-09-17%2520at%252015-51-54.gif)
